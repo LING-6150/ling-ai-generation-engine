@@ -1,7 +1,7 @@
-package com.ling.lingaicodegeneration.genresult.service;
+package com.ling.lingaicodegeneration.service;
 
 import com.mybatisflex.core.service.IService;
-import com.ling.lingaicodegeneration.genresult.entity.User;
+import com.ling.lingaicodegeneration.model.entity.User;
 
 /**
  *  服务层。

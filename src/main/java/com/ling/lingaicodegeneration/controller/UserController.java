@@ -1,4 +1,4 @@
-package com.ling.lingaicodegeneration.genresult.controller;
+package com.ling.lingaicodegeneration.controller;
 
 import com.mybatisflex.core.paginate.Page;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.ling.lingaicodegeneration.genresult.entity.User;
-import com.ling.lingaicodegeneration.genresult.service.UserService;
+import com.ling.lingaicodegeneration.model.entity.User;
+import com.ling.lingaicodegeneration.service.UserService;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 

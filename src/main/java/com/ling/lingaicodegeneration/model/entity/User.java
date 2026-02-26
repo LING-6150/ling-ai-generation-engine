@@ -1,4 +1,4 @@
-package com.ling.lingaicodegeneration.genresult.entity;
+package com.ling.lingaicodegeneration.model.entity;
 
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Id;
