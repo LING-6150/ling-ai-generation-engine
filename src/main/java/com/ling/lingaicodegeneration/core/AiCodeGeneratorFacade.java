@@ -1,6 +1,7 @@
 package com.ling.lingaicodegeneration.core;
 
 import com.ling.lingaicodegeneration.ai.AiCodeGeneratorService;
+import com.ling.lingaicodegeneration.ai.AiCodeGeneratorServiceFactory;
 import com.ling.lingaicodegeneration.ai.model.HtmlCodeResult;
 import com.ling.lingaicodegeneration.ai.model.MultiFileCodeResult;
 import com.ling.lingaicodegeneration.exception.BusinessException;
@@ -18,7 +19,7 @@ import java.io.File;
 public class AiCodeGeneratorFacade {
 
     @Resource
-    private AiCodeGeneratorService aiCodeGeneratorService;
+    private AiCodeGeneratorServiceFactory aiCodeGeneratorServiceFactory;
 
     /**
      * Generate and save code (non-streaming)
@@ -51,17 +52,21 @@ public class AiCodeGeneratorFacade {
     }
 
     private File generateAndSaveHtmlCode(String userMessage, Long appId) {
-        HtmlCodeResult result = aiCodeGeneratorService.generateHtmlCode(userMessage);
+        // 根据 appId 获取对应的 AI Service 实例
+        AiCodeGeneratorService aiService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appId);
+        HtmlCodeResult result = aiService.generateHtmlCode(userMessage);
         return CodeFileSaver.saveHtmlCodeResult(result, appId);
     }
 
     private File generateAndSaveMultiFileCode(String userMessage, Long appId) {
-        MultiFileCodeResult result = aiCodeGeneratorService.generateMultiFileCode(userMessage);
+        AiCodeGeneratorService aiService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appId);
+        MultiFileCodeResult result = aiService.generateMultiFileCode(userMessage);
         return CodeFileSaver.saveMultiFileCodeResult(result, appId);
     }
 
     private Flux<String> generateAndSaveHtmlCodeStream(String userMessage, Long appId) {
-        Flux<String> codeStream = aiCodeGeneratorService.generateHtmlCodeStream(userMessage);
+        AiCodeGeneratorService aiService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appId);
+        Flux<String> codeStream = aiService.generateHtmlCodeStream(userMessage);
         StringBuilder codeBuilder = new StringBuilder();
         return codeStream
                 .doOnNext(codeBuilder::append)
@@ -77,7 +82,8 @@ public class AiCodeGeneratorFacade {
     }
 
     private Flux<String> generateAndSaveMultiFileCodeStream(String userMessage, Long appId) {
-        Flux<String> codeStream = aiCodeGeneratorService.generateMultiFileCodeStream(userMessage);
+        AiCodeGeneratorService aiService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appId);
+        Flux<String> codeStream = aiService.generateMultiFileCodeStream(userMessage);
         StringBuilder codeBuilder = new StringBuilder();
         return codeStream
                 .doOnNext(codeBuilder::append)

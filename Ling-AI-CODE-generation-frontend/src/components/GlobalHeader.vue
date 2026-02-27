@@ -74,9 +74,19 @@ const originItems = [
     title: 'Home',
   },
   {
+    key: '/my/apps',
+    label: 'My Apps',
+    title: 'My Apps',
+  },
+  {
     key: '/admin/userManage',
     label: 'User Management',
     title: 'User Management',
+  },
+  {
+    key: '/admin/appManage',
+    label: 'App Management',
+    title: 'App Management',
   },
 ]
 

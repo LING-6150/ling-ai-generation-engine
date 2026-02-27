@@ -9,15 +9,18 @@ import com.ling.lingaicodegeneration.exception.ErrorCode;
 import com.ling.lingaicodegeneration.model.dto.app.AppQueryRequest;
 import com.ling.lingaicodegeneration.model.entity.App;
 import com.ling.lingaicodegeneration.model.entity.User;
+import com.ling.lingaicodegeneration.model.enums.ChatHistoryMessageTypeEnum;
 import com.ling.lingaicodegeneration.model.enums.CodeGenTypeEnum;
 import com.ling.lingaicodegeneration.model.vo.AppVO;
 import com.ling.lingaicodegeneration.model.vo.UserVO;
 import com.ling.lingaicodegeneration.mapper.AppMapper;
 import com.ling.lingaicodegeneration.service.AppService;
+import com.ling.lingaicodegeneration.service.ChatHistoryService;
 import com.ling.lingaicodegeneration.service.UserService;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,7 @@ import reactor.core.publisher.Flux;
 
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +37,7 @@ import java.util.stream.Collectors;
 
 import static com.ling.lingaicodegeneration.model.entity.table.AppTableDef.APP;
 
-
+@Slf4j
 @Service
 public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppService {
 
@@ -42,6 +46,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
     @Resource
     private AiCodeGeneratorFacade aiCodeGeneratorFacade;
+
+    @Resource
+    private ChatHistoryService chatHistoryService;
 
     @Override
     public QueryWrapper getQueryWrapper(AppQueryRequest appQueryRequest) {
@@ -157,6 +164,28 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         return String.format("%s/%s", AppConstant.CODE_DEPLOY_HOST, deployKey);
     }
 
+
+
+    @Override
+    public boolean removeById(Serializable id) {
+        if (id == null) {
+            return false;
+        }
+        Long appId = Long.valueOf(id.toString());
+        if (appId <= 0) {
+            return false;
+        }
+        // 先删除关联的对话历史
+        try {
+            chatHistoryService.deleteByAppId(appId);
+        } catch (Exception e) {
+            // 记录日志但不阻止应用删除
+            log.error("Failed to delete chat history for app: {}", e.getMessage());
+        }
+        // 删除应用
+        return super.removeById(id);
+    }
+
     @Override
     public Flux<String> chatToGenCode(Long appId, String message, User loginUser) {
         // 1. Validate params
@@ -181,7 +210,32 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         if (codeGenTypeEnum == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Unsupported code gen type");
         }
-        // 5. Call AI to generate code (streaming)
-        return aiCodeGeneratorFacade.generateAndSaveCodeStream(message, codeGenTypeEnum, appId);
+        // 5. 保存用户消息到对话历史
+        chatHistoryService.addChatMessage(appId, message,
+                ChatHistoryMessageTypeEnum.USER.getValue(), loginUser.getId());
+
+        // 6. Call AI to generate code (streaming)
+        Flux<String> contentFlux = aiCodeGeneratorFacade.generateAndSaveCodeStream(
+                message, codeGenTypeEnum, appId);
+
+        // 7. 收集 AI 回复内容并在完成后记录到对话历史
+        StringBuilder aiResponseBuilder = new StringBuilder();
+        return contentFlux
+                .map(chunk -> {
+                    aiResponseBuilder.append(chunk);
+                    return chunk;
+                })
+                .doOnComplete(() -> {
+                    String aiResponse = aiResponseBuilder.toString();
+                    if (!aiResponse.isBlank()) {
+                        chatHistoryService.addChatMessage(appId, aiResponse,
+                                ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
+                    }
+                })
+                .doOnError(error -> {
+                    String errorMessage = "AI generation failed: " + error.getMessage();
+                    chatHistoryService.addChatMessage(appId, errorMessage,
+                            ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
+                });
     }
 }

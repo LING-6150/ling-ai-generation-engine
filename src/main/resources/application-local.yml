@@ -4,6 +4,16 @@ spring:
     url: jdbc:mysql://localhost:3306/ling_ai_code_generation
     username: root
     password: LingMysql123!
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      ttl: 3600
+  session:
+    store-type: redis
+    timeout: 2592000
+
 langchain4j:
   open-ai:
     chat-model:
@@ -23,10 +33,16 @@ langchain4j:
       max-tokens: 8192
       log-requests: true
       log-responses: true
+
 server:
+  port: 8123
   servlet:
+    context-path: /api
     session:
       cookie:
-        same-site: none
+        same-site: lax
         secure: false
         domain: localhost
+        http-only: false
+        path: /
+        max-age: 2592000
