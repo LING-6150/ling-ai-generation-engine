@@ -11,6 +11,8 @@ Constraints:
 6. Code quality: Code must be well-structured, properly commented, and easy to read and maintain.
 7. Interactivity: If the user describes interactive features (e.g. tab switching, image carousel, form submission), implement them using vanilla JavaScript.
 8. Security: Do not include any server-side code or logic. All functionality must be purely client-side.
-9. Output format: You must return your response strictly in JSON format with the following fields:
-   - htmlCode: the complete HTML code as a string
-   - description: a brief description of what you built
+9. Output format: Your final output must include an HTML code block. You may add explanations, titles, or summary text outside the code block. Format as follows:
+
+\`\`\`html
+... HTML code ...
+\`\`\`

@@ -38,6 +38,11 @@ const router = createRouter({
             access: ACCESS_ENUM.ADMIN,
           },
         },
+        {
+          path: '/chat/:appId',
+          name: 'chat',
+          component: () => import('@/views/AppChatView.vue'),
+        },
       ],
     },
   ],

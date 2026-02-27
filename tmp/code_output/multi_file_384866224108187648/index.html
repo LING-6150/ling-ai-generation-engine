@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yellow Cat - The Sunshine Feline</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐱</text></svg>">
+</head>
+<body>
+    <!-- Header with navigation -->
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo">
+                    <span class="logo-icon">🐱</span>
+                    <h1 class="logo-text">Yellow Cat</h1>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#gallery">Gallery</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+                <button class="menu-toggle" aria-label="Toggle navigation menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main>
+        <!-- Hero section -->
+        <section id="home" class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h2 class="hero-title">Meet the Sunshine Cat</h2>
+                        <p class="hero-subtitle">Yellow cats bring warmth and joy to every home they enter. Their golden fur shines like sunlight, and their playful nature brightens any day.</p>
+                        <button class="cta-button" id="meowButton">Hear the Yellow Cat Meow</button>
+                    </div>
+                    <div class="hero-image">
+                        <div class="cat-container">
+                            <div class="cat" id="catFace">
+                                <div class="cat-ears">
+                                    <div class="ear left-ear"></div>
+                                    <div class="ear right-ear"></div>
+                                </div>
+                                <div class="cat-face">
+                                    <div class="eyes">
+                                        <div class="eye left-eye"></div>
+                                        <div class="eye right-eye"></div>
+                                    </div>
+                                    <div class="nose"></div>
+                                    <div class="mouth" id="catMouth"></div>
+                                    <div class="whiskers">
+                                        <div class="whisker left-whiskers">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                        <div class="whisker right-whiskers">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="expression-controls">
+                            <p>Change my expression:</p>
+                            <div class="expression-buttons">
+                                <button class="expr-btn" data-expression="happy">😊 Happy</button>
+                                <button class="expr-btn" data-expression="sleepy">😴 Sleepy</button>
+                                <button class="expr-btn" data-expression="playful">😺 Playful</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About section -->
+        <section id="about" class="about">
+            <div class="container">
+                <h2 class="section-title">About Yellow Cats</h2>
+                <div class="about-content">
+                    <div class="about-text">
+                        <p>Yellow cats, often called ginger or orange cats, are known for their vibrant fur that ranges from pale cream to deep orange. These felines are not a specific breed but rather have a distinctive coat color caused by the "O" gene.</p>
+                        <p>Most yellow cats are male (about 80%), making female yellow cats somewhat rare. They're often associated with friendly, outgoing personalities and are sometimes called "marmalade cats" in some regions.</p>
+                        <div class="facts">
+                            <h3>Fun Facts About Yellow Cats:</h3>
+                            <ul>
+                                <li>They often have freckles on their nose and lips</li>
+                                <li>Many famous cartoon cats are yellow (Garfield, Heathcliff)</li>
+                                <li>Their coat pattern can be tabby, solid, or tortoiseshell</li>
+                                <li>They're known for being particularly affectionate</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="about-image">
+                        <div class="image-placeholder">
+                            <div class="placeholder-text">Image of a playful yellow cat</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery section -->
+        <section id="gallery" class="gallery">
+            <div class="container">
+                <h2 class="section-title">Yellow Cat Gallery</h2>
+                <p class="section-subtitle">A collection of beautiful yellow cats in various settings</p>
+                <div class="gallery-grid">
+                    <div class="gallery-item">
+                        <div class="gallery-image" style="background-color: #FFD700;"></div>
+                        <div class="gallery-caption">Sunny the Cat</div>
+                    </div>
+                    <div class="gallery-item">
+                        <div class="gallery-image" style="background-color: #FFA500;"></div>
+                        <div class="gallery-caption">Marmalade Explorer</div>
+                    </div>
+                    <div class="gallery-item">
+                        <div class="gallery-image" style="background-color: #FFEC8B;"></div>
+                        <div class="gallery-caption">Golden Nap Time</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact section -->
+        <section id="contact" class="contact">
+            <div class="container">
+                <h2 class="section-title">Love Yellow Cats?</h2>
+                <p class="section-subtitle">Share your yellow cat stories or learn more about adopting one</p>
+                <div class="contact-content">
+                    <form class="contact-form" id="contactForm">
+                        <div class="form-group">
+                            <label for="name">Your Name</label>
+                            <input type="text" id="name" placeholder="Enter your name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Your Email</label>
+                            <input type="email" id="email" placeholder="Enter your email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Your Yellow Cat Story</label>
+                            <textarea id="message" placeholder="Tell us about your yellow cat..." rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="submit-button">Share Your Story</button>
+                    </form>
+                    <div class="contact-info">
+                        <h3>Did You Know?</h3>
+                        <p>Yellow cats have been beloved companions throughout history. In many cultures, they're seen as symbols of good luck and prosperity.</p>
+                        <p>If you're considering adopting a cat, check your local animal shelters - you might just find a sunny yellow friend waiting for you!</p>
+                        <div class="adoption-tip">
+                            <strong>Adoption Tip:</strong> Yellow cats come in all personalities. Spend time with a potential adoptee to see if their energy matches yours.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <span class="logo-icon">🐱</span>
+                    <h3>Yellow Cat</h3>
+                    <p>Bringing sunshine into homes since forever</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#gallery">Gallery</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-newsletter">
+                    <h4>Cat Updates</h4>
+                    <p>Subscribe for yellow cat facts and stories</p>
+                    <form class="newsletter-form" id="newsletterForm">
+                        <input type="email" placeholder="Your email address" required>
+                        <button type="submit">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <span id="currentYear"></span> Yellow Cat Website. All rights reserved. This is a fictional website for demonstration purposes.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Audio element for meow sound -->
+    <audio id="meowSound" preload="auto">
+        <!-- This would typically be an actual audio file, but we'll simulate it with JS -->
+    </audio>
+
+    <script src="script.js"></script>
+</body>
+</html>

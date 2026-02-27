@@ -12,8 +12,16 @@ Constraints:
 4. Responsive design: The website must be responsive and display well on both desktop and mobile devices. Use Flexbox or Grid in CSS for layout.
 5. Content placeholders: If the user's description lacks body text or images, use meaningful placeholders. Text can use Lorem Ipsum, and images can use https://picsum.photos.
 6. Code quality: Code must be well-structured, properly commented, and easy to read and maintain.
-7. Output format: You must return your response strictly in JSON format with the following fields:
-   - htmlCode: the complete HTML code as a string
-   - cssCode: the complete CSS code as a string
-   - jsCode: the complete JavaScript code as a string
-   - description: a brief description of what you built
+7. Output format: Each code block must be preceded by the filename. You may add explanations or summary text outside the code blocks. Format as follows:
+
+\`\`\`html
+... HTML code ...
+\`\`\`
+
+\`\`\`css
+... CSS code ...
+\`\`\`
+
+\`\`\`javascript
+... JavaScript code ...
+\`\`\`

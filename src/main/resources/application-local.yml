@@ -23,3 +23,10 @@ langchain4j:
       max-tokens: 8192
       log-requests: true
       log-responses: true
+server:
+  servlet:
+    session:
+      cookie:
+        same-site: none
+        secure: false
+        domain: localhost

@@ -9,15 +9,26 @@
           <span class="gradient-text">AI Applications</span> in Seconds
         </h1>
         <p class="hero-desc">
-          Describe your idea, and our AI will generate a complete, deployable web application for you.
-          No coding required.
+          Describe your idea, and our AI will generate a complete, deployable web application for
+          you. No coding required.
         </p>
-        <div class="hero-actions">
-          <a-button type="primary" size="large" @click="$router.push('/user/login')">
-            Get Started Free →
-          </a-button>
-          <a-button size="large" @click="$router.push('/explore')">
-            Explore Apps
+        <div class="input-area">
+          <a-textarea
+            v-model:value="prompt"
+            :rows="3"
+            placeholder="Describe your website idea... e.g. A personal portfolio with dark theme"
+            class="prompt-input"
+            :maxlength="1000"
+            show-count
+          />
+          <a-button
+            type="primary"
+            size="large"
+            class="generate-btn"
+            :loading="generating"
+            @click="handleGenerate"
+          >
+            Generate Now →
           </a-button>
         </div>
       </div>
@@ -34,10 +45,129 @@
         </div>
       </div>
     </div>
+
+    <!-- Featured Apps Section -->
+    <div class="featured-apps">
+      <h2 class="section-title">Featured Apps</h2>
+      <a-spin :spinning="loading">
+        <div v-if="featuredApps.length === 0 && !loading" class="empty-state">
+          <a-empty description="No featured apps yet" />
+        </div>
+        <a-row :gutter="[24, 24]" v-else>
+          <a-col :span="8" v-for="app in featuredApps" :key="app.id">
+            <a-card
+              hoverable
+              class="app-card"
+              @click="$router.push(`/app/${app.id}`)"
+            >
+              <template #cover>
+                <img
+                  :src="app.cover || `https://picsum.photos/400/200?random=${app.id}`"
+                  alt="App cover"
+                  class="app-cover"
+                />
+              </template>
+              <a-card-meta :title="app.appName">
+                <template #description>
+                  <div class="app-meta">
+                    <a-avatar
+                      :src="app.user?.userAvatar"
+                      :size="20"
+                    />
+                    <span class="creator-name">
+                      {{ app.user?.userName ?? 'Anonymous' }}
+                    </span>
+                  </div>
+                </template>
+              </a-card-meta>
+            </a-card>
+          </a-col>
+        </a-row>
+      </a-spin>
+
+      <!-- Pagination -->
+      <div class="pagination" v-if="total > 0">
+        <a-pagination
+          v-model:current="currentPage"
+          :total="total"
+          :page-size="pageSize"
+          @change="loadFeaturedApps"
+          show-less-items
+        />
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useLoginUserStore } from '@/stores/loginUser'
+import { addApp, listGoodAppVoByPage } from '@/api/appController'
+import { message } from 'ant-design-vue'
+
+const router = useRouter()
+const loginUserStore = useLoginUserStore()
+
+// Generate
+const prompt = ref('')
+const generating = ref(false)
+
+const handleGenerate = async () => {
+  if (!prompt.value.trim()) {
+    message.warning('Please describe your website idea first')
+    return
+  }
+  // Check login
+  if (!loginUserStore.loginUser.id) {
+    message.warning('Please sign in first')
+    router.push('/user/login')
+    return
+  }
+  generating.value = true
+  try {
+    const res = await addApp({ initPrompt: prompt.value })
+    if (res.data.code === 0) {
+      const appId = res.data.data
+      message.success('App created! Generating your website...')
+      router.push(`/chat/${appId}`)
+    } else {
+      message.error(res.data.message || 'Failed to create app')
+    }
+  } catch (e) {
+    message.error('Network error, please try again')
+  } finally {
+    generating.value = false
+  }
+}
+
+// Featured Apps
+const featuredApps = ref<API.AppVO[]>([])
+const loading = ref(false)
+const currentPage = ref(1)
+const pageSize = 6
+const total = ref(0)
+
+const loadFeaturedApps = async (page = 1) => {
+  loading.value = true
+  try {
+    const res = await listGoodAppVoByPage({
+      pageNum: page,
+      pageSize,
+      sortField: 'createTime',
+      sortOrder: 'desc',
+    })
+    if (res.data.code === 0) {
+      featuredApps.value = res.data.data?.records ?? []
+      total.value = res.data.data?.totalRow ?? 0
+    }
+  } catch (e) {
+    message.error('Failed to load featured apps')
+  } finally {
+    loading.value = false
+  }
+}
+
 const features = [
   {
     icon: '⚡',
@@ -60,6 +190,10 @@ const features = [
     desc: 'Built with Spring Boot 3 microservices architecture for production-grade reliability.',
   },
 ]
+
+onMounted(() => {
+  loadFeaturedApps()
+})
 </script>
 
 <style scoped>
@@ -103,14 +237,27 @@ const features = [
   line-height: 1.6;
 }
 
-.hero-actions {
+.input-area {
+  max-width: 640px;
+  margin: 0 auto;
   display: flex;
-  gap: 16px;
-  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.prompt-input {
+  font-size: 15px;
+  border-radius: 8px;
+}
+
+.generate-btn {
+  align-self: flex-end;
+  min-width: 160px;
 }
 
 .features {
   padding: 0 8px;
+  margin-bottom: 60px;
 }
 
 .section-title {
@@ -155,5 +302,48 @@ const features = [
   font-size: 14px;
   color: #666;
   line-height: 1.6;
+}
+
+.featured-apps {
+  padding: 0 8px;
+}
+
+.app-card {
+  cursor: pointer;
+  transition: box-shadow 0.3s;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.app-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.app-cover {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.app-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.creator-name {
+  font-size: 13px;
+  color: #666;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.empty-state {
+  padding: 60px 0;
 }
 </style>
