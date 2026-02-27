@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/ling_ai_code_generation
+    username: root
+    password: LingMysql123!
+langchain4j:
+  open-ai:
+    chat-model:
+      base-url: https://api.deepseek.com
+      api-key: sk-3a83065722f641b8b81fcc2cf0a432d0
+      model-name: deepseek-chat
+      max-tokens: 8192
+      strict-json-schema: true
+      response-format: json_object
+      timeout: 120s
+      log-requests: true
+      log-responses: true
+    streaming-chat-model:
+      base-url: https://api.deepseek.com
+      api-key: sk-3a83065722f641b8b81fcc2cf0a432d0
+      model-name: deepseek-chat
+      max-tokens: 8192
+      log-requests: true
+      log-responses: true

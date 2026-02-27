@@ -1,11 +1,8 @@
 spring:
   application:
     name: Ling-AI-CODE-generation-backend
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/ling_ai_code_generation
-    username: root
-    password: LingMysql123!
+  profiles:
+    active: local
 server:
   port: 8123
   servlet:
