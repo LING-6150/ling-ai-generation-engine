@@ -15,22 +15,22 @@ public class CodeFileSaver {
 
     private static final String FILE_SAVE_ROOT_DIR = System.getProperty("user.dir") + "/tmp/code_output";
 
-    public static File saveHtmlCodeResult(HtmlCodeResult result) {
-        String baseDirPath = buildUniqueDir(CodeGenTypeEnum.HTML.getValue());
+    public static File saveHtmlCodeResult(HtmlCodeResult result, Long appId) {
+        String baseDirPath = buildUniqueDir(CodeGenTypeEnum.HTML.getValue(), appId);
         writeToFile(baseDirPath, "index.html", result.getHtmlCode());
         return new File(baseDirPath);
     }
 
-    public static File saveMultiFileCodeResult(MultiFileCodeResult result) {
-        String baseDirPath = buildUniqueDir(CodeGenTypeEnum.MULTI_FILE.getValue());
+    public static File saveMultiFileCodeResult(MultiFileCodeResult result, Long appId) {
+        String baseDirPath = buildUniqueDir(CodeGenTypeEnum.MULTI_FILE.getValue(), appId);
         writeToFile(baseDirPath, "index.html", result.getHtmlCode());
         writeToFile(baseDirPath, "style.css", result.getCssCode());
         writeToFile(baseDirPath, "script.js", result.getJsCode());
         return new File(baseDirPath);
     }
 
-    private static String buildUniqueDir(String bizType) {
-        String uniqueDirName = StrUtil.format("{}_{}", bizType, IdUtil.getSnowflakeNextIdStr());
+    private static String buildUniqueDir(String bizType, Long appId) {
+        String uniqueDirName = StrUtil.format("{}_{}", bizType, appId);
         String dirPath = FILE_SAVE_ROOT_DIR + File.separator + uniqueDirName;
         try {
             FileUtils.forceMkdirParent(new File(dirPath + File.separator + "placeholder"));

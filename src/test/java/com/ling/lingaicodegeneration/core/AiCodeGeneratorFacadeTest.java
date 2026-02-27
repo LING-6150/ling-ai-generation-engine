@@ -21,22 +21,23 @@ class AiCodeGeneratorFacadeTest {
     void generateAndSaveCode() {
         File file = aiCodeGeneratorFacade.generateAndSaveCode(
                 "A task tracker website",
-                CodeGenTypeEnum.MULTI_FILE
+                CodeGenTypeEnum.MULTI_FILE,
+                1L  // 加一个测试用的 appId
         );
         assertNotNull(file);
         System.out.println("Saved to: " + file.getAbsolutePath());
     }
+
     @Test
     void generateAndSaveCodeStream() {
         Flux<String> codeStream = aiCodeGeneratorFacade.generateAndSaveCodeStream(
                 "A task tracker website",
-                CodeGenTypeEnum.MULTI_FILE
+                CodeGenTypeEnum.MULTI_FILE,
+                1L  // 加一个测试用的 appId
         );
-        // collect all chunks and block until complete
         List<String> result = codeStream.collectList().block();
         assertNotNull(result);
         String completeContent = String.join("", result);
         System.out.println("Stream complete, total length: " + completeContent.length());
-        System.out.println("First 200 chars: " + completeContent.substring(0, Math.min(200, completeContent.length())));
     }
 }
