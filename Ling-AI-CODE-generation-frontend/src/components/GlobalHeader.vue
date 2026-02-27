@@ -23,33 +23,96 @@
 
     <!-- Right: User Actions -->
     <div class="header-right">
-      <a-button type="primary" @click="() => $router.push('/user/login')">
-        Sign In
-      </a-button>
+      <div v-if="loginUserStore.loginUser.id">
+        <a-dropdown>
+          <a-space>
+            <a-avatar :src="loginUserStore.loginUser.userAvatar" />
+            {{ loginUserStore.loginUser.userName ?? 'Anonymous' }}
+          </a-space>
+          <template #overlay>
+            <a-menu>
+              <a-menu-item @click="doLogout">
+                Sign Out
+              </a-menu-item>
+            </a-menu>
+          </template>
+        </a-dropdown>
+      </div>
+      <div v-else>
+        <a-button type="primary" @click="() => $router.push('/user/login')">
+          Sign In
+        </a-button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useLoginUserStore } from '@/stores/loginUser'
+import { userLogout } from '@/api/userController'
+import { message } from 'ant-design-vue'
+import checkAccess from '@/access/checkAccess'
+import ACCESS_ENUM from '@/access/accessEnum'
+import type { MenuProps } from 'ant-design-vue'
 
 const router = useRouter()
+const loginUserStore = useLoginUserStore()
+
 const selectedKeys = ref<string[]>(['/'])
 
 router.afterEach((to) => {
   selectedKeys.value = [to.path]
 })
 
-const menuItems = ref([
-  { key: '/', label: 'Home', title: 'Home' },
-  { key: '/explore', label: 'Explore', title: 'Explore' },
-])
+// 菜单配置项
+const originItems = [
+  {
+    key: '/',
+    label: 'Home',
+    title: 'Home',
+  },
+  {
+    key: '/admin/userManage',
+    label: 'User Management',
+    title: 'User Management',
+  },
+]
+
+// 过滤菜单项
+const filterMenus = (menus: typeof originItems) => {
+  return menus.filter((menu) => {
+    const menuKey = menu.key as string
+    if (menuKey?.startsWith('/admin')) {
+      const loginUser = loginUserStore.loginUser
+      if (!loginUser || loginUser.userRole !== ACCESS_ENUM.ADMIN) {
+        return false
+      }
+    }
+    return true
+  })
+}
+
+// 展示在菜单的路由数组
+const menuItems = computed<MenuProps['items']>(() => filterMenus(originItems))
 
 const handleMenuClick = ({ key }: { key: string }) => {
   selectedKeys.value = [key]
   if (key.startsWith('/')) {
     router.push(key)
+  }
+}
+
+// 用户注销
+const doLogout = async () => {
+  const res = await userLogout()
+  if (res.data.code === 0) {
+    loginUserStore.setLoginUser({ userName: 'Not logged in' })
+    message.success('Signed out successfully')
+    await router.push('/user/login')
+  } else {
+    message.error('Sign out failed, ' + res.data.message)
   }
 }
 </script>

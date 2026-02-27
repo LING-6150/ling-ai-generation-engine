@@ -24,3 +24,4 @@ create table if not exists user
     UNIQUE KEY uk_userAccount (userAccount),
     INDEX idx_userName (userName)
     ) comment 'User' collate = utf8mb4_unicode_ci;
+
