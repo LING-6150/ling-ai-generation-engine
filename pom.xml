@@ -58,6 +58,12 @@
             <version>1.11.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.mybatis-flex</groupId>
+            <artifactId>mybatis-flex-processor</artifactId>
+            <version>1.11.0</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- 代码生成器模块 -->
         <dependency>
             <groupId>com.mybatis-flex</groupId>
