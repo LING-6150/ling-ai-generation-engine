@@ -1,168 +1,278 @@
 <template>
   <div class="cart-page">
     <div class="container">
-      <h1 class="page-title">Shopping Cart</h1>
-      
-      <div v-if="cartItems.length === 0" class="empty-cart">
-        <div class="empty-cart-icon">🛒</div>
-        <h2>Your cart is empty</h2>
-        <p>Add some products to your cart to get started!</p>
-        <router-link to="/" class="btn btn-primary btn-lg">Continue Shopping</router-link>
+      <div class="page-header">
+        <h1 class="page-title">Your Shopping Cart</h1>
+        <p class="page-subtitle">Review your items and proceed to checkout</p>
       </div>
 
-      <div v-else class="cart-content">
-        <div class="cart-items">
-          <div class="cart-item" v-for="item in cartItems" :key="item.id">
-            <div class="item-image">
-              <img :src="item.image" :alt="item.name" />
-            </div>
-            
-            <div class="item-details">
-              <div class="item-header">
-                <h3 class="item-name">{{ item.name }}</h3>
-                <button class="remove-btn" @click="removeItem(item.id)">×</button>
-              </div>
+      <div v-if="cartStore.items.length === 0" class="empty-cart">
+        <div class="empty-cart-icon">🛒</div>
+        <h2 class="empty-cart-title">Your cart is empty</h2>
+        <p class="empty-cart-description">Add some products to your cart to see them here</p>
+        <router-link to="/products" class="shop-button">
+          Continue Shopping →
+        </router-link>
+      </div>
+
+      <div v-else class="cart-layout">
+        <main class="cart-items">
+          <div class="cart-header">
+            <h2 class="cart-section-title">Cart Items ({{ cartStore.totalItems }})</h2>
+            <button class="clear-cart-btn" @click="cartStore.clearCart">
+              Clear Cart
+            </button>
+          </div>
+
+          <div class="items-list">
+            <div v-for="item in cartStore.items" :key="item.id" class="cart-item">
+              <img :src="item.image" :alt="item.name" class="item-image" />
               
-              <div class="item-category">{{ item.category }}</div>
-              
-              <div class="item-price">${{ item.price.toFixed(2) }}</div>
-              
-              <div class="item-actions">
-                <div class="quantity-control">
-                  <button class="qty-btn" @click="decreaseQuantity(item.id)" :disabled="item.quantity <= 1">-</button>
-                  <span class="qty-value">{{ item.quantity }}</span>
-                  <button class="qty-btn" @click="increaseQuantity(item.id)" :disabled="item.quantity >= 10">+</button>
+              <div class="item-details">
+                <div class="item-header">
+                  <h3 class="item-name">{{ item.name }}</h3>
+                  <button class="remove-item-btn" @click="cartStore.removeFromCart(item.id)">
+                    ✕
+                  </button>
                 </div>
                 
-                <div class="item-total">${{ (item.price * item.quantity).toFixed(2) }}</div>
+                <div class="item-category">{{ item.category }}</div>
+                
+                <div class="item-features">
+                  <span v-for="feature in item.features.slice(0, 2)" :key="feature" class="feature-tag">
+                    {{ feature }}
+                  </span>
+                </div>
+                
+                <div class="item-footer">
+                  <div class="quantity-controls">
+                    <button
+                      class="quantity-btn"
+                      @click="decreaseQuantity(item.id)"
+                      :disabled="item.quantity <= 1"
+                    >
+                      −
+                    </button>
+                    <span class="quantity-value">{{ item.quantity }}</span>
+                    <button class="quantity-btn" @click="increaseQuantity(item.id)">
+                      +
+                    </button>
+                  </div>
+                  
+                  <div class="item-price">
+                    <div class="item-total">${{ (item.price * item.quantity).toFixed(2) }}</div>
+                    <div class="item-unit-price">${{ item.price.toFixed(2) }} each</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="cart-summary">
-          <h2 class="summary-title">Order Summary</h2>
-          
-          <div class="summary-details">
-            <div class="summary-row">
-              <span>Subtotal</span>
-              <span>${{ subtotal.toFixed(2) }}</span>
-            </div>
+          <div class="continue-shopping">
+            <router-link to="/products" class="continue-shopping-link">
+              ← Continue Shopping
+            </router-link>
+          </div>
+        </main>
+
+        <aside class="cart-summary">
+          <div class="summary-card">
+            <h2 class="summary-title">Order Summary</h2>
             
-            <div class="summary-row">
-              <span>Shipping</span>
-              <span v-if="shippingCost === 0">FREE</span>
-              <span v-else>${{ shippingCost.toFixed(2) }}</span>
+            <div class="summary-details">
+              <div class="summary-row">
+                <span class="summary-label">Subtotal</span>
+                <span class="summary-value">${{ cartStore.subtotal.toFixed(2) }}</span>
+              </div>
+              
+              <div class="summary-row">
+                <span class="summary-label">Shipping</span>
+                <span class="summary-value">
+                  {{ cartStore.shipping === 0 ? 'FREE' : `$${cartStore.shipping.toFixed(2)}` }}
+                </span>
+              </div>
+              
+              <div class="summary-row">
+                <span class="summary-label">Tax</span>
+                <span class="summary-value">${{ cartStore.tax.toFixed(2) }}</span>
+              </div>
+              
+              <div class="summary-divider"></div>
+              
+              <div class="summary-row total-row">
+                <span class="summary-label">Total</span>
+                <span class="summary-value total-value">${{ cartStore.total.toFixed(2) }}</span>
+              </div>
             </div>
-            
-            <div class="summary-row">
-              <span>Tax</span>
-              <span>${{ tax.toFixed(2) }}</span>
+
+            <div class="shipping-note" v-if="cartStore.subtotal < 50">
+              Add ${{ (50 - cartStore.subtotal).toFixed(2) }} more to get FREE shipping!
             </div>
-            
-            <div class="summary-row total">
-              <span>Total</span>
-              <span>${{ total.toFixed(2) }}</span>
+
+            <button class="checkout-btn" @click="proceedToCheckout">
+              Proceed to Checkout
+            </button>
+
+            <div class="payment-methods">
+              <div class="payment-icons">
+                <span class="payment-icon">💳</span>
+                <span class="payment-icon">💵</span>
+                <span class="payment-icon">💰</span>
+                <span class="payment-icon">💲</span>
+              </div>
+              <p class="payment-note">Secure payment with 256-bit SSL encryption</p>
             </div>
           </div>
 
-          <div class="shipping-note" v-if="shippingCost === 0">
-            🎉 You've qualified for free shipping!
+          <div class="customer-support">
+            <h3 class="support-title">Need Help?</h3>
+            <p class="support-description">Our customer support team is available 24/7</p>
+            <div class="support-contact">
+              <span class="contact-icon">📞</span>
+              <span class="contact-info">1-800-SHOP-NOW</span>
+            </div>
           </div>
-          
-          <div class="shipping-note" v-else>
-            Add ${{ (50 - subtotal).toFixed(2) }} more to get free shipping
-          </div>
-
-          <div class="summary-actions">
-            <router-link to="/" class="btn btn-secondary btn-full">Continue Shopping</router-link>
-            <button class="btn btn-primary btn-full" @click="proceedToCheckout">Proceed to Checkout</button>
-          </div>
-        </div>
+        </aside>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
+import { useRouter } from 'vue-router'
 
-const router = useRouter()
 const cartStore = useCartStore()
-
-const cartItems = computed(() => cartStore.items)
-const subtotal = computed(() => cartStore.subtotal)
-const shippingCost = computed(() => cartStore.shippingCost)
-const tax = computed(() => cartStore.tax)
-const total = computed(() => cartStore.total)
-
-const removeItem = (productId) => {
-  cartStore.removeFromCart(productId)
-}
+const router = useRouter()
 
 const increaseQuantity = (productId) => {
-  const item = cartItems.value.find(item => item.id === productId)
-  if (item && item.quantity < 10) {
+  const item = cartStore.items.find(item => item.id === productId)
+  if (item) {
     cartStore.updateQuantity(productId, item.quantity + 1)
   }
 }
 
 const decreaseQuantity = (productId) => {
-  const item = cartItems.value.find(item => item.id === productId)
+  const item = cartStore.items.find(item => item.id === productId)
   if (item && item.quantity > 1) {
     cartStore.updateQuantity(productId, item.quantity - 1)
   }
 }
 
 const proceedToCheckout = () => {
-  router.push('/checkout')
+  alert('Checkout functionality would be implemented here')
+  // In a real application, this would navigate to checkout page
 }
 </script>
 
 <style scoped>
 .cart-page {
-  padding: 2rem 0 4rem;
+  padding: 3rem 0;
+}
+
+.page-header {
+  margin-bottom: 3rem;
 }
 
 .page-title {
   font-size: 2.5rem;
-  margin-bottom: 2rem;
+  font-weight: 700;
   color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.125rem;
 }
 
 .empty-cart {
   text-align: center;
   padding: 4rem 2rem;
-  background-color: var(--bg-tertiary);
-  border-radius: var(--radius-xl);
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
 }
 
 .empty-cart-icon {
   font-size: 4rem;
   margin-bottom: 1.5rem;
+  opacity: 0.5;
 }
 
-.empty-cart h2 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
+.empty-cart-title {
+  font-size: 1.75rem;
+  font-weight: 600;
   color: var(--text-primary);
+  margin-bottom: 0.5rem;
 }
 
-.empty-cart p {
+.empty-cart-description {
   color: var(--text-secondary);
   margin-bottom: 2rem;
-  font-size: 1.125rem;
 }
 
-.cart-content {
+.shop-button {
+  display: inline-block;
+  background-color: var(--primary-color);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.shop-button:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.cart-layout {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr 380px;
   gap: 3rem;
 }
 
 .cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.cart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cart-section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.clear-cart-btn {
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clear-cart-btn:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.items-list {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -170,26 +280,25 @@ const proceedToCheckout = () => {
 
 .cart-item {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: 120px 1fr;
   gap: 1.5rem;
   padding: 1.5rem;
-  background-color: white;
+  background-color: var(--bg-primary);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
   border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.cart-item:hover {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-sm);
 }
 
 .item-image {
-  width: 120px;
-  height: 120px;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-}
-
-.item-image img {
   width: 100%;
-  height: 100%;
+  height: 120px;
   object-fit: cover;
+  border-radius: var(--radius-md);
 }
 
 .item-details {
@@ -200,30 +309,30 @@ const proceedToCheckout = () => {
 
 .item-header {
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
+  justify-content: space-between;
 }
 
 .item-name {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
+  flex: 1;
 }
 
-.remove-btn {
+.remove-item-btn {
   background: none;
   border: none;
-  font-size: 1.5rem;
-  color: var(--text-secondary);
+  color: var(--text-light);
+  font-size: 1.25rem;
   cursor: pointer;
   padding: 0.25rem;
-  line-height: 1;
   transition: color 0.2s ease;
 }
 
-.remove-btn:hover {
-  color: #ef4444;
+.remove-item-btn:hover {
+  color: var(--error-color);
 }
 
 .item-category {
@@ -233,72 +342,118 @@ const proceedToCheckout = () => {
   letter-spacing: 0.05em;
 }
 
-.item-price {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--primary-color);
+.item-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-.item-actions {
+.feature-tag {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.item-footer {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   margin-top: auto;
 }
 
-.quantity-control {
+.quantity-controls {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.qty-btn {
+.quantity-btn {
   width: 2rem;
   height: 2rem;
-  border: 1px solid var(--border-color);
   background-color: white;
-  border-radius: var(--radius-md);
-  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  font-size: 1.25rem;
+  color: var(--text-primary);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.2s ease;
 }
 
-.qty-btn:hover:not(:disabled) {
+.quantity-btn:hover:not(:disabled) {
+  background-color: var(--primary-color);
+  color: white;
   border-color: var(--primary-color);
-  color: var(--primary-color);
 }
 
-.qty-btn:disabled {
+.quantity-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.qty-value {
+.quantity-value {
   min-width: 2rem;
   text-align: center;
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.item-price {
+  text-align: right;
 }
 
 .item-total {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--primary-color);
+}
+
+.item-unit-price {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.continue-shopping {
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.continue-shopping-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.continue-shopping-link:hover {
+  color: var(--primary-dark);
+  transform: translateX(-4px);
 }
 
 .cart-summary {
-  background-color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.summary-card {
+  background-color: var(--bg-primary);
   border-radius: var(--radius-lg);
-  padding: 2rem;
-  box-shadow: var(--shadow-sm);
   border: 1px solid var(--border-color);
-  position: sticky;
-  top: 2rem;
+  padding: 2rem;
 }
 
 .summary-title {
   font-size: 1.5rem;
-  margin-bottom: 1.5rem;
+  font-weight: 600;
   color: var(--text-primary);
+  margin-bottom: 1.5rem;
 }
 
 .summary-details {
@@ -310,57 +465,149 @@ const proceedToCheckout = () => {
 
 .summary-row {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border-color);
 }
 
-.summary-row.total {
-  border-bottom: none;
-  font-size: 1.25rem;
-  font-weight: 700;
+.summary-label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.summary-value {
   color: var(--text-primary);
-  padding-top: 0.75rem;
-  border-top: 2px solid var(--border-color);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.summary-divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 0.5rem 0;
+}
+
+.total-row {
+  margin-top: 0.5rem;
+}
+
+.total-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
 }
 
 .shipping-note {
-  text-align: center;
-  padding: 0.75rem;
-  background-color: rgba(16, 185, 129, 0.1);
-  color: var(--secondary-color);
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 0.75rem 1rem;
   border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  text-align: center;
   margin-bottom: 1.5rem;
-  font-weight: 500;
 }
 
-.summary-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.btn-full {
+.checkout-btn {
   width: 100%;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 1.5rem;
+}
+
+.checkout-btn:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.payment-methods {
+  text-align: center;
+}
+
+.payment-icons {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.payment-icon {
+  font-size: 1.5rem;
+  opacity: 0.7;
+}
+
+.payment-note {
+  color: var(--text-light);
+  font-size: 0.75rem;
+}
+
+.customer-support {
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.support-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.support-description {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.support-contact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.contact-icon {
+  font-size: 1.25rem;
+}
+
+.contact-info {
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 0.875rem;
 }
 
 @media (max-width: 1024px) {
-  .cart-content {
+  .cart-layout {
     grid-template-columns: 1fr;
   }
   
-  .cart-summary {
-    position: static;
+  .cart-item {
+    grid-template-columns: 100px 1fr;
   }
 }
 
 @media (max-width: 768px) {
+  .cart-page {
+    padding: 2rem 0;
+  }
+  
   .page-title {
     font-size: 2rem;
   }
   
   .cart-item {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
   .item-image {
@@ -368,10 +615,14 @@ const proceedToCheckout = () => {
     height: 200px;
   }
   
-  .item-actions {
+  .item-footer {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
+  }
+  
+  .item-price {
+    text-align: left;
   }
 }
 </style>

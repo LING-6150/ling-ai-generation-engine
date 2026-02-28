@@ -1,28 +1,32 @@
 <template>
   <div class="product-card">
-    <div class="product-image">
-      <img :src="product.image" :alt="product.name" />
-      <div v-if="!product.inStock" class="out-of-stock">Out of Stock</div>
+    <div class="product-image-container">
+      <img :src="product.image" :alt="product.name" class="product-image" />
+      <div v-if="product.inStock" class="stock-badge">In Stock</div>
+      <div v-else class="stock-badge out-of-stock">Out of Stock</div>
     </div>
     
-    <div class="product-content">
+    <div class="product-info">
       <div class="product-category">{{ product.category }}</div>
-      <h3 class="product-title">{{ product.name }}</h3>
-      <p class="product-description">{{ product.description }}</p>
+      <h3 class="product-name">{{ product.name }}</h3>
       
       <div class="product-rating">
-        <div class="stars">
-          <span v-for="n in 5" :key="n" class="star" :class="{ filled: n <= Math.floor(product.rating) }">★</span>
+        <span class="rating-stars">★★★★★</span>
+        <span class="rating-value">{{ product.rating }}</span>
+      </div>
+      
+      <div class="product-features">
+        <div v-for="feature in product.features.slice(0, 2)" :key="feature" class="feature-tag">
+          {{ feature }}
         </div>
-        <span class="rating-text">{{ product.rating }} ({{ product.reviewCount }} reviews)</span>
       </div>
       
       <div class="product-footer">
         <div class="product-price">${{ product.price.toFixed(2) }}</div>
         <button 
-          class="btn btn-primary btn-sm" 
+          class="add-to-cart-btn" 
           :disabled="!product.inStock"
-          @click="addToCart"
+          @click="handleAddToCart"
         >
           {{ product.inStock ? 'Add to Cart' : 'Out of Stock' }}
         </button>
@@ -32,7 +36,6 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
 
 const props = defineProps({
@@ -42,26 +45,23 @@ const props = defineProps({
   }
 })
 
-const router = useRouter()
 const cartStore = useCartStore()
 
-const addToCart = () => {
-  cartStore.addToCart(props.product)
-}
-
-const viewDetails = () => {
-  router.push(`/product/${props.product.id}`)
+const handleAddToCart = () => {
+  if (props.product.inStock) {
+    cartStore.addToCart(props.product)
+  }
 }
 </script>
 
 <style scoped>
 .product-card {
-  background: white;
+  background-color: var(--bg-primary);
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
   border: 1px solid var(--border-color);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -69,40 +69,45 @@ const viewDetails = () => {
 
 .product-card:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-color);
 }
 
-.product-image {
+.product-image-container {
   position: relative;
-  height: 200px;
+  aspect-ratio: 4/3;
   overflow: hidden;
 }
 
-.product-image img {
+.product-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
 }
 
-.product-card:hover .product-image img {
+.product-card:hover .product-image {
   transform: scale(1.05);
 }
 
-.out-of-stock {
+.stock-badge {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  background-color: rgba(239, 68, 68, 0.9);
+  top: 0.75rem;
+  left: 0.75rem;
+  background-color: #10b981;
   color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
-.product-content {
-  padding: 1.5rem;
+.stock-badge.out-of-stock {
+  background-color: #ef4444;
+}
+
+.product-info {
+  padding: 1.25rem;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -117,19 +122,12 @@ const viewDetails = () => {
   letter-spacing: 0.05em;
 }
 
-.product-title {
-  font-size: 1.25rem;
+.product-name {
+  font-size: 1.125rem;
   font-weight: 600;
-  margin-bottom: 0.75rem;
   color: var(--text-primary);
+  margin-bottom: 0.75rem;
   line-height: 1.4;
-}
-
-.product-description {
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-  line-height: 1.5;
-  margin-bottom: 1rem;
   flex: 1;
 }
 
@@ -140,23 +138,32 @@ const viewDetails = () => {
   margin-bottom: 1rem;
 }
 
-.stars {
-  display: flex;
-  gap: 0.125rem;
-}
-
-.star {
-  color: var(--border-color);
-  font-size: 1rem;
-}
-
-.star.filled {
+.rating-stars {
   color: #fbbf24;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
 }
 
-.rating-text {
+.rating-value {
   color: var(--text-secondary);
   font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.product-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.feature-tag {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
 .product-footer {
@@ -172,21 +179,47 @@ const viewDetails = () => {
   color: var(--primary-color);
 }
 
+.add-to-cart-btn {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-to-cart-btn:hover:not(:disabled) {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.add-to-cart-btn:disabled {
+  background-color: var(--text-light);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 @media (max-width: 768px) {
-  .product-image {
-    height: 180px;
-  }
-  
-  .product-content {
+  .product-info {
     padding: 1rem;
   }
   
-  .product-title {
-    font-size: 1.125rem;
+  .product-name {
+    font-size: 1rem;
   }
   
   .product-price {
     font-size: 1.25rem;
+  }
+  
+  .add-to-cart-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
   }
 }
 </style>

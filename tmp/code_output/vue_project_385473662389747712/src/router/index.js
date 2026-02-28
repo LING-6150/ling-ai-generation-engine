@@ -1,9 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import HomePage from '../pages/HomePage.vue'
-import ProductDetail from '../pages/ProductDetail.vue'
+import ProductsPage from '../pages/ProductsPage.vue'
 import CartPage from '../pages/CartPage.vue'
-import CheckoutPage from '../pages/CheckoutPage.vue'
-import OrderConfirmation from '../pages/OrderConfirmation.vue'
 
 const routes = [
   {
@@ -12,31 +10,27 @@ const routes = [
     component: HomePage
   },
   {
-    path: '/product/:id',
-    name: 'ProductDetail',
-    component: ProductDetail,
-    props: true
+    path: '/products',
+    name: 'Products',
+    component: ProductsPage
   },
   {
     path: '/cart',
     name: 'Cart',
     component: CartPage
-  },
-  {
-    path: '/checkout',
-    name: 'Checkout',
-    component: CheckoutPage
-  },
-  {
-    path: '/order-confirmation',
-    name: 'OrderConfirmation',
-    component: OrderConfirmation
   }
 ]
 
 const router = createRouter({
   history: createWebHashHistory(),
-  routes
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      return { top: 0 }
+    }
+  }
 })
 
 export default router

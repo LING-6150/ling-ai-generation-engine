@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>John Doe | Personal Portfolio</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="#" class="logo">JD</a>
+            <button class="menu-toggle" aria-label="Toggle navigation menu">
+                <span class="hamburger"></span>
+            </button>
+            <ul class="nav-links">
+                <li><a href="#home" class="nav-link active" data-page="home">Home</a></li>
+                <li><a href="#about" class="nav-link" data-page="about">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="main-content">
+        <!-- Home Page -->
+        <section id="home-page" class="page active">
+            <div class="container">
+                <div class="hero">
+                    <div class="hero-content">
+                        <h1 class="hero-title">Hi, I'm <span class="highlight">John Doe</span></h1>
+                        <p class="hero-subtitle">Frontend Developer & UI/UX Designer</p>
+                        <p class="hero-description">
+                            I create beautiful, functional web experiences that solve real problems 
+                            and deliver value to users. Passionate about clean code and intuitive design.
+                        </p>
+                        <div class="hero-buttons">
+                            <a href="#about" class="btn btn-primary" data-page="about">Learn More</a>
+                            <a href="mailto:john@example.com" class="btn btn-secondary">Contact Me</a>
+                        </div>
+                    </div>
+                    <div class="hero-image">
+                        <img src="https://picsum.photos/500/500?random=1" alt="John Doe - Portfolio" class="profile-img">
+                    </div>
+                </div>
+
+                <div class="skills-section">
+                    <h2 class="section-title">My Skills</h2>
+                    <div class="skills-grid">
+                        <div class="skill-card">
+                            <div class="skill-icon">💻</div>
+                            <h3 class="skill-title">Web Development</h3>
+                            <p class="skill-description">HTML5, CSS3, JavaScript, React, Vue.js</p>
+                        </div>
+                        <div class="skill-card">
+                            <div class="skill-icon">🎨</div>
+                            <h3 class="skill-title">UI/UX Design</h3>
+                            <p class="skill-description">Figma, Adobe XD, User Research, Prototyping</p>
+                        </div>
+                        <div class="skill-card">
+                            <div class="skill-icon">📱</div>
+                            <h3 class="skill-title">Responsive Design</h3>
+                            <p class="skill-description">Mobile-first approach, Cross-browser compatibility</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Page -->
+        <section id="about-page" class="page">
+            <div class="container">
+                <div class="about-header">
+                    <h1 class="page-title">About Me</h1>
+                    <p class="page-subtitle">Get to know my journey and passion</p>
+                </div>
+
+                <div class="about-content">
+                    <div class="about-image">
+                        <img src="https://picsum.photos/400/500?random=2" alt="John Doe - About" class="about-img">
+                    </div>
+                    <div class="about-text">
+                        <h2 class="about-title">My Story</h2>
+                        <p class="about-description">
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor 
+                            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis 
+                            nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                        </p>
+                        <p class="about-description">
+                            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore 
+                            eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, 
+                            sunt in culpa qui officia deserunt mollit anim id est laborum.
+                        </p>
+                        
+                        <div class="experience-section">
+                            <h3 class="experience-title">Experience</h3>
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="timeline-date">2022 - Present</div>
+                                    <div class="timeline-content">
+                                        <h4 class="timeline-role">Senior Frontend Developer</h4>
+                                        <p class="timeline-company">Tech Solutions Inc.</p>
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-date">2020 - 2022</div>
+                                    <div class="timeline-content">
+                                        <h4 class="timeline-role">UI/UX Designer</h4>
+                                        <p class="timeline-company">Creative Agency</p>
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-date">2018 - 2020</div>
+                                    <div class="timeline-content">
+                                        <h4 class="timeline-role">Web Developer</h4>
+                                        <p class="timeline-company">Startup Ventures</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contact-section">
+                    <h2 class="section-title">Let's Connect</h2>
+                    <p class="contact-description">
+                        Interested in working together or have a project in mind? 
+                        Feel free to reach out!
+                    </p>
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <span class="contact-icon">📧</span>
+                            <span class="contact-text">john@example.com</span>
+                        </div>
+                        <div class="contact-item">
+                            <span class="contact-icon">📍</span>
+                            <span class="contact-text">San Francisco, CA</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p class="copyright">© 2024 John Doe. All rights reserved.</p>
+            <p class="footer-note">Built with HTML, CSS & Vanilla JavaScript</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

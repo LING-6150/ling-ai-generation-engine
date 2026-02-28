@@ -1,86 +1,64 @@
 import { reactive, computed } from 'vue'
 
-const cartState = reactive({
+const cartStore = reactive({
   items: [],
-  shippingAddress: null,
-  paymentMethod: null
-})
-
-export function useCartStore() {
-  const addToCart = (product, quantity = 1) => {
-    const existingItem = cartState.items.find(item => item.id === product.id)
+  
+  addToCart(product) {
+    const existingItem = this.items.find(item => item.id === product.id)
     
     if (existingItem) {
-      existingItem.quantity += quantity
+      existingItem.quantity += 1
     } else {
-      cartState.items.push({
+      this.items.push({
         ...product,
-        quantity
+        quantity: 1
       })
     }
-  }
-
-  const removeFromCart = (productId) => {
-    const index = cartState.items.findIndex(item => item.id === productId)
+  },
+  
+  removeFromCart(productId) {
+    const index = this.items.findIndex(item => item.id === productId)
     if (index !== -1) {
-      cartState.items.splice(index, 1)
+      this.items.splice(index, 1)
     }
-  }
-
-  const updateQuantity = (productId, quantity) => {
-    const item = cartState.items.find(item => item.id === productId)
+  },
+  
+  updateQuantity(productId, quantity) {
+    const item = this.items.find(item => item.id === productId)
     if (item) {
       if (quantity <= 0) {
-        removeFromCart(productId)
+        this.removeFromCart(productId)
       } else {
         item.quantity = quantity
       }
     }
+  },
+  
+  clearCart() {
+    this.items = []
+  },
+  
+  get totalItems() {
+    return this.items.reduce((total, item) => total + item.quantity, 0)
+  },
+  
+  get subtotal() {
+    return this.items.reduce((total, item) => total + (item.price * item.quantity), 0)
+  },
+  
+  get shipping() {
+    return this.subtotal >= 50 ? 0 : 5.99
+  },
+  
+  get tax() {
+    return this.subtotal * 0.08 // 8% tax
+  },
+  
+  get total() {
+    return this.subtotal + this.shipping + this.tax
   }
+})
 
-  const clearCart = () => {
-    cartState.items = []
-  }
-
-  const setShippingAddress = (address) => {
-    cartState.shippingAddress = address
-  }
-
-  const setPaymentMethod = (method) => {
-    cartState.paymentMethod = method
-  }
-
-  const subtotal = computed(() => {
-    return cartState.items.reduce((total, item) => {
-      return total + (item.price * item.quantity)
-    }, 0)
-  })
-
-  const shippingCost = computed(() => {
-    return subtotal.value > 50 ? 0 : 5.99
-  })
-
-  const tax = computed(() => {
-    return subtotal.value * 0.08 // 8% tax
-  })
-
-  const total = computed(() => {
-    return subtotal.value + shippingCost.value + tax.value
-  })
-
-  return {
-    items: computed(() => cartState.items),
-    shippingAddress: computed(() => cartState.shippingAddress),
-    paymentMethod: computed(() => cartState.paymentMethod),
-    subtotal,
-    shippingCost,
-    tax,
-    total,
-    addToCart,
-    removeFromCart,
-    updateQuantity,
-    clearCart,
-    setShippingAddress,
-    setPaymentMethod
-  }
+export const useCartStore = () => {
+  return cartStore
 }

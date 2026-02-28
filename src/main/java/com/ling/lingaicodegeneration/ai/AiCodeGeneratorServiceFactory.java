@@ -2,6 +2,10 @@ package com.ling.lingaicodegeneration.ai;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.ling.lingaicodegeneration.ai.tools.FileDeleteTool;
+import com.ling.lingaicodegeneration.ai.tools.FileDirReadTool;
+import com.ling.lingaicodegeneration.ai.tools.FileModifyTool;
+import com.ling.lingaicodegeneration.ai.tools.FileReadTool;
 import com.ling.lingaicodegeneration.ai.tools.FileWriteTool;
 import com.ling.lingaicodegeneration.model.enums.CodeGenTypeEnum;
 import com.ling.lingaicodegeneration.service.ChatHistoryService;
@@ -93,7 +97,13 @@ public class AiCodeGeneratorServiceFactory {
             case VUE_PROJECT -> AiServices.builder(AiCodeGeneratorService.class)
                     .streamingChatModel(reasoningStreamingChatModel)
                     .chatMemoryProvider(memoryId -> chatMemory)
-                    .tools(new FileWriteTool())
+                    .tools(
+                            new FileWriteTool(),
+                            new FileReadTool(),
+                            new FileDirReadTool(),
+                            new FileModifyTool(),
+                            new FileDeleteTool()
+                    )
                     .hallucinatedToolNameStrategy(toolExecutionRequest -> ToolExecutionResultMessage.from(
                             toolExecutionRequest, "Error: there is no tool called " + toolExecutionRequest.name()))
                     .build();
