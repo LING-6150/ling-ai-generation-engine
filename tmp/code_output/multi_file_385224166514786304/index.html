@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Personal Blog</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">Blog<span>Space</span></a>
+            <button class="menu-toggle" aria-label="Toggle navigation menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link active" data-page="home">Home</a></li>
+                <li><a href="#articles" class="nav-link" data-page="articles">Articles</a></li>
+                <li><a href="#about" class="nav-link" data-page="about">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="main-content">
+        <!-- Home Page Section -->
+        <section id="home" class="page-section active">
+            <header class="hero">
+                <div class="hero-content">
+                    <h1 class="hero-title">Welcome to My Digital Space</h1>
+                    <p class="hero-subtitle">Thoughts, ideas, and stories from a curious mind</p>
+                    <a href="#articles" class="btn btn-primary">Explore Articles</a>
+                </div>
+                <div class="hero-image">
+                    <img src="https://picsum.photos/600/400?random=1" alt="Blog workspace with laptop and coffee">
+                </div>
+            </header>
+
+            <div class="featured-section">
+                <h2 class="section-title">Featured Articles</h2>
+                <div class="featured-grid">
+                    <article class="featured-card">
+                        <div class="card-image">
+                            <img src="https://picsum.photos/400/250?random=2" alt="Featured article image">
+                            <span class="card-category">Technology</span>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="card-title">The Future of Web Development</h3>
+                            <p class="card-excerpt">Exploring emerging trends and technologies that are shaping the future of web development and how they impact developers.</p>
+                            <div class="card-meta">
+                                <span class="date">March 15, 2024</span>
+                                <span class="read-time">5 min read</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="featured-card">
+                        <div class="card-image">
+                            <img src="https://picsum.photos/400/250?random=3" alt="Featured article image">
+                            <span class="card-category">Design</span>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="card-title">Minimalism in Digital Design</h3>
+                            <p class="card-excerpt">How minimalism principles can create more effective and user-friendly digital experiences across platforms.</p>
+                            <div class="card-meta">
+                                <span class="date">March 10, 2024</span>
+                                <span class="read-time">4 min read</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="featured-card">
+                        <div class="card-image">
+                            <img src="https://picsum.photos/400/250?random=4" alt="Featured article image">
+                            <span class="card-category">Lifestyle</span>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="card-title">Building Productive Habits</h3>
+                            <p class="card-excerpt">Practical strategies for developing and maintaining productive habits that stick in our increasingly distracted world.</p>
+                            <div class="card-meta">
+                                <span class="date">March 5, 2024</span>
+                                <span class="read-time">6 min read</span>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <div class="newsletter-section">
+                <div class="newsletter-content">
+                    <h2>Stay Updated</h2>
+                    <p>Subscribe to receive the latest articles and insights directly in your inbox.</p>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="Your email address" required>
+                        <button type="submit" class="btn btn-secondary">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Articles Page Section -->
+        <section id="articles" class="page-section">
+            <div class="page-header">
+                <h1 class="page-title">All Articles</h1>
+                <p class="page-subtitle">Browse through all my published thoughts and writings</p>
+            </div>
+
+            <div class="articles-controls">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Search articles...">
+                    <button class="search-btn" aria-label="Search">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="filter-controls">
+                    <select id="category-filter">
+                        <option value="all">All Categories</option>
+                        <option value="technology">Technology</option>
+                        <option value="design">Design</option>
+                        <option value="lifestyle">Lifestyle</option>
+                        <option value="travel">Travel</option>
+                        <option value="food">Food</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="articles-grid" id="articles-container">
+                <!-- Articles will be dynamically loaded here -->
+            </div>
+
+            <div class="load-more">
+                <button id="load-more-btn" class="btn btn-outline">Load More Articles</button>
+            </div>
+        </section>
+
+        <!-- About Page Section -->
+        <section id="about" class="page-section">
+            <div class="about-container">
+                <div class="about-header">
+                    <h1 class="page-title">About Me</h1>
+                    <p class="page-subtitle">Get to know the person behind the words</p>
+                </div>
+
+                <div class="about-content">
+                    <div class="about-image">
+                        <img src="https://picsum.photos/500/600?random=5" alt="Author portrait">
+                    </div>
+                    <div class="about-text">
+                        <h2>Hello, I'm Alex</h2>
+                        <p>I'm a passionate writer, web developer, and lifelong learner based in San Francisco. This blog is my digital canvas where I share thoughts on technology, design, lifestyle, and everything in between.</p>
+                        
+                        <p>With over 8 years of experience in the tech industry, I've worked with startups and established companies to create meaningful digital experiences. When I'm not coding or writing, you can find me hiking in the Marin Headlands, experimenting with new recipes, or lost in a good book.</p>
+                        
+                        <div class="about-details">
+                            <div class="detail-item">
+                                <h3>Background</h3>
+                                <p>Computer Science graduate with a passion for creative writing and digital design.</p>
+                            </div>
+                            <div class="detail-item">
+                                <h3>Interests</h3>
+                                <p>Web technologies, UX design, photography, hiking, coffee brewing, and sustainable living.</p>
+                            </div>
+                            <div class="detail-item">
+                                <h3>Currently Reading</h3>
+                                <p>"The Creative Act: A Way of Being" by Rick Rubin</p>
+                            </div>
+                        </div>
+
+                        <div class="social-links">
+                            <a href="#" class="social-link" aria-label="Twitter">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+                                </svg>
+                            </a>
+                            <a href="#" class="social-link" aria-label="GitHub">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                                </svg>
+                            </a>
+                            <a href="#" class="social-link" aria-label="LinkedIn">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                                    <rect x="2" y="9" width="4" height="12"></rect>
+                                    <circle cx="4" cy="4" r="2"></circle>
+                                </svg>
+                            </a>
+                            <a href="#" class="social-link" aria-label="Email">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                    <polyline points="22,6 12,13 2,6"></polyline>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">Blog<span>Space</span></div>
+            <p class="footer-tagline">Sharing thoughts, one post at a time</p>
+            <p class="copyright">&copy; 2024 Personal Blog. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

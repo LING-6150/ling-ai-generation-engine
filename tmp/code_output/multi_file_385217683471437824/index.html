@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Personal Blog</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="#" class="logo">BlogSpace</a>
+            <button class="menu-toggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link active">Home</a></li>
+                <li><a href="#articles" class="nav-link">Articles</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="main-content">
+        <!-- Home Section -->
+        <section id="home" class="page-section active">
+            <div class="container">
+                <header class="hero">
+                    <h1 class="hero-title">Welcome to My Digital Space</h1>
+                    <p class="hero-subtitle">Thoughts, ideas, and stories from a curious mind</p>
+                    <a href="#articles" class="btn btn-primary">Explore Articles</a>
+                </header>
+                
+                <div class="featured-articles">
+                    <h2 class="section-title">Featured Articles</h2>
+                    <div class="articles-grid">
+                        <article class="article-card">
+                            <div class="article-image">
+                                <img src="https://picsum.photos/400/250?random=1" alt="Featured article image">
+                            </div>
+                            <div class="article-content">
+                                <h3 class="article-title">The Future of Web Development</h3>
+                                <p class="article-excerpt">Exploring emerging trends and technologies that are shaping the future of web development...</p>
+                                <div class="article-meta">
+                                    <span class="article-date">March 15, 2024</span>
+                                    <span class="article-category">Technology</span>
+                                </div>
+                            </div>
+                        </article>
+                        
+                        <article class="article-card">
+                            <div class="article-image">
+                                <img src="https://picsum.photos/400/250?random=2" alt="Featured article image">
+                            </div>
+                            <div class="article-content">
+                                <h3 class="article-title">Minimalism in Digital Design</h3>
+                                <p class="article-excerpt">How minimalism principles can create more effective and user-friendly digital experiences...</p>
+                                <div class="article-meta">
+                                    <span class="article-date">March 10, 2024</span>
+                                    <span class="article-category">Design</span>
+                                </div>
+                            </div>
+                        </article>
+                        
+                        <article class="article-card">
+                            <div class="article-image">
+                                <img src="https://picsum.photos/400/250?random=3" alt="Featured article image">
+                            </div>
+                            <div class="article-content">
+                                <h3 class="article-title">Building Personal Projects</h3>
+                                <p class="article-excerpt">A guide to starting and completing personal projects that enhance your skills and portfolio...</p>
+                                <div class="article-meta">
+                                    <span class="article-date">March 5, 2024</span>
+                                    <span class="article-category">Productivity</span>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Articles Section -->
+        <section id="articles" class="page-section">
+            <div class="container">
+                <header class="page-header">
+                    <h1 class="page-title">All Articles</h1>
+                    <p class="page-subtitle">Browse through all my published thoughts and ideas</p>
+                </header>
+                
+                <div class="filter-controls">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="technology">Technology</button>
+                    <button class="filter-btn" data-filter="design">Design</button>
+                    <button class="filter-btn" data-filter="productivity">Productivity</button>
+                    <button class="filter-btn" data-filter="lifestyle">Lifestyle</button>
+                </div>
+                
+                <div class="articles-list" id="articles-container">
+                    <!-- Articles will be populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="page-section">
+            <div class="container">
+                <header class="page-header">
+                    <h1 class="page-title">About Me</h1>
+                    <p class="page-subtitle">Get to know the person behind the words</p>
+                </header>
+                
+                <div class="about-content">
+                    <div class="about-image">
+                        <img src="https://picsum.photos/400/500?random=4" alt="Profile picture">
+                    </div>
+                    <div class="about-text">
+                        <h2>Hello, I'm Alex</h2>
+                        <p>I'm a passionate writer, developer, and lifelong learner who believes in the power of sharing knowledge and experiences. This blog is my digital canvas where I explore ideas, document learnings, and connect with like-minded individuals.</p>
+                        
+                        <p>With a background in computer science and a deep appreciation for design, I write about the intersection of technology, creativity, and personal growth. My goal is to create content that inspires, educates, and sparks meaningful conversations.</p>
+                        
+                        <div class="about-details">
+                            <h3>What I Write About</h3>
+                            <ul>
+                                <li>Web development trends and tutorials</li>
+                                <li>Design principles and user experience</li>
+                                <li>Productivity and personal growth</li>
+                                <li>Technology's impact on society</li>
+                                <li>Creative processes and inspiration</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="contact-info">
+                            <h3>Get in Touch</h3>
+                            <p>Feel free to reach out if you'd like to collaborate, have questions about my articles, or just want to say hello!</p>
+                            <div class="contact-links">
+                                <a href="mailto:hello@blogspace.com" class="contact-link">Email</a>
+                                <a href="#" class="contact-link">Twitter</a>
+                                <a href="#" class="contact-link">LinkedIn</a>
+                                <a href="#" class="contact-link">GitHub</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="#home" class="logo">BlogSpace</a>
+                    <p class="footer-tagline">Sharing thoughts, one article at a time</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#articles">Articles</a></li>
+                        <li><a href="#about">About</a></li>
+                    </ul>
+                </div>
+                <div class="footer-newsletter">
+                    <h4>Stay Updated</h4>
+                    <p>Subscribe to receive the latest articles directly in your inbox</p>
+                    <form id="newsletter-form" class="newsletter-form">
+                        <input type="email" placeholder="Your email address" required>
+                        <button type="submit" class="btn btn-secondary">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 BlogSpace. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

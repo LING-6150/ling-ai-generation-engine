@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Todo List</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1><i class="fas fa-tasks"></i> Todo List</h1>
+            <p class="subtitle">Organize your tasks efficiently</p>
+        </header>
+
+        <main class="app-main">
+            <div class="input-section">
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="todo-input" 
+                        placeholder="Add a new task..." 
+                        maxlength="100"
+                        autocomplete="off"
+                    >
+                    <button id="add-btn" class="btn-primary">
+                        <i class="fas fa-plus"></i> Add Task
+                    </button>
+                </div>
+                <div class="stats">
+                    <span id="total-tasks">Total: 0</span>
+                    <span id="completed-tasks">Completed: 0</span>
+                </div>
+            </div>
+
+            <div class="filters">
+                <button class="filter-btn active" data-filter="all">All Tasks</button>
+                <button class="filter-btn" data-filter="active">Active</button>
+                <button class="filter-btn" data-filter="completed">Completed</button>
+            </div>
+
+            <div class="todo-list-container">
+                <ul id="todo-list">
+                    <!-- Todo items will be dynamically inserted here -->
+                    <li class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>Your todo list is empty. Add a task to get started!</p>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="actions">
+                <button id="clear-completed" class="btn-secondary">
+                    <i class="fas fa-trash"></i> Clear Completed
+                </button>
+                <button id="clear-all" class="btn-danger">
+                    <i class="fas fa-broom"></i> Clear All
+                </button>
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <p>Tasks are saved automatically in your browser</p>
+            <p class="hint">Press Enter to add tasks • Click task text to edit</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

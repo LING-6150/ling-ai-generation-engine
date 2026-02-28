@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Todo List</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1><i class="fas fa-tasks"></i> Todo List</h1>
+            <p class="subtitle">Organize your tasks efficiently</p>
+        </header>
+
+        <main class="app-main">
+            <div class="input-section">
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="taskInput" 
+                        placeholder="Enter a new task..." 
+                        maxlength="100"
+                        autocomplete="off"
+                    >
+                    <button id="addTaskBtn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Task
+                    </button>
+                </div>
+                <div class="task-stats">
+                    <span id="totalTasks">Total: 0</span>
+                    <span id="completedTasks">Completed: 0</span>
+                    <span id="pendingTasks">Pending: 0</span>
+                </div>
+            </div>
+
+            <div class="tasks-container">
+                <div class="tasks-header">
+                    <h2>Your Tasks</h2>
+                    <button id="clearCompletedBtn" class="btn btn-secondary">
+                        <i class="fas fa-check-double"></i> Clear Completed
+                    </button>
+                </div>
+                
+                <div class="tasks-list" id="tasksList">
+                    <!-- Tasks will be dynamically inserted here -->
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>No tasks yet</h3>
+                        <p>Add your first task using the input above</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <p>Double-click a task to mark as complete • Click <i class="fas fa-trash"></i> to delete</p>
+        </footer>
+    </div>
+
+    <!-- Task item template (hidden) -->
+    <template id="taskTemplate">
+        <div class="task-item">
+            <div class="task-checkbox">
+                <input type="checkbox" class="task-complete">
+            </div>
+            <div class="task-content">
+                <span class="task-text"></span>
+                <span class="task-date"></span>
+            </div>
+            <div class="task-actions">
+                <button class="btn-icon delete-task" title="Delete task">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <script src="script.js"></script>
+</body>
+</html>

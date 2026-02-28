@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TodoList App - Modern Task Management</title>
+    <meta name="description" content="A modern task management application built with Vue 3. Stay organized and boost your productivity.">
+    <meta name="keywords" content="todo, task management, productivity, vue3, web app">
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+      }
+      
+      .loading-container {
+        text-align: center;
+        color: white;
+        max-width: 600px;
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      
+      .loading-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        animation: pulse 2s infinite;
+      }
+      
+      .loading-title {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+      }
+      
+      .loading-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 2rem;
+      }
+      
+      .loading-progress {
+        width: 100%;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 2px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+      }
+      
+      .loading-progress-bar {
+        height: 100%;
+        background: white;
+        width: 0%;
+        animation: progress 2s ease-in-out infinite;
+      }
+      
+      .loading-features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+      }
+      
+      .feature-item {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1rem;
+        border-radius: 10px;
+        text-align: center;
+      }
+      
+      .feature-icon {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+      
+      .feature-text {
+        font-size: 0.9rem;
+        opacity: 0.9;
+      }
+      
+      @keyframes pulse {
+        0%, 100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(1.1);
+          opacity: 0.8;
+        }
+      }
+      
+      @keyframes progress {
+        0% {
+          width: 0%;
+          transform: translateX(0);
+        }
+        50% {
+          width: 100%;
+          transform: translateX(0);
+        }
+        100% {
+          width: 100%;
+          transform: translateX(100%);
+        }
+      }
+      
+      @media (max-width: 768px) {
+        .loading-container {
+          padding: 1.5rem;
+        }
+        
+        .loading-title {
+          font-size: 1.5rem;
+        }
+        
+        .loading-subtitle {
+          font-size: 1rem;
+        }
+        
+        .loading-features {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="loading-container">
+        <div class="loading-icon">✓</div>
+        <h1 class="loading-title">TodoList App</h1>
+        <p class="loading-subtitle">Loading your task management dashboard...</p>
+        
+        <div class="loading-progress">
+          <div class="loading-progress-bar"></div>
+        </div>
+        
+        <div class="loading-features">
+          <div class="feature-item">
+            <span class="feature-icon">🎯</span>
+            <span class="feature-text">Priority Tasks</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">📊</span>
+            <span class="feature-text">Real-time Stats</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">📱</span>
+            <span class="feature-text">Responsive Design</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">💾</span>
+            <span class="feature-text">Local Storage</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

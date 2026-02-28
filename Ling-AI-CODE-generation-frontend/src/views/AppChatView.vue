@@ -19,6 +19,18 @@
 
       <!-- Messages -->
       <div class="messages" ref="messagesRef">
+        <!-- 加载更多按钮 -->
+        <div v-if="hasMoreHistory" class="load-more-container">
+          <a-button
+            type="link"
+            size="small"
+            :loading="loadingHistory"
+            @click="loadMoreHistory"
+          >
+            Load more history
+          </a-button>
+        </div>
+
         <div
           v-for="(msg, index) in messages"
           :key="index"
@@ -105,6 +117,7 @@ import { onMounted, ref, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useLoginUserStore } from '@/stores/loginUser'
 import { getAppVoById, deployApp as deployAppApi } from '@/api/appController'
+import { listAppChatHistory } from '@/api/chatHistoryController'
 import { message } from 'ant-design-vue'
 
 const route = useRoute()
@@ -119,15 +132,10 @@ interface Message {
   role: 'user' | 'ai'
   content: string
   loading?: boolean
+  createTime?: string
 }
 
-const messages = ref<Message[]>([
-  {
-    role: 'ai',
-    content: `Hi! I'm your AI assistant. I'll generate a complete website based on your description. What would you like to build today?`,
-  },
-])
-
+const messages = ref<Message[]>([])
 const inputMessage = ref('')
 const isGenerating = ref(false)
 const messagesRef = ref<HTMLElement>()
@@ -135,25 +143,112 @@ const iframeRef = ref<HTMLIFrameElement>()
 const previewUrl = ref('')
 const deploying = ref(false)
 
+// 对话历史相关
+const loadingHistory = ref(false)
+const hasMoreHistory = ref(false)
+const lastCreateTime = ref<string | undefined>(undefined)
+const historyLoaded = ref(false)
+
+// 加载对话历史
+const loadChatHistory = async (isLoadMore = false) => {
+  if (!appId || loadingHistory.value) return
+  loadingHistory.value = true
+  try {
+    const params: API.listAppChatHistoryParams = {
+      appId: appId as any,
+      pageSize: 10,
+    }
+    // 如果是加载更多，传入游标
+    if (isLoadMore && lastCreateTime.value) {
+      params.lastCreateTime = lastCreateTime.value
+    }
+    const res = await listAppChatHistory(params)
+    if (res.data.code === 0 && res.data.data) {
+      const chatHistories = res.data.data.records ?? []
+      if (chatHistories.length > 0) {
+        // 将历史记录转换为消息格式，后端返回的是时间降序，需要反转
+        const historyMessages: Message[] = chatHistories
+          .map((chat) => ({
+            role: (chat.messageType === 'user' ? 'user' : 'ai') as 'user' | 'ai',
+            content: chat.message ?? '',
+            createTime: chat.createTime,
+          }))
+          .reverse()
+
+        if (isLoadMore) {
+          // 加载更多时，把历史消息插入到列表开头
+          messages.value.unshift(...historyMessages)
+        } else {
+          // 初始加载，直接设置
+          messages.value = historyMessages
+        }
+
+        // 更新游标：使用最旧的一条消息的创建时间
+        lastCreateTime.value = chatHistories[chatHistories.length - 1]?.createTime
+        // 判断是否还有更多历史
+        hasMoreHistory.value = chatHistories.length === 10
+      } else {
+        hasMoreHistory.value = false
+      }
+      historyLoaded.value = true
+    }
+  } catch (error) {
+    console.error('Failed to load chat history:', error)
+    message.error('Failed to load chat history')
+  } finally {
+    loadingHistory.value = false
+  }
+}
+
+// 加载更多历史消息
+const loadMoreHistory = async () => {
+  await loadChatHistory(true)
+}
+
 // Fetch app info
 const fetchAppInfo = async () => {
   try {
     const res = await getAppVoById({ id: appId as any })
     if (res.data.code === 0) {
       appInfo.value = res.data.data
-      // If already has code, show preview
-      if (appInfo.value?.codeGenType && appInfo.value?.id) {
-        previewUrl.value = `http://localhost:8123/api/static/${appInfo.value.codeGenType}_${appId}/`
+
+      // 先加载对话历史
+      await loadChatHistory()
+
+      // 如果有至少 2 条对话记录，展示对应的网站预览
+      if (messages.value.length >= 2) {
+        updatePreview()
       }
-      // If has initPrompt, auto-send first message
-      if (appInfo.value?.initPrompt && messages.value.length === 1) {
-        inputMessage.value = appInfo.value.initPrompt
-        await sendMessage()
+
+      // 只有在是自己的应用且没有对话历史时才自动发送初始提示词
+      const isOwner = appInfo.value?.userId === loginUserStore.loginUser?.id
+      if (
+        appInfo.value?.initPrompt &&
+        isOwner &&
+        messages.value.length === 0 &&
+        historyLoaded.value
+      ) {
+        await sendInitialMessage(appInfo.value.initPrompt)
       }
+    } else {
+      message.error('Failed to load app info')
+      router.push('/')
     }
   } catch (e) {
     message.error('Failed to load app info')
+    router.push('/')
   }
+}
+
+// 发送初始消息
+const sendInitialMessage = async (prompt: string) => {
+  messages.value.push({ role: 'user', content: prompt })
+  const aiMsgIndex = messages.value.length
+  messages.value.push({ role: 'ai', content: '', loading: true })
+  await nextTick()
+  scrollToBottom()
+  isGenerating.value = true
+  await generateCode(prompt, aiMsgIndex)
 }
 
 // Send message
@@ -171,79 +266,104 @@ const sendMessage = async () => {
   messages.value.push({ role: 'ai', content: '', loading: true })
 
   isGenerating.value = true
-  await scrollToBottom()
+  await nextTick()
+  scrollToBottom()
 
-  // Build SSE URL
-  const params = new URLSearchParams({
-    appId: appId,
-    message: userMsg,
-  })
-  const url = `http://localhost:8123/api/app/chat/gen/code?${params}`
+  await generateCode(userMsg, aiMsgIndex)
+}
 
-  let fullContent = ''
+// 生成代码 - 使用 EventSource 处理流式响应
+const generateCode = async (userMessage: string, aiMessageIndex: number) => {
   let eventSource: EventSource | null = null
+  let streamCompleted = false
 
   try {
-    eventSource = new EventSource(url, { withCredentials: true })
+    const params = new URLSearchParams({
+      appId: appId || '',
+      message: userMessage,
+    })
+    const url = `http://localhost:8123/api/app/chat/gen/code?${params}`
 
-    eventSource.onmessage = (event) => {
+    // 创建 EventSource 连接
+    eventSource = new EventSource(url, {
+      withCredentials: true,
+    })
+
+    let fullContent = ''
+
+    // 处理接收到的消息
+    eventSource.onmessage = function (event) {
+      if (streamCompleted) return
       try {
+        // 解析JSON包装的数据
         const parsed = JSON.parse(event.data)
         const content = parsed.d
+
+        // 拼接内容
         if (content !== undefined && content !== null) {
           fullContent += content
-          messages.value[aiMsgIndex] = {
-            role: 'ai',
-            content: fullContent,
-            loading: false,
-          }
+          messages.value[aiMessageIndex].content = fullContent
+          messages.value[aiMessageIndex].loading = false
           scrollToBottom()
         }
-      } catch (e) {
-        console.error('Parse error:', e)
+      } catch (error) {
+        console.error('解析消息失败:', error)
+        handleError(error, aiMessageIndex)
       }
     }
 
-    eventSource.addEventListener('done', async () => {
-      eventSource?.close()
+    // 处理done事件
+    eventSource.addEventListener('done', function () {
+      if (streamCompleted) return
+
+      streamCompleted = true
       isGenerating.value = false
-      messages.value[aiMsgIndex] = {
-        role: 'ai',
-        content: fullContent || 'Website generated successfully!',
-        loading: false,
-      }
-      // Refresh app info and preview after 1s
+      eventSource?.close()
+
+      // 延迟更新预览，确保后端已完成处理
       setTimeout(async () => {
         await fetchAppInfo()
         updatePreview()
       }, 1000)
     })
 
-    eventSource.onerror = (error) => {
+    // 处理错误
+    eventSource.onerror = function () {
+      if (streamCompleted || !isGenerating.value) return
+      // 检查是否是正常的连接关闭
       if (eventSource?.readyState === EventSource.CONNECTING) {
-        eventSource.close()
+        streamCompleted = true
         isGenerating.value = false
-        return
-      }
-      console.error('SSE error:', error)
-      eventSource?.close()
-      isGenerating.value = false
-      messages.value[aiMsgIndex] = {
-        role: 'ai',
-        content: 'Sorry, generation failed. Please try again.',
-        loading: false,
+        eventSource?.close()
+
+        setTimeout(async () => {
+          await fetchAppInfo()
+          updatePreview()
+        }, 1000)
+      } else {
+        handleError(new Error('SSE connection error'), aiMessageIndex)
       }
     }
-  } catch (e) {
-    isGenerating.value = false
-    message.error('Failed to connect to AI service')
+  } catch (error) {
+    console.error('创建 EventSource 失败: ', error)
+    handleError(error, aiMessageIndex)
   }
+}
+
+// 错误处理函数
+const handleError = (error: unknown, aiMessageIndex: number) => {
+  console.error('生成代码失败: ', error)
+  messages.value[aiMessageIndex].content = 'Generation failed, please try again.'
+  messages.value[aiMessageIndex].loading = false
+  message.error('Generation failed, please try again.')
+  isGenerating.value = false
 }
 
 // Update preview
 const updatePreview = () => {
-  if (appInfo.value?.codeGenType && appId) {
-    previewUrl.value = `http://localhost:8123/api/static/${appInfo.value.codeGenType}_${appId}/?t=${Date.now()}`
+  if (appId) {
+    const codeGenType = appInfo.value?.codeGenType ?? 'multi_file'
+    previewUrl.value = `http://localhost:8123/api/static/${codeGenType}_${appId}/?t=${Date.now()}`
   }
 }
 
@@ -327,6 +447,12 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.load-more-container {
+  text-align: center;
+  padding: 8px 0;
+  margin-bottom: 8px;
 }
 
 .message {

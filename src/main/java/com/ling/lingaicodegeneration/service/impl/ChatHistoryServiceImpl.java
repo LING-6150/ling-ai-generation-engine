@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import static com.ling.lingaicodegeneration.model.entity.table.ChatHistoryTableDef.CHAT_HISTORY;
@@ -94,28 +95,21 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
     @Override
     public int loadChatHistoryToMemory(Long appId, MessageWindowChatMemory chatMemory, int maxCount) {
         try {
-            // 查询起始点设置为 1 而非 0，用于排除最新的用户消息
             QueryWrapper queryWrapper = QueryWrapper.create()
                     .eq("appId", appId)
+                    .eq("messageType", ChatHistoryMessageTypeEnum.USER.getValue()) // 只加载用户消息
                     .orderBy("createTime", false)
                     .limit(1, maxCount);
             List<ChatHistory> historyList = this.list(queryWrapper);
             if (historyList == null || historyList.isEmpty()) {
                 return 0;
             }
-            // 反转列表，确保按时间正序（老的在前，新的在后）
-            java.util.Collections.reverse(historyList);
-            // 先清理记忆，防止重复加载
+            Collections.reverse(historyList);
             chatMemory.clear();
             int loadedCount = 0;
             for (ChatHistory history : historyList) {
-                if (ChatHistoryMessageTypeEnum.USER.getValue().equals(history.getMessageType())) {
-                    chatMemory.add(dev.langchain4j.data.message.UserMessage.from(history.getMessage()));
-                    loadedCount++;
-                } else if (ChatHistoryMessageTypeEnum.AI.getValue().equals(history.getMessageType())) {
-                    chatMemory.add(dev.langchain4j.data.message.AiMessage.from(history.getMessage()));
-                    loadedCount++;
-                }
+                chatMemory.add(dev.langchain4j.data.message.UserMessage.from(history.getMessage()));
+                loadedCount++;
             }
             log.info("Successfully loaded {} chat history for appId: {}", loadedCount, appId);
             return loadedCount;

@@ -88,6 +88,11 @@ const originItems = [
     label: 'App Management',
     title: 'App Management',
   },
+  {
+    key: '/admin/chatManage',
+    label: 'Chat Management',
+    title: 'Chat Management',
+  },
 ]
 
 // 过滤菜单项

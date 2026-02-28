@@ -39,6 +39,14 @@ const router = createRouter({
           },
         },
         {
+          path: '/admin/chatManage',
+          name: 'adminChatManage',
+          component: () => import('@/views/admin/ChatManagePage.vue'),
+          meta: {
+            access: ACCESS_ENUM.ADMIN,
+          },
+        },
+        {
           path: '/chat/:appId',
           name: 'chat',
           component: () => import('@/views/AppChatView.vue'),

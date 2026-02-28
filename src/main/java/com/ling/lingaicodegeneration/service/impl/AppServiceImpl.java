@@ -4,8 +4,11 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.ling.lingaicodegeneration.constant.AppConstant;
 import com.ling.lingaicodegeneration.core.AiCodeGeneratorFacade;
+import com.ling.lingaicodegeneration.core.builder.VueProjectBuilder;
+import com.ling.lingaicodegeneration.core.handler.StreamHandlerExecutor;
 import com.ling.lingaicodegeneration.exception.BusinessException;
 import com.ling.lingaicodegeneration.exception.ErrorCode;
+import com.ling.lingaicodegeneration.exception.ThrowUtils;
 import com.ling.lingaicodegeneration.model.dto.app.AppQueryRequest;
 import com.ling.lingaicodegeneration.model.entity.App;
 import com.ling.lingaicodegeneration.model.entity.User;
@@ -112,6 +115,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         }).collect(Collectors.toList());
     }
 
+    @Resource
+    private VueProjectBuilder vueProjectBuilder;
+
     @Override
     public String deployApp(Long appId, User loginUser) {
         // 1. Validate params
@@ -144,14 +150,30 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         if (!sourceDir.exists() || !sourceDir.isDirectory()) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "App code not found, please generate first");
         }
-        // 7. Copy files to deploy directory
+        // 7. Vue 项目特殊处理：需要构建后使用 dist 目录
+        CodeGenTypeEnum codeGenTypeEnum = CodeGenTypeEnum.getEnumByValue(codeGenType);
+        if (codeGenTypeEnum == CodeGenTypeEnum.VUE_PROJECT) {
+            // 执行构建
+            boolean buildSuccess = vueProjectBuilder.buildProject(sourceDirPath);
+            ThrowUtils.throwIf(!buildSuccess, ErrorCode.SYSTEM_ERROR,
+                    "Vue project build failed, please check the generated code");
+            // 检查 dist 目录是否存在
+            File distDir = new File(sourceDir, "dist");
+            ThrowUtils.throwIf(!distDir.exists(), ErrorCode.SYSTEM_ERROR,
+                    "Vue project build completed but dist directory not found");
+            // 将 dist 目录作为部署源
+            sourceDir = distDir;
+            log.info("Vue project built successfully, deploying dist directory: {}",
+                    distDir.getAbsolutePath());
+        }
+        // 8. Copy files to deploy directory
         String deployDirPath = AppConstant.CODE_DEPLOY_ROOT_DIR + File.separator + deployKey;
         try {
             FileUtils.copyDirectory(sourceDir, new File(deployDirPath));
         } catch (Exception e) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Deploy failed: " + e.getMessage());
         }
-        // 8. Update deployKey and deployedTime
+        // 9. Update deployKey and deployedTime
         App updateApp = new App();
         updateApp.setId(appId);
         updateApp.setDeployKey(deployKey);
@@ -160,7 +182,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         if (!updateResult) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "Failed to update deploy info");
         }
-        // 9. Return URL
+        // 10. Return URL
         return String.format("%s/%s", AppConstant.CODE_DEPLOY_HOST, deployKey);
     }
 
@@ -186,6 +208,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         return super.removeById(id);
     }
 
+    @Resource
+    private StreamHandlerExecutor streamHandlerExecutor;
+
     @Override
     public Flux<String> chatToGenCode(Long appId, String message, User loginUser) {
         // 1. Validate params
@@ -210,32 +235,17 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         if (codeGenTypeEnum == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Unsupported code gen type");
         }
+        log.info("appId: {}, codeGenType from DB: {}, enum: {}", appId, codeGenTypeStr, codeGenTypeEnum);
         // 5. 保存用户消息到对话历史
         chatHistoryService.addChatMessage(appId, message,
                 ChatHistoryMessageTypeEnum.USER.getValue(), loginUser.getId());
 
         // 6. Call AI to generate code (streaming)
-        Flux<String> contentFlux = aiCodeGeneratorFacade.generateAndSaveCodeStream(
+        Flux<String> codeStream = aiCodeGeneratorFacade.generateAndSaveCodeStream(
                 message, codeGenTypeEnum, appId);
 
-        // 7. 收集 AI 回复内容并在完成后记录到对话历史
-        StringBuilder aiResponseBuilder = new StringBuilder();
-        return contentFlux
-                .map(chunk -> {
-                    aiResponseBuilder.append(chunk);
-                    return chunk;
-                })
-                .doOnComplete(() -> {
-                    String aiResponse = aiResponseBuilder.toString();
-                    if (!aiResponse.isBlank()) {
-                        chatHistoryService.addChatMessage(appId, aiResponse,
-                                ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
-                    }
-                })
-                .doOnError(error -> {
-                    String errorMessage = "AI generation failed: " + error.getMessage();
-                    chatHistoryService.addChatMessage(appId, errorMessage,
-                            ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
-                });
+        // 7. 使用流处理器执行器处理流，自动根据生成类型调用不同的处理器
+        return streamHandlerExecutor.doExecute(codeStream, chatHistoryService,
+                appId, loginUser, codeGenTypeEnum);
     }
 }

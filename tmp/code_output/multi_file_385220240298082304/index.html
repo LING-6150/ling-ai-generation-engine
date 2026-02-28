@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Personal Blog</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">Blog<span>Space</span></a>
+            <button class="menu-toggle" aria-label="Toggle navigation menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link active" data-page="home">Home</a></li>
+                <li><a href="#articles" class="nav-link" data-page="articles">Articles</a></li>
+                <li><a href="#about" class="nav-link" data-page="about">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="main-content">
+        <!-- Home Page -->
+        <section id="home" class="page active">
+            <header class="hero">
+                <div class="hero-content">
+                    <h1 class="hero-title">Welcome to My Digital Space</h1>
+                    <p class="hero-subtitle">Thoughts, ideas, and stories about technology, design, and life</p>
+                    <a href="#articles" class="btn btn-primary" data-page="articles">Explore Articles</a>
+                </div>
+                <div class="hero-image">
+                    <img src="https://picsum.photos/600/400?random=1" alt="Blog hero image">
+                </div>
+            </header>
+
+            <section class="featured-posts">
+                <h2 class="section-title">Featured Articles</h2>
+                <div class="posts-grid">
+                    <article class="post-card featured">
+                        <div class="post-image">
+                            <img src="https://picsum.photos/400/250?random=2" alt="Featured post image">
+                            <span class="post-category">Technology</span>
+                        </div>
+                        <div class="post-content">
+                            <h3 class="post-title">The Future of Web Development</h3>
+                            <p class="post-excerpt">Exploring emerging trends and technologies that are shaping the future of web development and how they will impact developers and users alike.</p>
+                            <div class="post-meta">
+                                <span class="post-date">March 15, 2024</span>
+                                <span class="read-time">5 min read</span>
+                            </div>
+                            <a href="#" class="read-more">Read Article →</a>
+                        </div>
+                    </article>
+
+                    <article class="post-card">
+                        <div class="post-image">
+                            <img src="https://picsum.photos/400/250?random=3" alt="Post image">
+                            <span class="post-category">Design</span>
+                        </div>
+                        <div class="post-content">
+                            <h3 class="post-title">Minimalism in Modern UI Design</h3>
+                            <p class="post-excerpt">How minimalism principles are being applied to create cleaner, more intuitive user interfaces that enhance user experience.</p>
+                            <div class="post-meta">
+                                <span class="post-date">March 10, 2024</span>
+                                <span class="read-time">4 min read</span>
+                            </div>
+                            <a href="#" class="read-more">Read Article →</a>
+                        </div>
+                    </article>
+
+                    <article class="post-card">
+                        <div class="post-image">
+                            <img src="https://picsum.photos/400/250?random=4" alt="Post image">
+                            <span class="post-category">Lifestyle</span>
+                        </div>
+                        <div class="post-content">
+                            <h3 class="post-title">Building a Productive Daily Routine</h3>
+                            <p class="post-excerpt">Practical tips and strategies for creating a daily routine that maximizes productivity while maintaining work-life balance.</p>
+                            <div class="post-meta">
+                                <span class="post-date">March 5, 2024</span>
+                                <span class="read-time">6 min read</span>
+                            </div>
+                            <a href="#" class="read-more">Read Article →</a>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </section>
+
+        <!-- Articles Page -->
+        <section id="articles" class="page">
+            <div class="page-header">
+                <h1 class="page-title">All Articles</h1>
+                <p class="page-subtitle">Browse through all my published articles and thoughts</p>
+            </div>
+
+            <div class="filter-controls">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="technology">Technology</button>
+                <button class="filter-btn" data-filter="design">Design</button>
+                <button class="filter-btn" data-filter="lifestyle">Lifestyle</button>
+            </div>
+
+            <div class="articles-grid" id="articles-container">
+                <!-- Articles will be dynamically loaded here -->
+            </div>
+        </section>
+
+        <!-- About Page -->
+        <section id="about" class="page">
+            <div class="about-container">
+                <div class="about-header">
+                    <h1 class="page-title">About Me</h1>
+                    <p class="page-subtitle">Get to know the person behind the words</p>
+                </div>
+
+                <div class="about-content">
+                    <div class="about-image">
+                        <img src="https://picsum.photos/400/500?random=5" alt="Profile picture">
+                    </div>
+                    <div class="about-text">
+                        <h2>Hello, I'm Alex</h2>
+                        <p>I'm a passionate writer, web developer, and digital creator based in San Francisco. With over 8 years of experience in the tech industry, I've developed a deep appreciation for the intersection of technology, design, and human experience.</p>
+                        
+                        <p>This blog serves as my digital notebook where I share insights, lessons learned, and thoughts on various topics that interest me. From technical deep dives to personal reflections, I believe in the power of sharing knowledge and experiences.</p>
+                        
+                        <h3>My Journey</h3>
+                        <p>My career began in software engineering, but I quickly discovered my love for writing and communicating complex ideas in accessible ways. This led me to technical writing, content creation, and eventually starting this blog.</p>
+                        
+                        <h3>What I Write About</h3>
+                        <ul class="interests-list">
+                            <li>Web Development & Emerging Technologies</li>
+                            <li>UI/UX Design Principles</li>
+                            <li>Digital Product Strategy</li>
+                            <li>Personal Growth & Productivity</li>
+                            <li>Creative Process & Inspiration</li>
+                        </ul>
+                        
+                        <div class="contact-info">
+                            <h3>Get in Touch</h3>
+                            <p>I love connecting with readers and fellow creators. Feel free to reach out if you have questions, suggestions, or just want to say hello!</p>
+                            <a href="mailto:hello@blogspace.com" class="btn btn-secondary">Send Email</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <a href="#" class="logo">Blog<span>Space</span></a>
+                <p class="footer-tagline">Sharing thoughts, one article at a time</p>
+            </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#home" data-page="home">Home</a></li>
+                    <li><a href="#articles" data-page="articles">Articles</a></li>
+                    <li><a href="#about" data-page="about">About</a></li>
+                </ul>
+            </div>
+            <div class="footer-social">
+                <h4>Connect</h4>
+                <div class="social-icons">
+                    <a href="#" aria-label="Twitter">𝕏</a>
+                    <a href="#" aria-label="GitHub">GitHub</a>
+                    <a href="#" aria-label="LinkedIn">LinkedIn</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 BlogSpace. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
