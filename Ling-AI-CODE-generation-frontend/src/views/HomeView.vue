@@ -21,26 +21,20 @@
             :maxlength="1000"
             show-count
           />
-          <!-- 生成模式选择 -->
-          <div class="mode-select">
-            <span class="mode-label">Generation Mode:</span>
-            <a-radio-group v-model:value="codeGenType" button-style="solid">
-              <a-radio-button value="html">⚡ Single HTML</a-radio-button>
-              <a-radio-button value="multi_file">📁 Multi-file</a-radio-button>
-              <a-radio-button value="vue_project">🖖 Vue Project</a-radio-button>
-            </a-radio-group>
+          <div class="mode-hint">
+            <span class="hint-icon">🤖</span>
+            <span class="hint-text">AI will automatically select the best generation mode for your idea</span>
           </div>
         </div>
-          <a-button
-            type="primary"
-            size="large"
-            class="generate-btn"
-            :loading="generating"
-            @click="handleGenerate"
-          >
-            Generate Now →
-          </a-button>
-        </div>
+        <a-button
+          type="primary"
+          size="large"
+          class="generate-btn"
+          :loading="generating"
+          @click="handleGenerate"
+        >
+          Generate Now →
+        </a-button>
       </div>
     </div>
 
@@ -80,13 +74,13 @@
               <a-card-meta :title="app.appName">
                 <template #description>
                   <div class="app-meta">
-                    <a-avatar
-                      :src="app.user?.userAvatar"
-                      :size="20"
-                    />
+                    <a-avatar :src="app.user?.userAvatar" :size="20" />
                     <span class="creator-name">
                       {{ app.user?.userName ?? 'Anonymous' }}
                     </span>
+                    <a-tag v-if="app.codeGenType" color="blue" class="type-tag">
+                      {{ formatCodeGenType(app.codeGenType) }}
+                    </a-tag>
                   </div>
                 </template>
               </a-card-meta>
@@ -106,6 +100,7 @@
         />
       </div>
     </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -122,13 +117,11 @@ const loginUserStore = useLoginUserStore()
 const prompt = ref('')
 const generating = ref(false)
 
-const codeGenType = ref('multi_file')
 const handleGenerate = async () => {
   if (!prompt.value.trim()) {
     message.warning('Please describe your website idea first')
     return
   }
-  // Check login
   if (!loginUserStore.loginUser.id) {
     message.warning('Please sign in first')
     router.push('/user/login')
@@ -136,10 +129,11 @@ const handleGenerate = async () => {
   }
   generating.value = true
   try {
-    const res = await addApp({ initPrompt: prompt.value,  codeGenType: codeGenType.value})
+    // No codeGenType passed — backend AI routing will decide automatically
+    const res = await addApp({ initPrompt: prompt.value })
     if (res.data.code === 0) {
       const appId = res.data.data
-      message.success('App created! Generating your website...')
+      message.success('App created! AI is selecting the best generation mode...')
       router.push(`/chat/${appId}`)
     } else {
       message.error(res.data.message || 'Failed to create app')
@@ -149,6 +143,16 @@ const handleGenerate = async () => {
   } finally {
     generating.value = false
   }
+}
+
+// Format codeGenType for display
+const formatCodeGenType = (type: string) => {
+  const map: Record<string, string> = {
+    html: '⚡ HTML',
+    multi_file: '📁 Multi-file',
+    vue_project: '🖖 Vue',
+  }
+  return map[type] ?? type
 }
 
 // Featured Apps
@@ -180,14 +184,14 @@ const loadFeaturedApps = async (page = 1) => {
 
 const features = [
   {
+    icon: '🤖',
+    title: 'AI Smart Routing',
+    desc: 'AI automatically selects the optimal generation mode based on your description — HTML, Multi-file, or Vue Project.',
+  },
+  {
     icon: '⚡',
     title: 'Instant Generation',
     desc: 'From idea to deployed app in under 60 seconds using AI-powered code generation.',
-  },
-  {
-    icon: '🎨',
-    title: 'Visual Editor',
-    desc: 'Fine-tune your generated app with our visual editor. No coding knowledge needed.',
   },
   {
     icon: '🚀',
@@ -249,10 +253,10 @@ onMounted(() => {
 
 .input-area {
   max-width: 640px;
-  margin: 0 auto;
+  margin: 0 auto 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .prompt-input {
@@ -260,8 +264,26 @@ onMounted(() => {
   border-radius: 8px;
 }
 
+.mode-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #f0f7ff;
+  border-radius: 8px;
+  border: 1px solid #d0e6ff;
+}
+
+.hint-icon {
+  font-size: 16px;
+}
+
+.hint-text {
+  font-size: 13px;
+  color: #1677ff;
+}
+
 .generate-btn {
-  align-self: flex-end;
   min-width: 160px;
 }
 
@@ -340,11 +362,17 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   margin-top: 4px;
+  flex-wrap: wrap;
 }
 
 .creator-name {
   font-size: 13px;
   color: #666;
+}
+
+.type-tag {
+  font-size: 11px;
+  margin: 0;
 }
 
 .pagination {
@@ -355,17 +383,5 @@ onMounted(() => {
 
 .empty-state {
   padding: 60px 0;
-}
-.mode-select {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.mode-label {
-  font-size: 14px;
-  color: #666;
-  white-space: nowrap;
 }
 </style>

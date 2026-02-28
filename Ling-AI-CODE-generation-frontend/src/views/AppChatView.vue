@@ -19,7 +19,7 @@
 
       <!-- Messages -->
       <div class="messages" ref="messagesRef">
-        <!-- 加载更多按钮 -->
+        <!-- Load more button -->
         <div v-if="hasMoreHistory" class="load-more-container">
           <a-button
             type="link"
@@ -83,6 +83,14 @@
           <a-button
             size="small"
             :disabled="!appInfo?.id || isGenerating"
+            :loading="downloading"
+            @click="downloadCode"
+          >
+            ⬇ Download Code
+          </a-button>
+          <a-button
+            size="small"
+            :disabled="!appInfo?.id || isGenerating"
             :loading="deploying"
             @click="deployApp"
           >
@@ -142,14 +150,15 @@ const messagesRef = ref<HTMLElement>()
 const iframeRef = ref<HTMLIFrameElement>()
 const previewUrl = ref('')
 const deploying = ref(false)
+const downloading = ref(false)
 
-// 对话历史相关
+// Chat history
 const loadingHistory = ref(false)
 const hasMoreHistory = ref(false)
 const lastCreateTime = ref<string | undefined>(undefined)
 const historyLoaded = ref(false)
 
-// 加载对话历史
+// Load chat history
 const loadChatHistory = async (isLoadMore = false) => {
   if (!appId || loadingHistory.value) return
   loadingHistory.value = true
@@ -158,7 +167,6 @@ const loadChatHistory = async (isLoadMore = false) => {
       appId: appId as any,
       pageSize: 10,
     }
-    // 如果是加载更多，传入游标
     if (isLoadMore && lastCreateTime.value) {
       params.lastCreateTime = lastCreateTime.value
     }
@@ -166,7 +174,6 @@ const loadChatHistory = async (isLoadMore = false) => {
     if (res.data.code === 0 && res.data.data) {
       const chatHistories = res.data.data.records ?? []
       if (chatHistories.length > 0) {
-        // 将历史记录转换为消息格式，后端返回的是时间降序，需要反转
         const historyMessages: Message[] = chatHistories
           .map((chat) => ({
             role: (chat.messageType === 'user' ? 'user' : 'ai') as 'user' | 'ai',
@@ -176,16 +183,12 @@ const loadChatHistory = async (isLoadMore = false) => {
           .reverse()
 
         if (isLoadMore) {
-          // 加载更多时，把历史消息插入到列表开头
           messages.value.unshift(...historyMessages)
         } else {
-          // 初始加载，直接设置
           messages.value = historyMessages
         }
 
-        // 更新游标：使用最旧的一条消息的创建时间
         lastCreateTime.value = chatHistories[chatHistories.length - 1]?.createTime
-        // 判断是否还有更多历史
         hasMoreHistory.value = chatHistories.length === 10
       } else {
         hasMoreHistory.value = false
@@ -200,7 +203,6 @@ const loadChatHistory = async (isLoadMore = false) => {
   }
 }
 
-// 加载更多历史消息
 const loadMoreHistory = async () => {
   await loadChatHistory(true)
 }
@@ -212,15 +214,12 @@ const fetchAppInfo = async () => {
     if (res.data.code === 0) {
       appInfo.value = res.data.data
 
-      // 先加载对话历史
       await loadChatHistory()
 
-      // 如果有至少 2 条对话记录，展示对应的网站预览
       if (messages.value.length >= 2) {
         updatePreview()
       }
 
-      // 只有在是自己的应用且没有对话历史时才自动发送初始提示词
       const isOwner = appInfo.value?.userId === loginUserStore.loginUser?.id
       if (
         appInfo.value?.initPrompt &&
@@ -240,7 +239,6 @@ const fetchAppInfo = async () => {
   }
 }
 
-// 发送初始消息
 const sendInitialMessage = async (prompt: string) => {
   messages.value.push({ role: 'user', content: prompt })
   const aiMsgIndex = messages.value.length
@@ -258,10 +256,7 @@ const sendMessage = async () => {
   const userMsg = inputMessage.value.trim()
   inputMessage.value = ''
 
-  // Add user message
   messages.value.push({ role: 'user', content: userMsg })
-
-  // Add AI loading message
   const aiMsgIndex = messages.value.length
   messages.value.push({ role: 'ai', content: '', loading: true })
 
@@ -272,7 +267,7 @@ const sendMessage = async () => {
   await generateCode(userMsg, aiMsgIndex)
 }
 
-// 生成代码 - 使用 EventSource 处理流式响应
+// Generate code via SSE
 const generateCode = async (userMessage: string, aiMessageIndex: number) => {
   let eventSource: EventSource | null = null
   let streamCompleted = false
@@ -284,23 +279,18 @@ const generateCode = async (userMessage: string, aiMessageIndex: number) => {
     })
     const url = `http://localhost:8123/api/app/chat/gen/code?${params}`
 
-    // 创建 EventSource 连接
-    eventSource = new EventSource(url, {
-      withCredentials: true,
-    })
+    eventSource = new EventSource(url, { withCredentials: true })
 
     let fullContent = ''
 
-    // 处理接收到的消息
     eventSource.onmessage = function (event) {
       if (streamCompleted) return
       try {
         const parsed = JSON.parse(event.data)
 
-        // Vue 项目模式：JSON 消息格式
         if (parsed.type) {
+          // Vue project mode: JSON message format
           if (parsed.type === 'ai_response') {
-            // AI 文本响应
             const content = parsed.data
             if (content !== undefined && content !== null) {
               fullContent += content
@@ -309,14 +299,12 @@ const generateCode = async (userMessage: string, aiMessageIndex: number) => {
               scrollToBottom()
             }
           } else if (parsed.type === 'tool_request') {
-            // 工具调用请求：显示"[Selecting Tool] Writing file"
             const toolMsg = `\n\n[Selecting Tool] Writing file: ${parsed.name}\n`
             fullContent += toolMsg
             messages.value[aiMessageIndex].content = fullContent
             messages.value[aiMessageIndex].loading = false
             scrollToBottom()
           } else if (parsed.type === 'tool_executed') {
-            // 工具执行完成：显示写入的文件路径
             const args = JSON.parse(parsed.arguments || '{}')
             const toolMsg = `[Tool Executed] ✅ ${args.relativeFilePath}\n`
             fullContent += toolMsg
@@ -325,7 +313,7 @@ const generateCode = async (userMessage: string, aiMessageIndex: number) => {
             scrollToBottom()
           }
         } else {
-          // 原生模式：普通文本格式 {"d": "chunk"}
+          // Native mode: plain text format {"d": "chunk"}
           const content = parsed.d
           if (content !== undefined && content !== null) {
             fullContent += content
@@ -335,35 +323,28 @@ const generateCode = async (userMessage: string, aiMessageIndex: number) => {
           }
         }
       } catch (error) {
-        console.error('解析消息失败:', error)
+        console.error('Failed to parse message:', error)
         handleError(error, aiMessageIndex)
       }
     }
 
-    // 处理done事件
     eventSource.addEventListener('done', function () {
       if (streamCompleted) return
-
       streamCompleted = true
       isGenerating.value = false
       eventSource?.close()
-
-      // 延迟更新预览，确保后端已完成处理
       setTimeout(async () => {
         await fetchAppInfo()
         updatePreview()
       }, 1000)
     })
 
-    // 处理错误
     eventSource.onerror = function () {
       if (streamCompleted || !isGenerating.value) return
-      // 检查是否是正常的连接关闭
       if (eventSource?.readyState === EventSource.CONNECTING) {
         streamCompleted = true
         isGenerating.value = false
         eventSource?.close()
-
         setTimeout(async () => {
           await fetchAppInfo()
           updatePreview()
@@ -373,26 +354,24 @@ const generateCode = async (userMessage: string, aiMessageIndex: number) => {
       }
     }
   } catch (error) {
-    console.error('创建 EventSource 失败: ', error)
+    console.error('Failed to create EventSource:', error)
     handleError(error, aiMessageIndex)
   }
 }
 
-// 错误处理函数
 const handleError = (error: unknown, aiMessageIndex: number) => {
-  console.error('生成代码失败: ', error)
+  console.error('Code generation failed:', error)
   messages.value[aiMessageIndex].content = 'Generation failed, please try again.'
   messages.value[aiMessageIndex].loading = false
   message.error('Generation failed, please try again.')
   isGenerating.value = false
 }
 
-// Update preview
+// Update preview iframe
 const updatePreview = () => {
   if (appId) {
     const codeGenType = appInfo.value?.codeGenType ?? 'multi_file'
     let previewPath = `http://localhost:8123/api/static/${codeGenType}_${appId}/`
-    // Vue 项目需要访问 dist 目录
     if (codeGenType === 'vue_project') {
       previewPath = `http://localhost:8123/api/static/${codeGenType}_${appId}/dist/index.html`
     }
@@ -416,6 +395,45 @@ const deployApp = async () => {
     message.error('Deploy failed')
   } finally {
     deploying.value = false
+  }
+}
+
+// Download source code as ZIP
+const downloadCode = async () => {
+  if (!appId) return
+  downloading.value = true
+  try {
+    const url = `http://localhost:8123/api/app/download/${appId}`
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+    })
+    if (!response.ok) {
+      // Try to parse error message from JSON response
+      const errorData = await response.json().catch(() => null)
+      const errorMsg = errorData?.message || `Download failed: ${response.status}`
+      throw new Error(errorMsg)
+    }
+    // Extract filename from Content-Disposition header
+    const contentDisposition = response.headers.get('Content-Disposition')
+    const fileName = contentDisposition?.match(/filename="(.+)"/)?.[1] || `app-${appId}.zip`
+    // Convert response to blob and trigger download
+    const blob = await response.blob()
+    const downloadUrl = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = downloadUrl
+    link.download = fileName
+    link.style.display = 'none'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000)
+    message.success('Code downloaded successfully!')
+  } catch (error: any) {
+    console.error('Download failed:', error)
+    message.error(error?.message || 'Download failed, please try again')
+  } finally {
+    downloading.value = false
   }
 }
 

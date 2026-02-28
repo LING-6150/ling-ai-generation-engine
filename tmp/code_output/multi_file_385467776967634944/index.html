@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Bio | John Doe</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👤</text></svg>">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="#" class="logo">JD</a>
+            <button class="menu-toggle" aria-label="Toggle navigation menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-links">
+                <li><a href="#about">About</a></li>
+                <li><a href="#skills">Skills</a></li>
+                <li><a href="#experience">Experience</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>John Doe</h1>
+                    <p class="tagline">Frontend Developer & UI/UX Enthusiast</p>
+                    <p class="intro">Creating beautiful, functional web experiences with clean code and thoughtful design.</p>
+                    <a href="#contact" class="btn">Get in Touch</a>
+                </div>
+                <div class="hero-image">
+                    <img src="https://picsum.photos/400/400?random=1" alt="Profile picture of John Doe">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- About Section -->
+        <section id="about" class="section">
+            <h2>About Me</h2>
+            <div class="about-content">
+                <p>Hello! I'm a passionate frontend developer with over 5 years of experience building responsive web applications. I specialize in creating intuitive user interfaces that provide exceptional user experiences.</p>
+                <p>My journey in web development started during my computer science studies, and I've been hooked ever since. I believe in writing clean, maintainable code and staying up-to-date with the latest web technologies.</p>
+                <p>When I'm not coding, you can find me hiking, reading tech blogs, or experimenting with new design tools.</p>
+            </div>
+        </section>
+
+        <!-- Skills Section -->
+        <section id="skills" class="section">
+            <h2>Skills & Expertise</h2>
+            <div class="skills-grid">
+                <div class="skill-category">
+                    <h3>Frontend</h3>
+                    <ul class="skill-list">
+                        <li>HTML5 & CSS3</li>
+                        <li>JavaScript (ES6+)</li>
+                        <li>Responsive Design</li>
+                        <li>Accessibility (a11y)</li>
+                    </ul>
+                </div>
+                <div class="skill-category">
+                    <h3>Tools & Methods</h3>
+                    <ul class="skill-list">
+                        <li>Git & Version Control</li>
+                        <li>Agile/Scrum</li>
+                        <li>Figma & Adobe XD</li>
+                        <li>Browser DevTools</li>
+                    </ul>
+                </div>
+                <div class="skill-category">
+                    <h3>Soft Skills</h3>
+                    <ul class="skill-list">
+                        <li>Problem Solving</li>
+                        <li>Team Collaboration</li>
+                        <li>Communication</li>
+                        <li>Time Management</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Experience Section -->
+        <section id="experience" class="section">
+            <h2>Experience</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">2021 - Present</div>
+                    <div class="timeline-content">
+                        <h3>Senior Frontend Developer</h3>
+                        <p class="company">Tech Solutions Inc.</p>
+                        <p>Lead frontend development for multiple client projects, implemented responsive designs, and mentored junior developers.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">2019 - 2021</div>
+                    <div class="timeline-content">
+                        <h3>Web Developer</h3>
+                        <p class="company">Creative Agency Co.</p>
+                        <p>Developed and maintained websites for various clients, focusing on performance and user experience optimization.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">2017 - 2019</div>
+                    <div class="timeline-content">
+                        <h3>Junior Developer</h3>
+                        <p class="company">Startup Ventures</p>
+                        <p>Assisted in building web applications and learned best practices in modern web development.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="section">
+            <h2>Get in Touch</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <p>I'm always open to discussing new opportunities, collaborations, or just chatting about web development!</p>
+                    <div class="contact-details">
+                        <p><strong>Email:</strong> john.doe@example.com</p>
+                        <p><strong>Location:</strong> San Francisco, CA</p>
+                        <p><strong>Available for:</strong> Freelance projects & full-time positions</p>
+                    </div>
+                </div>
+                <form class="contact-form">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn">Send Message</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; <span id="current-year"></span> John Doe. All rights reserved.</p>
+            <p class="footer-note">Built with HTML, CSS, and vanilla JavaScript</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

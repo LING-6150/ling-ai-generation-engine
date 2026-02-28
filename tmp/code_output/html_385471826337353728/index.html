@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Bio | Alex Morgan</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👤</text></svg>">
+    <style>
+        /* CSS Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --light-color: #f9f9f9;
+            --dark-color: #333;
+            --gray-color: #ecf0f1;
+            --text-color: #333;
+            --text-light: #777;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--light-color);
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            color: #bdc3c7;
+            font-weight: 300;
+        }
+
+        /* Main Content Layout */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (min-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr 2fr;
+            }
+        }
+
+        /* Profile Card */
+        .profile-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            padding: 2rem;
+            text-align: center;
+            height: fit-content;
+        }
+
+        .profile-img-container {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 0 auto 1.5rem;
+            border: 5px solid var(--gray-color);
+        }
+
+        .profile-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            color: var(--secondary-color);
+        }
+
+        .profile-title {
+            color: var(--primary-color);
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+
+        .contact-info {
+            margin-top: 1.5rem;
+            text-align: left;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .contact-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--gray-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        /* Content Sections */
+        .content-sections {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .section {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--gray-color);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 60px;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+
+        /* About Section */
+        .about-text {
+            line-height: 1.8;
+        }
+
+        .about-text p {
+            margin-bottom: 1rem;
+        }
+
+        /* Skills Section */
+        .skills-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .skill-item {
+            background-color: var(--gray-color);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+
+        .skill-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .skill-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--secondary-color);
+        }
+
+        .skill-level {
+            height: 8px;
+            background-color: #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .skill-progress {
+            height: 100%;
+            background-color: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        /* Experience Section */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: var(--primary-color);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2rem;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px var(--primary-color);
+        }
+
+        .timeline-date {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.3rem;
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--secondary-color);
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--secondary-color);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .social-link:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            color: #bdc3c7;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .theme-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+
+        .theme-btn:hover {
+            background-color: var(--primary-color);
+            transform: rotate(30deg);
+        }
+
+        /* Dark Theme */
+        body.dark-theme {
+            --light-color: #121212;
+            --dark-color: #f9f9f9;
+            --text-color: #f0f0f0;
+            --text-light: #aaa;
+            --gray-color: #2a2a2a;
+            --secondary-color: #1a1a1a;
+        }
+
+        body.dark-theme .section,
+        body.dark-theme .profile-card {
+            background-color: #1e1e1e;
+            color: #f0f0f0;
+        }
+
+        body.dark-theme .skill-item {
+            background-color: #2a2a2a;
+        }
+
+        body.dark-theme .skill-level {
+            background-color: #333;
+        }
+
+        body.dark-theme .theme-btn {
+            background-color: var(--primary-color);
+        }
+
+        /* Print Styles */
+        @media print {
+            .theme-toggle,
+            .social-links {
+                display: none;
+            }
+            
+            .section,
+            .profile-card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Toggle Button -->
+    <div class="theme-toggle">
+        <button class="theme-btn" id="themeToggle" aria-label="Toggle dark mode">🌙</button>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <h1>Alex Morgan</h1>
+            <p class="tagline">Frontend Developer & UI/UX Designer</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Profile Card -->
+            <aside class="profile-card">
+                <div class="profile-img-container">
+                    <img src="https://picsum.photos/400/400?random=1" alt="Alex Morgan" class="profile-img" id="profileImage">
+                </div>
+                <h2 class="profile-name">Alex Morgan</h2>
+                <p class="profile-title">Senior Frontend Developer</p>
+                <p>Passionate about creating beautiful, functional web experiences with clean code and intuitive design.</p>
+                
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">@</div>
+                        <div>
+                            <div>Email</div>
+                            <div>alex@example.com</div>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">#</div>
+                        <div>
+                            <div>Phone</div>
+                            <div>+1 (555) 123-4567</div>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">📍</div>
+                        <div>
+                            <div>Location</div>
+                            <div>San Francisco, CA</div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Content Sections -->
+            <div class="content-sections">
+                <!-- About Section -->
+                <section class="section" id="about">
+                    <h2 class="section-title">About Me</h2>
+                    <div class="about-text">
+                        <p>Hello! I'm Alex, a passionate frontend developer with over 8 years of experience creating responsive, user-friendly web applications. I specialize in modern JavaScript, HTML5, and CSS3, with a strong focus on performance and accessibility.</p>
+                        <p>My journey in web development started during my computer science studies, and I've been hooked ever since. I love turning complex problems into simple, beautiful designs that provide excellent user experiences.</p>
+                        <p>When I'm not coding, you can find me hiking in the mountains, reading tech blogs, or experimenting with new web technologies. I believe in continuous learning and staying up-to-date with the latest industry trends.</p>
+                    </div>
+                </section>
+
+                <!-- Skills Section -->
+                <section class="section" id="skills">
+                    <h2 class="section-title">Skills & Expertise</h2>
+                    <div class="skills-container" id="skillsContainer">
+                        <!-- Skills will be populated by JavaScript -->
+                    </div>
+                </section>
+
+                <!-- Experience Section -->
+                <section class="section" id="experience">
+                    <h2 class="section-title">Experience</h2>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-date">2020 - Present</div>
+                            <h3 class="timeline-title">Senior Frontend Developer</h3>
+                            <p>TechVision Inc.</p>
+                            <p>Lead frontend development for multiple client projects, implemented responsive designs, and mentored junior developers.</p>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-date">2017 - 2020</div>
+                            <h3 class="timeline-title">Frontend Developer</h3>
+                            <p>CreativeWeb Solutions</p>
+                            <p>Developed and maintained client websites, optimized performance, and collaborated with design teams.</p>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-date">2015 - 2017</div>
+                            <h3 class="timeline-title">Web Developer</h3>
+                            <p>StartUp Innovations</p>
+                            <p>Built responsive websites and web applications, implemented UI/UX designs, and participated in agile development cycles.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>Let's connect and create something amazing together!</p>
+            <div class="social-links">
+                <a href="#" class="social-link" aria-label="LinkedIn">in</a>
+                <a href="#" class="social-link" aria-label="GitHub">gh</a>
+                <a href="#" class="social-link" aria-label="Twitter">tw</a>
+                <a href="#" class="social-link" aria-label="Portfolio">pf</a>
+            </div>
+            <p class="copyright">&copy; 2023 Alex Morgan. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // DOM Elements
+        const themeToggle = document.getElementById('themeToggle');
+        const profileImage = document.getElementById('profileImage');
+        const skillsContainer = document.getElementById('skillsContainer');
+        
+        // Skills Data
+        const skills = [
+            { name: 'HTML5', level: 95 },
+            { name: 'CSS3', level: 90 },
+            { name: 'JavaScript', level: 88 },
+            { name: 'React', level: 85 },
+            { name: 'Vue.js', level: 80 },
+            { name: 'Responsive Design', level: 92 },
+            { name: 'UI/UX Design', level: 75 },
+            { name: 'Git & Version Control', level: 88 }
+        ];
+        
+        // Theme Management
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(savedTheme);
+        }
+        
+        function setTheme(theme) {
+            document.body.classList.toggle('dark-theme', theme === 'dark');
+            themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+            localStorage.setItem('theme', theme);
+        }
+        
+        function toggleTheme() {
+            const isDark = document.body.classList.contains('dark-theme');
+            setTheme(isDark ? 'light' : 'dark');
+        }
+        
+        // Initialize Skills
+        function renderSkills() {
+            skillsContainer.innerHTML = skills.map(skill => `
+                <div class="skill-item">
+                    <div class="skill-name">${skill.name}</div>
+                    <div class="skill-level">
+                        <div class="skill-progress" style="width: ${skill.level}%"></div>
+                    </div>
+                    <div class="skill-percentage">${skill.level}%</div>
+                </div>
+            `).join('');
+        }
+        
+        // Randomize profile image on click
+        function randomizeProfileImage() {
+            const randomId = Math.floor(Math.random() * 1000);
+            profileImage.src = `https://picsum.photos/400/400?random=${randomId}`;
+        }
+        
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            renderSkills();
+            
+            // Event Listeners
+            themeToggle.addEventListener('click', toggleTheme);
+            profileImage.addEventListener('click', randomizeProfileImage);
+            
+            // Add click animation to social links
+            document.querySelectorAll('.social-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    this.style.transform = 'scale(0.9)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 200);
+                    
+                    // In a real application, this would navigate to the actual social profile
+                    alert(`This would navigate to ${this.getAttribute('aria-label')} profile in a real application.`);
+                });
+            });
+            
+            // Add intersection observer for scroll animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+            
+            // Observe sections for scroll animations
+            document.querySelectorAll('.section').forEach(section => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(20px)';
+                section.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                observer.observe(section);
+            });
+        });
+        
+        // Add keyboard navigation support
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 't' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                toggleTheme();
+            }
+        });
+    </script>
+</body>
+</html>

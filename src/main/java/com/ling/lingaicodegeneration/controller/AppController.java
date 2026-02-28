@@ -15,21 +15,21 @@ import com.ling.lingaicodegeneration.model.entity.User;
 import com.ling.lingaicodegeneration.model.enums.CodeGenTypeEnum;
 import com.ling.lingaicodegeneration.model.vo.AppVO;
 import com.ling.lingaicodegeneration.service.AppService;
+import com.ling.lingaicodegeneration.ai.AiCodeGenTypeRoutingService;
+import com.ling.lingaicodegeneration.service.ProjectDownloadService;
 import com.ling.lingaicodegeneration.service.UserService;
-import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
-import org.springframework.http.codec.ServerSentEvent;
-import com.ling.lingaicodegeneration.model.dto.app.AppDeployRequest;
 
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
+import java.io.File;
 import java.util.List;
 
 @RestController
@@ -42,6 +42,12 @@ public class AppController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private ProjectDownloadService projectDownloadService;
+
+    @Resource
+    private AiCodeGenTypeRoutingService aiCodeGenTypeRoutingService;
 
     // ========== User APIs ==========
 
@@ -60,14 +66,20 @@ public class AppController {
         app.setUserId(loginUser.getId());
         // Use first 12 chars of prompt as app name
         app.setAppName(initPrompt.substring(0, Math.min(initPrompt.length(), 12)));
-        // Default to multi-file generation
-        // Use specified codeGenType, default to multi-file
+        // Use AI routing to select the best code generation type
+        // If user explicitly specified a type, respect it; otherwise use AI to decide
         String codeGenType = appAddRequest.getCodeGenType();
         if (codeGenType == null || codeGenType.isBlank()) {
-            app.setCodeGenType(CodeGenTypeEnum.MULTI_FILE.getValue());
-        } else {
-            app.setCodeGenType(codeGenType);
+            try {
+                CodeGenTypeEnum routedType = aiCodeGenTypeRoutingService.routeCodeGenType(initPrompt);
+                codeGenType = (routedType != null) ? routedType.getValue() : CodeGenTypeEnum.MULTI_FILE.getValue();
+                log.info("AI routing selected: {} for prompt: {}", codeGenType, initPrompt.substring(0, Math.min(initPrompt.length(), 50)));
+            } catch (Exception e) {
+                log.warn("AI routing failed, falling back to MULTI_FILE: {}", e.getMessage());
+                codeGenType = CodeGenTypeEnum.MULTI_FILE.getValue();
+            }
         }
+        app.setCodeGenType(codeGenType);
         boolean result = appService.save(app);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(app.getId());
@@ -184,6 +196,39 @@ public class AppController {
         User loginUser = userService.getLoginUser(request);
         String deployUrl = appService.deployApp(appId, loginUser);
         return ResultUtils.success(deployUrl);
+    }
+
+    /**
+     * Download app source code as ZIP.
+     * Only the app owner can download.
+     */
+    @GetMapping("/download/{appId}")
+    public void downloadAppCode(@PathVariable Long appId,
+                                HttpServletRequest request,
+                                HttpServletResponse response) {
+        // 1. Validate params
+        ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "App ID is invalid");
+        // 2. Get app info
+        App app = appService.getById(appId);
+        ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR, "App not found");
+        // 3. Permission check: only the owner can download
+        User loginUser = userService.getLoginUser(request);
+        if (!app.getUserId().equals(loginUser.getId())) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "No permission to download this app's code");
+        }
+        // 4. Build source directory path (original source, not deploy dir)
+        String codeGenType = app.getCodeGenType();
+        String sourceDirName = codeGenType + "_" + appId;
+        String sourceDirPath = AppConstant.CODE_OUTPUT_ROOT_DIR + File.separator + sourceDirName;
+        // 5. Check source directory exists
+        File sourceDir = new File(sourceDirPath);
+        ThrowUtils.throwIf(!sourceDir.exists() || !sourceDir.isDirectory(),
+                ErrorCode.NOT_FOUND_ERROR, "App code not found, please generate code first");
+        // 6. Use appId as file name to avoid Chinese encoding issues in browser
+        String downloadFileName = String.valueOf(appId);
+        // 7. Stream ZIP to client
+        log.info("User {} downloading app {} code", loginUser.getId(), appId);
+        projectDownloadService.downloadProjectAsZip(sourceDirPath, downloadFileName, response);
     }
 
     /**
