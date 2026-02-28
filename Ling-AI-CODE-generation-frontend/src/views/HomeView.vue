@@ -21,6 +21,16 @@
             :maxlength="1000"
             show-count
           />
+          <!-- 生成模式选择 -->
+          <div class="mode-select">
+            <span class="mode-label">Generation Mode:</span>
+            <a-radio-group v-model:value="codeGenType" button-style="solid">
+              <a-radio-button value="html">⚡ Single HTML</a-radio-button>
+              <a-radio-button value="multi_file">📁 Multi-file</a-radio-button>
+              <a-radio-button value="vue_project">🖖 Vue Project</a-radio-button>
+            </a-radio-group>
+          </div>
+        </div>
           <a-button
             type="primary"
             size="large"
@@ -96,7 +106,6 @@
         />
       </div>
     </div>
-  </div>
 </template>
 
 <script setup lang="ts">
@@ -113,6 +122,7 @@ const loginUserStore = useLoginUserStore()
 const prompt = ref('')
 const generating = ref(false)
 
+const codeGenType = ref('multi_file')
 const handleGenerate = async () => {
   if (!prompt.value.trim()) {
     message.warning('Please describe your website idea first')
@@ -126,7 +136,7 @@ const handleGenerate = async () => {
   }
   generating.value = true
   try {
-    const res = await addApp({ initPrompt: prompt.value })
+    const res = await addApp({ initPrompt: prompt.value,  codeGenType: codeGenType.value})
     if (res.data.code === 0) {
       const appId = res.data.data
       message.success('App created! Generating your website...')
@@ -345,5 +355,17 @@ onMounted(() => {
 
 .empty-state {
   padding: 60px 0;
+}
+.mode-select {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.mode-label {
+  font-size: 14px;
+  color: #666;
+  white-space: nowrap;
 }
 </style>

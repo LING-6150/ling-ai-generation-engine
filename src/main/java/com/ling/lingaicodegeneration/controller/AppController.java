@@ -12,6 +12,7 @@ import com.ling.lingaicodegeneration.exception.ThrowUtils;
 import com.ling.lingaicodegeneration.model.dto.app.*;
 import com.ling.lingaicodegeneration.model.entity.App;
 import com.ling.lingaicodegeneration.model.entity.User;
+import com.ling.lingaicodegeneration.model.enums.CodeGenTypeEnum;
 import com.ling.lingaicodegeneration.model.vo.AppVO;
 import com.ling.lingaicodegeneration.service.AppService;
 import com.ling.lingaicodegeneration.service.UserService;
@@ -60,7 +61,13 @@ public class AppController {
         // Use first 12 chars of prompt as app name
         app.setAppName(initPrompt.substring(0, Math.min(initPrompt.length(), 12)));
         // Default to multi-file generation
-        app.setCodeGenType(com.ling.lingaicodegeneration.model.enums.CodeGenTypeEnum.MULTI_FILE.getValue());
+        // Use specified codeGenType, default to multi-file
+        String codeGenType = appAddRequest.getCodeGenType();
+        if (codeGenType == null || codeGenType.isBlank()) {
+            app.setCodeGenType(CodeGenTypeEnum.MULTI_FILE.getValue());
+        } else {
+            app.setCodeGenType(codeGenType);
+        }
         boolean result = appService.save(app);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(app.getId());

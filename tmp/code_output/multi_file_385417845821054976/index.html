@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Calculator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="calculator-container">
+        <header class="calculator-header">
+            <h1><i class="fas fa-calculator"></i> Simple Calculator</h1>
+            <p class="subtitle">A clean, responsive calculator with basic operations</p>
+        </header>
+        
+        <main class="calculator-main">
+            <div class="calculator">
+                <!-- Display Section -->
+                <div class="display-container">
+                    <div class="previous-operand" id="previous-operand"></div>
+                    <div class="current-operand" id="current-operand">0</div>
+                </div>
+                
+                <!-- Calculator Buttons -->
+                <div class="buttons-grid">
+                    <!-- First Row -->
+                    <button class="btn btn-operation" data-action="clear">C</button>
+                    <button class="btn btn-operation" data-action="backspace">
+                        <i class="fas fa-backspace"></i>
+                    </button>
+                    <button class="btn btn-operation" data-action="percentage">%</button>
+                    <button class="btn btn-operation" data-action="divide">÷</button>
+                    
+                    <!-- Second Row -->
+                    <button class="btn btn-number" data-number="7">7</button>
+                    <button class="btn btn-number" data-number="8">8</button>
+                    <button class="btn btn-number" data-number="9">9</button>
+                    <button class="btn btn-operation" data-action="multiply">×</button>
+                    
+                    <!-- Third Row -->
+                    <button class="btn btn-number" data-number="4">4</button>
+                    <button class="btn btn-number" data-number="5">5</button>
+                    <button class="btn btn-number" data-number="6">6</button>
+                    <button class="btn btn-operation" data-action="subtract">-</button>
+                    
+                    <!-- Fourth Row -->
+                    <button class="btn btn-number" data-number="1">1</button>
+                    <button class="btn btn-number" data-number="2">2</button>
+                    <button class="btn btn-number" data-number="3">3</button>
+                    <button class="btn btn-operation" data-action="add">+</button>
+                    
+                    <!-- Fifth Row -->
+                    <button class="btn btn-number btn-zero" data-number="0">0</button>
+                    <button class="btn btn-number" data-number=".">.</button>
+                    <button class="btn btn-equals" data-action="equals">=</button>
+                </div>
+                
+                <!-- History Section -->
+                <div class="history-container">
+                    <h3><i class="fas fa-history"></i> Calculation History</h3>
+                    <div class="history-list" id="history-list">
+                        <!-- History items will be added here by JavaScript -->
+                        <div class="history-empty">No calculations yet</div>
+                    </div>
+                    <button class="btn btn-clear-history" id="clear-history">
+                        <i class="fas fa-trash"></i> Clear History
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Instructions Section -->
+            <div class="instructions">
+                <h3><i class="fas fa-info-circle"></i> How to Use</h3>
+                <ul>
+                    <li>Click numbers and operators to perform calculations</li>
+                    <li><strong>C</strong> clears the current calculation</li>
+                    <li><strong>←</strong> removes the last entered digit</li>
+                    <li><strong>=</strong> calculates the result</li>
+                    <li>You can also use your keyboard for input</li>
+                </ul>
+            </div>
+        </main>
+        
+        <footer class="calculator-footer">
+            <p>Simple Calculator App &copy; <span id="current-year"></span> | Made with vanilla JavaScript</p>
+        </footer>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

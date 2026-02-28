@@ -88,7 +88,7 @@
           >
             🚀 Deploy
           </a-button>
-          <a-button size="small" @click="refreshPreview">↺ Refresh</a-button>
+          <a-button size="small" @click="updatePreview">↺ Refresh</a-button>
         </div>
       </div>
 
@@ -295,16 +295,44 @@ const generateCode = async (userMessage: string, aiMessageIndex: number) => {
     eventSource.onmessage = function (event) {
       if (streamCompleted) return
       try {
-        // 解析JSON包装的数据
         const parsed = JSON.parse(event.data)
-        const content = parsed.d
 
-        // 拼接内容
-        if (content !== undefined && content !== null) {
-          fullContent += content
-          messages.value[aiMessageIndex].content = fullContent
-          messages.value[aiMessageIndex].loading = false
-          scrollToBottom()
+        // Vue 项目模式：JSON 消息格式
+        if (parsed.type) {
+          if (parsed.type === 'ai_response') {
+            // AI 文本响应
+            const content = parsed.data
+            if (content !== undefined && content !== null) {
+              fullContent += content
+              messages.value[aiMessageIndex].content = fullContent
+              messages.value[aiMessageIndex].loading = false
+              scrollToBottom()
+            }
+          } else if (parsed.type === 'tool_request') {
+            // 工具调用请求：显示"[Selecting Tool] Writing file"
+            const toolMsg = `\n\n[Selecting Tool] Writing file: ${parsed.name}\n`
+            fullContent += toolMsg
+            messages.value[aiMessageIndex].content = fullContent
+            messages.value[aiMessageIndex].loading = false
+            scrollToBottom()
+          } else if (parsed.type === 'tool_executed') {
+            // 工具执行完成：显示写入的文件路径
+            const args = JSON.parse(parsed.arguments || '{}')
+            const toolMsg = `[Tool Executed] ✅ ${args.relativeFilePath}\n`
+            fullContent += toolMsg
+            messages.value[aiMessageIndex].content = fullContent
+            messages.value[aiMessageIndex].loading = false
+            scrollToBottom()
+          }
+        } else {
+          // 原生模式：普通文本格式 {"d": "chunk"}
+          const content = parsed.d
+          if (content !== undefined && content !== null) {
+            fullContent += content
+            messages.value[aiMessageIndex].content = fullContent
+            messages.value[aiMessageIndex].loading = false
+            scrollToBottom()
+          }
         }
       } catch (error) {
         console.error('解析消息失败:', error)
@@ -363,12 +391,13 @@ const handleError = (error: unknown, aiMessageIndex: number) => {
 const updatePreview = () => {
   if (appId) {
     const codeGenType = appInfo.value?.codeGenType ?? 'multi_file'
-    previewUrl.value = `http://localhost:8123/api/static/${codeGenType}_${appId}/?t=${Date.now()}`
+    let previewPath = `http://localhost:8123/api/static/${codeGenType}_${appId}/`
+    // Vue 项目需要访问 dist 目录
+    if (codeGenType === 'vue_project') {
+      previewPath = `http://localhost:8123/api/static/${codeGenType}_${appId}/dist/index.html`
+    }
+    previewUrl.value = previewPath + `?t=${Date.now()}`
   }
-}
-
-const refreshPreview = () => {
-  updatePreview()
 }
 
 // Deploy app

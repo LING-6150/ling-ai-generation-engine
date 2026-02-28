@@ -11,5 +11,10 @@ public class AppAddRequest implements Serializable {
      */
     private String initPrompt;
 
+    /**
+     * Code generation type: html, multi_file, vue_project
+     */
+    private String codeGenType;
+
     private static final long serialVersionUID = 1L;
 }

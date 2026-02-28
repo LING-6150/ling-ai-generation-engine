@@ -113,10 +113,14 @@ const isOwner = computed(() => {
   return loginUserStore.loginUser?.id === appInfo.value?.userId ||
     loginUserStore.loginUser?.userRole === 'admin'
 })
-
+//重新修改 改成vue逻辑的
 const previewUrl = computed(() => {
   if (!appInfo.value?.codeGenType || !appId) return ''
-  return `http://localhost:8123/api/static/${appInfo.value.codeGenType}_${appId}/`
+  const codeGenType = appInfo.value.codeGenType
+  if (codeGenType === 'vue_project') {
+    return `http://localhost:8123/api/static/${codeGenType}_${appId}/dist/index.html`
+  }
+  return `http://localhost:8123/api/static/${codeGenType}_${appId}/`
 })
 
 const fetchAppInfo = async () => {
