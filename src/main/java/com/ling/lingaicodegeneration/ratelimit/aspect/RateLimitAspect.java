@@ -48,6 +48,7 @@ public class RateLimitAspect {
 
     @Before("@annotation(rateLimit)")
     public void doBefore(JoinPoint point, RateLimit rateLimit) {
+        log.info("RateLimitAspect triggered for: {}", point.getSignature().getName());
         String key = generateRateLimitKey(point, rateLimit);
 
         // Get or create RRateLimiter for this key

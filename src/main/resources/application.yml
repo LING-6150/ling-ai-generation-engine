@@ -1,6 +1,8 @@
 spring:
   application:
     name: Ling-AI-CODE-generation-backend
+  main:
+    allow-bean-definition-overriding: true
   profiles:
     active: local
   data:

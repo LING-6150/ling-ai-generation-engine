@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Todo List</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <h1><i class="fas fa-tasks"></i> Todo List</h1>
+            <p class="subtitle">Stay organized and get things done</p>
+        </header>
+
+        <main class="app-main">
+            <div class="input-section">
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="todo-input" 
+                        placeholder="What needs to be done?"
+                        maxlength="100"
+                    >
+                    <button id="add-btn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Task
+                    </button>
+                </div>
+                <div class="input-hint">
+                    <span>Press Enter to add or click the Add button</span>
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <div class="stats">
+                    <span class="stat-item">
+                        <span class="stat-label">Total:</span>
+                        <span id="total-count" class="stat-value">0</span>
+                    </span>
+                    <span class="stat-item">
+                        <span class="stat-label">Pending:</span>
+                        <span id="pending-count" class="stat-value">0</span>
+                    </span>
+                    <span class="stat-item">
+                        <span class="stat-label">Completed:</span>
+                        <span id="completed-count" class="stat-value">0</span>
+                    </span>
+                </div>
+                <div class="filter-controls">
+                    <button id="filter-all" class="filter-btn active">All</button>
+                    <button id="filter-pending" class="filter-btn">Pending</button>
+                    <button id="filter-completed" class="filter-btn">Completed</button>
+                </div>
+            </div>
+
+            <div class="todos-section">
+                <div class="todos-header">
+                    <h2>Your Tasks</h2>
+                    <button id="clear-completed" class="btn btn-secondary">
+                        Clear Completed
+                    </button>
+                </div>
+                
+                <div id="todos-container" class="todos-container">
+                    <!-- Todo items will be dynamically inserted here -->
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>No tasks yet</h3>
+                        <p>Add your first task using the input above</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <p>Simple Todo List App &copy; <span id="current-year"></span> | Made with HTML, CSS & JavaScript</p>
+        </footer>
+    </div>
+
+    <!-- Template for todo items -->
+    <template id="todo-template">
+        <div class="todo-item">
+            <div class="todo-checkbox">
+                <input type="checkbox" class="todo-status">
+                <span class="checkmark"></span>
+            </div>
+            <div class="todo-content">
+                <input type="text" class="todo-text" readonly>
+                <div class="todo-meta">
+                    <span class="todo-date"></span>
+                </div>
+            </div>
+            <div class="todo-actions">
+                <button class="btn-icon edit-btn" title="Edit task">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn-icon delete-btn" title="Delete task">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <script src="script.js"></script>
+</body>
+</html>

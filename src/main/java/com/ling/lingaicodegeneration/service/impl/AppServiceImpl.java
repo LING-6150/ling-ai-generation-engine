@@ -26,6 +26,10 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.redisson.api.RRateLimiter;
+import org.redisson.api.RateIntervalUnit;
+import org.redisson.api.RateType;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -33,6 +37,7 @@ import reactor.core.publisher.Flux;
 
 import java.io.File;
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +61,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
     @Resource
     private CodeGenWorkflow codeGenWorkflow;
+
+    @Resource
+    private RedissonClient redissonClient;
 
     @Override
     public QueryWrapper getQueryWrapper(AppQueryRequest appQueryRequest) {
@@ -217,6 +225,17 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
     @Override
     public Flux<String> chatToGenCode(Long appId, String message, User loginUser, boolean agent) {
+        // 限流检查：每个用户每60秒最多5次
+        String rateLimitKey = "rate_limit:user:" + loginUser.getId();
+        RRateLimiter rateLimiter = redissonClient.getRateLimiter(rateLimitKey);
+        rateLimiter.trySetRate(RateType.OVERALL, 5, 60, RateIntervalUnit.SECONDS);
+        rateLimiter.expire(Duration.ofHours(1));
+        boolean acquired = rateLimiter.tryAcquire(1);
+        if (!acquired) {
+            throw new BusinessException(ErrorCode.TOO_MANY_REQUEST,
+                    "AI requests are limited to 5 per minute, please try again later");
+        }
+
         // 1. Validate params
         if (appId == null || appId <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "App ID cannot be null");

@@ -1,5 +1,7 @@
 package com.ling.lingaicodegeneration.ai;
 
+import com.ling.lingaicodegeneration.ai.guardrail.PromptSafetyInputGuardrail;
+import com.ling.lingaicodegeneration.ai.guardrail.RetryOutputGuardrail;
 import com.ling.lingaicodegeneration.ai.tools.*;
 import com.ling.lingaicodegeneration.exception.BusinessException;
 import com.ling.lingaicodegeneration.exception.ErrorCode;
@@ -103,7 +105,9 @@ public class AiCodeGeneratorServiceFactory {
                                         "Error: there is no tool called " + toolExecutionRequest.name()))
                         // Prevent infinite tool call loops
                         .maxSequentialToolsInvocations(20)
+                        .inputGuardrails(new PromptSafetyInputGuardrail())  // 加这里
                         .build();
+
             }
             // HTML / MULTI_FILE: standard streaming model
             case HTML, MULTI_FILE -> {
@@ -115,6 +119,8 @@ public class AiCodeGeneratorServiceFactory {
                         .chatModel(chatModel)
                         .streamingChatModel(streamingChatModel)
                         .chatMemory(chatMemory)
+                        .inputGuardrails(new PromptSafetyInputGuardrail())   // 加这里
+                        .outputGuardrails(new RetryOutputGuardrail())         // 加这里
                         .build();
             }
             default -> throw new BusinessException(ErrorCode.SYSTEM_ERROR,
