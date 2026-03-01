@@ -1,14 +1,11 @@
 package com.ling.lingaicodegeneration.ai;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.ling.lingaicodegeneration.ai.tools.FileDeleteTool;
-import com.ling.lingaicodegeneration.ai.tools.FileDirReadTool;
-import com.ling.lingaicodegeneration.ai.tools.FileModifyTool;
-import com.ling.lingaicodegeneration.ai.tools.FileReadTool;
-import com.ling.lingaicodegeneration.ai.tools.FileWriteTool;
+import com.ling.lingaicodegeneration.ai.tools.*;
+import com.ling.lingaicodegeneration.exception.BusinessException;
+import com.ling.lingaicodegeneration.exception.ErrorCode;
 import com.ling.lingaicodegeneration.model.enums.CodeGenTypeEnum;
 import com.ling.lingaicodegeneration.service.ChatHistoryService;
+import com.ling.lingaicodegeneration.utils.SpringContextUtil;
 import dev.langchain4j.community.store.memory.chat.redis.RedisChatMemoryStore;
 import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
@@ -22,21 +19,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import java.time.Duration;
-
 @Slf4j
 @Configuration
 public class AiCodeGeneratorServiceFactory {
 
     @Resource(name = "openAiChatModel")
     private ChatModel chatModel;
-
-    @Resource(name = "openAiStreamingChatModel")
-    private StreamingChatModel streamingChatModel;
-
-    @Resource(name = "reasoningStreamingChatModel")
-    private OpenAiStreamingChatModel reasoningStreamingChatModel;
-
 
     @Resource
     private RedisChatMemoryStore redisChatMemoryStore;
@@ -46,78 +34,96 @@ public class AiCodeGeneratorServiceFactory {
     private ChatHistoryService chatHistoryService;
 
     /**
-     * AI 服务实例缓存
-     * - 最大缓存 1000 个实例
-     * - 写入后 30 分钟过期
-     * - 访问后 10 分钟过期
-     */
-    private final Cache<String, AiCodeGeneratorService> serviceCache = Caffeine.newBuilder()
-            .maximumSize(1000)
-            .expireAfterWrite(Duration.ofMinutes(30))
-            .expireAfterAccess(Duration.ofMinutes(10))
-            .removalListener((key, value, cause) -> {
-                log.debug("AI service instance removed, key: {}, cause: {}", key, cause);
-            })
-            .build();
-
-    /**
-     * 根据 appId 获取服务（带缓存）
+     * Get AI service for the given appId and codeGenType.
+     *
+     * Key change from Chapter 7/8/9:
+     * - Previously: Caffeine cache reused same instance → concurrent requests on same ChatModel
+     *   triggered blocking in SpringRestClient.execute() → requests queued up
+     * - Now: Each call gets a FRESH instance via SpringContextUtil.getBean("prototype bean")
+     *   → every request has its own StreamingChatModel → no contention
+     *
+     * Chat memory is still persisted in Redis (data not lost), only the in-memory
+     * MessageWindowChatMemory wrapper is recreated each time.
      */
     public AiCodeGeneratorService getAiCodeGeneratorService(long appId, CodeGenTypeEnum codeGenType) {
-        // 缓存 key 包含 codeGenType，因为不同生成类型使用不同模型
-        String cacheKey = appId + "_" + codeGenType.getValue();
-        return serviceCache.get(cacheKey, key -> createAiCodeGeneratorService(appId, codeGenType));
+        log.info("Creating new AI service instance for appId: {}, codeGenType: {}", appId, codeGenType);
+        return createAiCodeGeneratorService(appId, codeGenType);
     }
 
     /**
-     * 向后兼容，默认使用 HTML 模式
+     * Backward-compatible overload, defaults to HTML mode.
      */
     public AiCodeGeneratorService getAiCodeGeneratorService(long appId) {
         return getAiCodeGeneratorService(appId, CodeGenTypeEnum.HTML);
     }
 
     /**
-     * 创建新的 AI 服务实例
+     * Build a fresh MessageWindowChatMemory backed by Redis.
+     * The object is new each time, but data is loaded from Redis — no history lost.
      */
-    private AiCodeGeneratorService createAiCodeGeneratorService(long appId, CodeGenTypeEnum codeGenType) {
-        log.info("Creating new AI service instance for appId: {}, codeGenType: {}", appId, codeGenType);
-        // 根据 appId 构建独立的对话记忆
-        MessageWindowChatMemory chatMemory = MessageWindowChatMemory
-                .builder()
+    private MessageWindowChatMemory buildChatMemory(long appId) {
+        MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder()
                 .id(appId)
                 .chatMemoryStore(redisChatMemoryStore)
                 .maxMessages(20)
                 .build();
-        // 从数据库加载历史对话到记忆中
+        // Load persisted chat history from DB into memory
         chatHistoryService.loadChatHistoryToMemory(appId, chatMemory, 20);
+        return chatMemory;
+    }
 
-        // 根据代码生成类型选择不同的模型配置
+    /**
+     * Create a new AI service instance.
+     * Uses SpringContextUtil.getBean() to fetch @Scope("prototype") model beans,
+     * ensuring each service instance gets its own dedicated model connection.
+     */
+    private AiCodeGeneratorService createAiCodeGeneratorService(long appId, CodeGenTypeEnum codeGenType) {
+        MessageWindowChatMemory chatMemory = buildChatMemory(appId);
+
         return switch (codeGenType) {
-            // Vue 项目使用推理流式模型 + 工具调用
-            case VUE_PROJECT -> AiServices.builder(AiCodeGeneratorService.class)
-                    .streamingChatModel(reasoningStreamingChatModel)
-                    .chatMemoryProvider(memoryId -> chatMemory)
-                    .tools(
-                            new FileWriteTool(),
-                            new FileReadTool(),
-                            new FileDirReadTool(),
-                            new FileModifyTool(),
-                            new FileDeleteTool()
-                    )
-                    .hallucinatedToolNameStrategy(toolExecutionRequest -> ToolExecutionResultMessage.from(
-                            toolExecutionRequest, "Error: there is no tool called " + toolExecutionRequest.name()))
-                    .build();
-            // HTML 和多文件使用默认模型
-            default -> AiServices.builder(AiCodeGeneratorService.class)
-                    .chatModel(chatModel)
-                    .streamingChatModel(streamingChatModel)
-                    .chatMemory(chatMemory)
-                    .build();
+            // Vue project: reasoning streaming model + tool calling
+            case VUE_PROJECT -> {
+                // Fetch a fresh prototype instance of the reasoning streaming model
+                OpenAiStreamingChatModel reasoningStreamingChatModel =
+                        SpringContextUtil.getBean("reasoningStreamingChatModel",
+                                OpenAiStreamingChatModel.class);
+                yield AiServices.builder(AiCodeGeneratorService.class)
+                        .streamingChatModel(reasoningStreamingChatModel)
+                        .chatMemoryProvider(memoryId -> chatMemory)
+                        .tools(
+                                new FileWriteTool(),
+                                new FileReadTool(),
+                                new FileDirReadTool(),
+                                new FileModifyTool(),
+                                new FileDeleteTool()
+                        )
+                        // Handle hallucinated tool names gracefully
+                        .hallucinatedToolNameStrategy(toolExecutionRequest ->
+                                ToolExecutionResultMessage.from(toolExecutionRequest,
+                                        "Error: there is no tool called " + toolExecutionRequest.name()))
+                        // Prevent infinite tool call loops
+                        .maxSequentialToolsInvocations(20)
+                        .build();
+            }
+            // HTML / MULTI_FILE: standard streaming model
+            case HTML, MULTI_FILE -> {
+                // Fetch a fresh prototype instance of the standard streaming model
+                StreamingChatModel streamingChatModel =
+                        SpringContextUtil.getBean("openAiStreamingChatModel",
+                                StreamingChatModel.class);
+                yield AiServices.builder(AiCodeGeneratorService.class)
+                        .chatModel(chatModel)
+                        .streamingChatModel(streamingChatModel)
+                        .chatMemory(chatMemory)
+                        .build();
+            }
+            default -> throw new BusinessException(ErrorCode.SYSTEM_ERROR,
+                    "Unsupported code gen type: " + codeGenType.getValue());
         };
     }
 
     /**
-     * 默认提供一个 Bean，保持向后兼容
+     * Default Bean for backward compatibility.
      */
     @Bean
     public AiCodeGeneratorService aiCodeGeneratorService() {

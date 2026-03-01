@@ -2,6 +2,7 @@ package com.ling.lingaicodegeneration.service.impl;
 
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import com.ling.lingaicodegeneration.ai.langgraph4j.workflow.CodeGenWorkflow;
 import com.ling.lingaicodegeneration.constant.AppConstant;
 import com.ling.lingaicodegeneration.core.AiCodeGeneratorFacade;
 import com.ling.lingaicodegeneration.core.builder.VueProjectBuilder;
@@ -52,6 +53,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
     @Resource
     private ChatHistoryService chatHistoryService;
+
+    @Resource
+    private CodeGenWorkflow codeGenWorkflow;
 
     @Override
     public QueryWrapper getQueryWrapper(AppQueryRequest appQueryRequest) {
@@ -212,7 +216,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
     private StreamHandlerExecutor streamHandlerExecutor;
 
     @Override
-    public Flux<String> chatToGenCode(Long appId, String message, User loginUser) {
+    public Flux<String> chatToGenCode(Long appId, String message, User loginUser, boolean agent) {
         // 1. Validate params
         if (appId == null || appId <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "App ID cannot be null");
@@ -241,11 +245,20 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
                 ChatHistoryMessageTypeEnum.USER.getValue(), loginUser.getId());
 
         // 6. Call AI to generate code (streaming)
-        Flux<String> codeStream = aiCodeGeneratorFacade.generateAndSaveCodeStream(
-                message, codeGenTypeEnum, appId);
-
-        // 7. 使用流处理器执行器处理流，自动根据生成类型调用不同的处理器
-        return streamHandlerExecutor.doExecute(codeStream, chatHistoryService,
-                appId, loginUser, codeGenTypeEnum);
+        Flux<String> codeStream;
+        if (agent) {
+            // Agent mode: use LangGraph4j workflow
+            log.info("Agent mode enabled, using workflow for appId: {}", appId);
+            codeStream = codeGenWorkflow.executeWorkflowWithFlux(message, appId);
+            // Workflow handles file saving internally, just return the stream
+            return codeStream;
+        } else {
+            // Normal mode: use existing AI generation
+            codeStream = aiCodeGeneratorFacade.generateAndSaveCodeStream(
+                    message, codeGenTypeEnum, appId);
+            // 7. 使用流处理器执行器处理流
+            return streamHandlerExecutor.doExecute(codeStream, chatHistoryService,
+                    appId, loginUser, codeGenTypeEnum);
+        }
     }
 }

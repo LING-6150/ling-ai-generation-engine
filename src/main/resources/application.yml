@@ -3,6 +3,11 @@ spring:
     name: Ling-AI-CODE-generation-backend
   profiles:
     active: local
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
 server:
   port: 8123
   servlet:
@@ -13,8 +18,14 @@ springdoc:
   group-configs:
     - group: 'default'
       packages-to-scan: com.ling.lingaicodegeneration.controller
+
 # knife4j
 knife4j:
   enable: true
   setting:
     language: zh_cn
+
+#redisson:
+  #onfig: |
+    #singleServerConfig:
+      #address: "redis://localhost:6379"

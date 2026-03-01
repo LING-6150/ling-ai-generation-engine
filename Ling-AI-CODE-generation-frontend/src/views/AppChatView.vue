@@ -62,7 +62,17 @@
           @keydown.ctrl.enter="sendMessage"
         />
         <div class="input-actions">
-          <span class="hint">Ctrl + Enter to send</span>
+          <div class="left-actions">
+            <span class="hint">Ctrl + Enter to send</span>
+            <a-tooltip title="Agent mode uses LangGraph4j workflow with image collection and code quality check">
+              <a-switch
+                v-model:checked="agentMode"
+                size="small"
+                :disabled="isGenerating"
+              />
+              <span class="agent-label">Agent Mode</span>
+            </a-tooltip>
+          </div>
           <a-button
             type="primary"
             :loading="isGenerating"
@@ -151,6 +161,7 @@ const iframeRef = ref<HTMLIFrameElement>()
 const previewUrl = ref('')
 const deploying = ref(false)
 const downloading = ref(false)
+const agentMode = ref(false)
 
 // Chat history
 const loadingHistory = ref(false)
@@ -276,6 +287,7 @@ const generateCode = async (userMessage: string, aiMessageIndex: number) => {
     const params = new URLSearchParams({
       appId: appId || '',
       message: userMessage,
+      agent: agentMode.value ? 'true' : 'false',
     })
     const url = `http://localhost:8123/api/app/chat/gen/code?${params}`
 

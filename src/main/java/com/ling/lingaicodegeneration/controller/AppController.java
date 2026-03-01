@@ -14,6 +14,8 @@ import com.ling.lingaicodegeneration.model.entity.App;
 import com.ling.lingaicodegeneration.model.entity.User;
 import com.ling.lingaicodegeneration.model.enums.CodeGenTypeEnum;
 import com.ling.lingaicodegeneration.model.vo.AppVO;
+import com.ling.lingaicodegeneration.ratelimit.annotation.RateLimit;
+import com.ling.lingaicodegeneration.ratelimit.enums.RateLimitType;
 import com.ling.lingaicodegeneration.service.AppService;
 import com.ling.lingaicodegeneration.ai.AiCodeGenTypeRoutingService;
 import com.ling.lingaicodegeneration.service.ProjectDownloadService;
@@ -24,6 +26,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
@@ -167,6 +171,11 @@ public class AppController {
      * List good apps by page
      */
     @PostMapping("/good/list/page/vo")
+    @Cacheable(
+            value = "good_app_page",
+            key = "T(com.ling.lingaicodegeneration.utils.CacheKeyUtils).generateKey(#appQueryRequest)",
+            condition = "#appQueryRequest.pageNum >= 10"
+    )
     public BaseResponse<com.mybatisflex.core.paginate.Page<AppVO>> listGoodAppVOByPage(
             @RequestBody AppQueryRequest appQueryRequest) {
         ThrowUtils.throwIf(appQueryRequest == null, ErrorCode.PARAMS_ERROR);
@@ -235,13 +244,17 @@ public class AppController {
      * Chat to generate code (SSE streaming)
      */
     @GetMapping(value = "/chat/gen/code", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<String>> chatToGenCode(@RequestParam Long appId,
-                                                       @RequestParam String message,
-                                                       HttpServletRequest request) {
+    @RateLimit(limitType = RateLimitType.USER, rate = 5, rateInterval = 60,
+            message = "AI requests are limited to 5 per minute, please try again later")
+    public Flux<ServerSentEvent<String>> chatToGenCode(
+            @RequestParam Long appId,
+            @RequestParam String message,
+            @RequestParam(defaultValue = "false") boolean agent,
+            HttpServletRequest request) {
         ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "App ID cannot be null");
         ThrowUtils.throwIf(message == null || message.isBlank(), ErrorCode.PARAMS_ERROR, "Message cannot be empty");
         User loginUser = userService.getLoginUser(request);
-        Flux<String> contentFlux = appService.chatToGenCode(appId, message, loginUser);
+        Flux<String> contentFlux = appService.chatToGenCode(appId, message, loginUser, agent);
         return contentFlux
                 .map(chunk -> {
                     java.util.Map<String, String> wrapper = java.util.Map.of("d", chunk);
@@ -271,6 +284,7 @@ public class AppController {
      */
     @PostMapping("/admin/delete")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @CacheEvict(value = "good_app_page", allEntries = true)
     public BaseResponse<Boolean> deleteAppByAdmin(@RequestBody DeleteRequest deleteRequest) {
         ThrowUtils.throwIf(deleteRequest == null || deleteRequest.getId() <= 0,
                 ErrorCode.PARAMS_ERROR);
@@ -285,6 +299,7 @@ public class AppController {
      * Admin update app
      */
     @PostMapping("/admin/update")
+    @CacheEvict(value = "good_app_page", allEntries = true)
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> updateAppByAdmin(@RequestBody AppAdminUpdateRequest appAdminUpdateRequest) {
         ThrowUtils.throwIf(appAdminUpdateRequest == null || appAdminUpdateRequest.getId() == null,

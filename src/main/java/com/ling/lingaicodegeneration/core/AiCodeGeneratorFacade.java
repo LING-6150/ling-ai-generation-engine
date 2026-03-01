@@ -5,6 +5,8 @@ import com.ling.lingaicodegeneration.ai.AiCodeGeneratorServiceFactory;
 import com.ling.lingaicodegeneration.ai.model.HtmlCodeResult;
 import com.ling.lingaicodegeneration.ai.model.MultiFileCodeResult;
 import com.ling.lingaicodegeneration.ai.model.message.*;
+import com.ling.lingaicodegeneration.constant.AppConstant;
+import com.ling.lingaicodegeneration.core.builder.VueProjectBuilder;
 import com.ling.lingaicodegeneration.exception.BusinessException;
 import com.ling.lingaicodegeneration.exception.ErrorCode;
 import com.ling.lingaicodegeneration.model.enums.CodeGenTypeEnum;
@@ -23,6 +25,9 @@ public class AiCodeGeneratorFacade {
 
     @Resource
     private AiCodeGeneratorServiceFactory aiCodeGeneratorServiceFactory;
+
+    @Resource
+    private VueProjectBuilder vueProjectBuilder;
 
     /**
      * Generate and save code (non-streaming)
@@ -59,9 +64,9 @@ public class AiCodeGeneratorFacade {
                 yield processCodeStream(codeStream, CodeGenTypeEnum.MULTI_FILE, appId);
             }
             case VUE_PROJECT -> {
-                // Vue 项目使用 TokenStream，需要转换为 Flux<String>
+                // Vue project uses TokenStream (for tool call events), convert to Flux<String>
                 TokenStream tokenStream = aiService.generateVueProjectCodeStream(appId, userMessage);
-                yield processTokenStream(tokenStream);
+                yield processTokenStream(tokenStream, appId);
             }
             default -> throw new BusinessException(ErrorCode.SYSTEM_ERROR,
                     "Unsupported generation type: " + codeGenTypeEnum.getValue());
@@ -103,10 +108,14 @@ public class AiCodeGeneratorFacade {
     }
 
     /**
-     * 将 TokenStream 转换为 Flux<String>，并传递工具调用信息
-     * 适配器方法，将 TokenStream 格式转为下游可处理的 Flux 格式
+     * Convert TokenStream to Flux<String>, forwarding tool execution events downstream.
+     * Adapter pattern: unifies TokenStream and Flux<String> for the handler layer.
+     *
+     * Chapter 11 change: Vue project is now built SYNCHRONOUSLY inside onCompleteResponse.
+     * The SSE stream only completes AFTER npm install + npm run build finish,
+     * so the frontend can immediately preview the result without a blank page.
      */
-    private Flux<String> processTokenStream(TokenStream tokenStream) {
+    private Flux<String> processTokenStream(TokenStream tokenStream, Long appId) {
         return Flux.create(sink -> {
             tokenStream
                     .onPartialResponse(partialResponse -> {
@@ -118,6 +127,11 @@ public class AiCodeGeneratorFacade {
                         sink.next(JSONUtil.toJsonStr(toolExecutedMessage));
                     })
                     .onCompleteResponse(response -> {
+                        // Synchronous build: stream only completes after build finishes.
+                        // User can immediately preview without manually refreshing.
+                        String projectPath = AppConstant.CODE_OUTPUT_ROOT_DIR
+                                + File.separator + "vue_project_" + appId;
+                        vueProjectBuilder.buildProject(projectPath);
                         sink.complete();
                     })
                     .onError(error -> {
