@@ -34,17 +34,37 @@ Ling-AI-CODE-generation is a full-stack AI platform that lets users describe a w
 
 ---
 
-## Live Demo
+## 🚀 Live Demo
 
-> *(Screenshots placeholder — add your screenshots here)*
+### 🏠 Home Page
 
-| Feature | Screenshot |
-|---|---|
-| Home page with prompt input | `screenshots/home.png` |
-| Real-time code generation (SSE) | `screenshots/chat.png` |
-| Live Preview | `screenshots/preview.png` |
-| Grafana monitoring dashboard | `screenshots/grafana.png` |
-| MCP Inspector connected | `screenshots/mcp-inspector.png` |
+| Landing View | Feature Overview |
+|--------------|------------------|
+| ![](screenshots/home1.png) | ![](screenshots/home2.png) |
+
+---
+
+### 💬 Real-time Code Generation (SSE Streaming)
+
+![](screenshots/chat.png)
+
+---
+
+### 👀 Live Preview
+
+![](screenshots/preview.png)
+
+---
+
+### 📊 Observability Dashboard (Grafana)
+
+![](screenshots/grafana.png)
+
+---
+
+### 🔌 MCP Inspector Connected
+
+![](screenshots/mcp-inspector.png)
 
 ---
 
@@ -584,3 +604,4 @@ GitHub: [@LING-6150](https://github.com/LING-6150)
 ---
 
 *Built with ❤️ using Spring Boot 3, LangChain4j, LangGraph4j, and Vue 3*
+
