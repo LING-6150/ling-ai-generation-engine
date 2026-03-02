@@ -18,6 +18,8 @@ import com.ling.lingaicodegeneration.model.enums.CodeGenTypeEnum;
 import com.ling.lingaicodegeneration.model.vo.AppVO;
 import com.ling.lingaicodegeneration.model.vo.UserVO;
 import com.ling.lingaicodegeneration.mapper.AppMapper;
+import com.ling.lingaicodegeneration.monitor.MonitorContext;
+import com.ling.lingaicodegeneration.monitor.MonitorContextHolder;
 import com.ling.lingaicodegeneration.service.AppService;
 import com.ling.lingaicodegeneration.service.ChatHistoryService;
 import com.ling.lingaicodegeneration.service.UserService;
@@ -236,6 +238,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
                     "AI requests are limited to 5 per minute, please try again later");
         }
 
+
         // 1. Validate params
         if (appId == null || appId <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "App ID cannot be null");
@@ -263,21 +266,31 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         chatHistoryService.addChatMessage(appId, message,
                 ChatHistoryMessageTypeEnum.USER.getValue(), loginUser.getId());
 
-        // 6. Call AI to generate code (streaming)
+        // 6. 设置监控上下文（放在这里，校验都通过了再设置）
+        MonitorContextHolder.setContext(
+                MonitorContext.builder()
+                        .userId(loginUser.getId().toString())
+                        .appId(appId.toString())
+                        .build()
+        );
+
+        // 7. Call AI to generate code (streaming)
         Flux<String> codeStream;
         if (agent) {
             // Agent mode: use LangGraph4j workflow
             log.info("Agent mode enabled, using workflow for appId: {}", appId);
             codeStream = codeGenWorkflow.executeWorkflowWithFlux(message, appId);
             // Workflow handles file saving internally, just return the stream
-            return codeStream;
+            return codeStream
+                    .doFinally(signalType -> MonitorContextHolder.clearContext());  // ✅ 加上
         } else {
             // Normal mode: use existing AI generation
             codeStream = aiCodeGeneratorFacade.generateAndSaveCodeStream(
                     message, codeGenTypeEnum, appId);
-            // 7. 使用流处理器执行器处理流
+            // 8. 使用流处理器执行器处理流
             return streamHandlerExecutor.doExecute(codeStream, chatHistoryService,
-                    appId, loginUser, codeGenTypeEnum);
+                    appId, loginUser, codeGenTypeEnum)
+                    .doFinally(signalType -> MonitorContextHolder.clearContext());
         }
     }
 }

@@ -1,12 +1,16 @@
 package com.ling.lingaicodegeneration.config;
 
+import com.ling.lingaicodegeneration.monitor.AiModelMonitorListener;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
+import jakarta.annotation.Resource;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+
+import java.util.List;
 
 /**
  * Reasoning streaming model config for Vue project generation with tool calling.
@@ -33,6 +37,10 @@ public class ReasoningStreamingChatModelConfig {
      * Dev: deepseek-chat (fast), Prod: deepseek-reasoner
      * @Scope("prototype") ensures a new instance per injection/getBean() call.
      */
+
+    @Resource
+    private AiModelMonitorListener aiModelMonitorListener;
+
     @Bean
     @Scope("prototype")
     public OpenAiStreamingChatModel reasoningStreamingChatModel() {
@@ -44,6 +52,7 @@ public class ReasoningStreamingChatModelConfig {
                 .temperature(temperature)
                 .logRequests(logRequests)
                 .logResponses(logResponses)
+                .listeners(List.of(aiModelMonitorListener))
                 .build();
     }
 }

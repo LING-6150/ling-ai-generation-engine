@@ -1,11 +1,15 @@
 package com.ling.lingaicodegeneration.config;
 
+import com.ling.lingaicodegeneration.monitor.AiModelMonitorListener;
 import dev.langchain4j.model.openai.OpenAiChatModel;
+import jakarta.annotation.Resource;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+
+import java.util.List;
 
 /**
  * Routing AI model config.
@@ -30,6 +34,10 @@ public class RoutingAiModelConfig {
      * Routing ChatModel — plain text output for enum-based routing decisions.
      * @Scope("prototype") — each factory call gets a fresh instance.
      */
+
+    @Resource
+    private AiModelMonitorListener aiModelMonitorListener;
+
     @Bean
     @Scope("prototype")
     public OpenAiChatModel routingChatModelPrototype() {
@@ -41,6 +49,7 @@ public class RoutingAiModelConfig {
                 .temperature(temperature)
                 .logRequests(logRequests)
                 .logResponses(logResponses)
+                .listeners(List.of(aiModelMonitorListener))
                 .build();
     }
 }

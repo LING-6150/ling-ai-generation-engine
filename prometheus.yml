@@ -1,0 +1,17 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Prometheus 自身监控
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # 你的 Spring Boot 应用
+  - job_name: 'ling-ai-code-generation'
+    metrics_path: '/api/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8123']
+    scrape_interval: 10s
+    scrape_timeout: 10s

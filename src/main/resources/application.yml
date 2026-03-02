@@ -31,3 +31,12 @@ knife4j:
   #onfig: |
     #singleServerConfig:
       #address: "redis://localhost:6379"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
