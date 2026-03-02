@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat in the Park</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">🐱 Cat in the Park</h1>
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li><a href="#home" class="nav-link active">Home</a></li>
+                    <li><a href="#about" class="nav-link">About</a></li>
+                    <li><a href="#gallery" class="nav-link">Gallery</a></li>
+                    <li><a href="#contact" class="nav-link">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section id="home" class="hero-section">
+            <div class="container">
+                <div class="hero-content">
+                    <h2 class="hero-title">A Feline's Day in the Park</h2>
+                    <p class="hero-text">Discover the charming adventures of a curious cat exploring the wonders of nature in a beautiful park setting.</p>
+                    <button class="cta-button" id="meowBtn">Hear the Cat Meow</button>
+                </div>
+                <div class="hero-image">
+                    <div class="cat-container" id="catContainer">
+                        <div class="cat" id="cat">
+                            <div class="cat-head">
+                                <div class="cat-ear cat-ear-left"></div>
+                                <div class="cat-ear cat-ear-right"></div>
+                                <div class="cat-eye cat-eye-left"></div>
+                                <div class="cat-eye cat-eye-right"></div>
+                                <div class="cat-nose"></div>
+                                <div class="cat-mouth"></div>
+                                <div class="cat-whisker cat-whisker-left-1"></div>
+                                <div class="cat-whisker cat-whisker-left-2"></div>
+                                <div class="cat-whisker cat-whisker-right-1"></div>
+                                <div class="cat-whisker cat-whisker-right-2"></div>
+                            </div>
+                            <div class="cat-body">
+                                <div class="cat-tail"></div>
+                                <div class="cat-paw cat-paw-left"></div>
+                                <div class="cat-paw cat-paw-right"></div>
+                            </div>
+                        </div>
+                        <div class="park-scene">
+                            <div class="tree tree-left"></div>
+                            <div class="tree tree-right"></div>
+                            <div class="grass"></div>
+                            <div class="sun"></div>
+                            <div class="cloud cloud-1"></div>
+                            <div class="cloud cloud-2"></div>
+                            <div class="butterfly" id="butterfly"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="about-section">
+            <div class="container">
+                <h2 class="section-title">About Our Park Cat</h2>
+                <div class="about-content">
+                    <div class="about-text">
+                        <p>Meet Whiskers, the park's most beloved resident. This curious feline spends her days exploring every corner of the park, from the flower beds to the old oak trees.</p>
+                        <p>Whiskers arrived at the park three years ago and quickly became a local favorite. She enjoys sunbathing on the benches, chasing butterflies, and greeting park visitors with gentle purrs.</p>
+                        <p>Local residents often bring treats and toys for Whiskers, who has become something of a park mascot. She's particularly fond of the afternoon sun patches near the fountain.</p>
+                    </div>
+                    <div class="about-stats">
+                        <div class="stat-card">
+                            <h3>3 Years</h3>
+                            <p>Park Resident</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Daily</h3>
+                            <p>Butterfly Chases</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>100+</h3>
+                            <p>Friends Made</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="gallery" class="gallery-section">
+            <div class="container">
+                <h2 class="section-title">Park Adventures</h2>
+                <div class="gallery-grid">
+                    <div class="gallery-item">
+                        <div class="gallery-image" style="background-image: url('https://picsum.photos/400/300?random=1');"></div>
+                        <h3>Morning Stroll</h3>
+                        <p>Whiskers exploring the dew-covered grass</p>
+                    </div>
+                    <div class="gallery-item">
+                        <div class="gallery-image" style="background-image: url('https://picsum.photos/400/300?random=2');"></div>
+                        <h3>Tree Climbing</h3>
+                        <p>Adventures in the old oak tree</p>
+                    </div>
+                    <div class="gallery-item">
+                        <div class="gallery-image" style="background-image: url('https://picsum.photos/400/300?random=3');"></div>
+                        <h3>Nap Time</h3>
+                        <p>Sunbathing on the favorite bench</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="contact-section">
+            <div class="container">
+                <h2 class="section-title">Visit the Park</h2>
+                <div class="contact-content">
+                    <div class="contact-info">
+                        <h3>Park Information</h3>
+                        <p><strong>Location:</strong> Central City Park</p>
+                        <p><strong>Best time to visit:</strong> Afternoons (Whiskers' active hours)</p>
+                        <p><strong>What to bring:</strong> Cat treats (approved by park staff)</p>
+                        <p><strong>Remember:</strong> Always be gentle and respectful to our feline friend</p>
+                    </div>
+                    <div class="weather-widget">
+                        <h3>Current Park Weather</h3>
+                        <div class="weather-display">
+                            <div class="weather-icon">☀️</div>
+                            <div class="weather-details">
+                                <p class="weather-temp">72°F</p>
+                                <p class="weather-desc">Sunny and pleasant</p>
+                                <p class="weather-note">Perfect for park visits!</p>
+                            </div>
+                        </div>
+                        <button class="weather-btn" id="updateWeather">Update Weather</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>🐾 Made with love for cat and park enthusiasts everywhere 🐾</p>
+            <p class="footer-note">This website celebrates the joy of cats in natural settings. Always respect wildlife and park rules.</p>
+        </div>
+    </footer>
+
+    <div class="notification" id="notification"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
