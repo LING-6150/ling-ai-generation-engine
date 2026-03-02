@@ -3,76 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple To-Do List</title>
+    <title>Brew & Bean Coffee Shop</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <h1><i class="fas fa-tasks"></i> My To-Do List</h1>
-            <p class="subtitle">Stay organized and productive</p>
-        </header>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="#" class="logo">Brew & Bean</a>
+            <button class="menu-toggle" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul class="nav-menu">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#menu">Menu</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
 
-        <main class="main-content">
-            <div class="input-section">
-                <div class="input-group">
-                    <input type="text" id="taskInput" placeholder="Add a new task..." maxlength="100">
-                    <button id="addTaskBtn" class="btn-primary">
-                        <i class="fas fa-plus"></i> Add Task
-                    </button>
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Freshly Brewed Coffee & Cozy Atmosphere</h1>
+                <p>Experience the perfect blend of premium coffee beans and warm hospitality at Brew & Bean.</p>
+                <a href="#menu" class="btn">View Our Menu</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Menu Highlights -->
+    <section id="menu" class="menu-section">
+        <div class="container">
+            <h2 class="section-title">Our Specialties</h2>
+            <p class="section-subtitle">Handcrafted with care and passion</p>
+            
+            <div class="menu-grid">
+                <div class="menu-item">
+                    <div class="menu-img">
+                        <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Cappuccino">
+                    </div>
+                    <h3>Cappuccino</h3>
+                    <p>Rich espresso topped with steamed milk and a thick layer of foam.</p>
+                    <span class="price">$4.50</span>
                 </div>
-                <div class="filter-section">
-                    <button class="filter-btn active" data-filter="all">All Tasks</button>
-                    <button class="filter-btn" data-filter="pending">Pending</button>
-                    <button class="filter-btn" data-filter="completed">Completed</button>
+                
+                <div class="menu-item">
+                    <div class="menu-img">
+                        <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Burger">
+                    </div>
+                    <h3>Gourmet Sandwich</h3>
+                    <p>Freshly baked bread with premium ingredients and house-made sauces.</p>
+                    <span class="price">$8.99</span>
+                </div>
+                
+                <div class="menu-item">
+                    <div class="menu-img">
+                        <img src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Pastry">
+                    </div>
+                    <h3>Fresh Pastries</h3>
+                    <p>Daily baked croissants, muffins, and cakes made from scratch.</p>
+                    <span class="price">$3.75</span>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <div class="stats-section">
-                <div class="stat-card">
-                    <span class="stat-number" id="totalTasks">0</span>
-                    <span class="stat-label">Total Tasks</span>
+    <!-- About Section -->
+    <section id="about" class="about-section">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2 class="section-title">Our Story</h2>
+                    <p>Founded in 2015, Brew & Bean started as a small neighborhood cafe with a simple mission: to serve exceptional coffee in a welcoming environment. Our passion for quality extends from sourcing sustainable beans to training our baristas in the art of coffee making.</p>
+                    <p>We believe coffee is more than just a drink—it's a ritual, a moment of pause, and a way to connect with others. That's why we've created a space where everyone feels at home.</p>
+                    <a href="#contact" class="btn btn-outline">Visit Us</a>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="pendingTasks">0</span>
-                    <span class="stat-label">Pending</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="completedTasks">0</span>
-                    <span class="stat-label">Completed</span>
+                <div class="about-img">
+                    <img src="https://images.unsplash.com/photo-1445116572660-236099ec97a0?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Coffee shop interior">
                 </div>
             </div>
+        </div>
+    </section>
 
-            <div class="tasks-section">
-                <h2>Your Tasks</h2>
-                <div class="tasks-container">
-                    <ul id="taskList">
-                        <!-- Tasks will be dynamically added here -->
-                    </ul>
-                    <div id="emptyState" class="empty-state">
-                        <i class="fas fa-clipboard-list"></i>
-                        <h3>No tasks yet</h3>
-                        <p>Add your first task using the input above</p>
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <h2 class="section-title">Visit Us</h2>
+            <p class="section-subtitle">We'd love to brew a cup for you</p>
+            
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <h3>Location & Hours</h3>
+                    <div class="info-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <h4>Address</h4>
+                            <p>123 Coffee Street, Brewtown, BT 12345</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <h4>Opening Hours</h4>
+                            <p>Monday - Friday: 7:00 AM - 8:00 PM</p>
+                            <p>Saturday - Sunday: 8:00 AM - 9:00 PM</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <h4>Phone</h4>
+                            <p>(123) 456-7890</p>
+                        </div>
                     </div>
                 </div>
+                
+                <div class="contact-form">
+                    <h3>Send us a message</h3>
+                    <form id="messageForm">
+                        <div class="form-group">
+                            <input type="text" id="name" placeholder="Your Name" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="email" placeholder="Your Email" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="message" rows="5" placeholder="Your Message" required></textarea>
+                        </div>
+                        <button type="submit" class="btn">Send Message</button>
+                    </form>
+                </div>
             </div>
+        </div>
+    </section>
 
-            <div class="actions-section">
-                <button id="clearCompletedBtn" class="btn-secondary">
-                    <i class="fas fa-check-double"></i> Clear Completed
-                </button>
-                <button id="clearAllBtn" class="btn-danger">
-                    <i class="fas fa-trash-alt"></i> Clear All Tasks
-                </button>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <a href="#" class="logo">Brew & Bean</a>
+                    <p>Fresh coffee, warm atmosphere.</p>
+                </div>
+                <div class="social-links">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                </div>
             </div>
-        </main>
-
-        <footer class="footer">
-            <p>Tasks are saved in your browser's local storage</p>
-            <p class="hint">Click on a task to mark it as complete/incomplete</p>
-        </footer>
-    </div>
+            <p class="copyright">&copy; 2023 Brew & Bean Coffee Shop. All rights reserved.</p>
+        </div>
+    </footer>
 
     <script src="script.js"></script>
 </body>

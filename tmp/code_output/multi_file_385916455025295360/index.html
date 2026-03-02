@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purrfect Cats</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐱</text></svg>">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">🐱 Purrfect Cats</h1>
+            <nav class="nav">
+                <button class="nav-toggle" aria-label="Toggle navigation">
+                    <span class="hamburger"></span>
+                </button>
+                <ul class="nav-menu">
+                    <li><a href="#home" class="nav-link active">Home</a></li>
+                    <li><a href="#breeds" class="nav-link">Breeds</a></li>
+                    <li><a href="#gallery" class="nav-link">Gallery</a></li>
+                    <li><a href="#care" class="nav-link">Care Tips</a></li>
+                    <li><a href="#contact" class="nav-link">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main">
+        <section id="home" class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h2>Welcome to the World of Cats</h2>
+                    <p>Discover the fascinating world of our feline friends. From playful kittens to majestic adults, cats bring joy and companionship to millions of homes worldwide.</p>
+                    <button class="btn" id="meowBtn">Hear a Meow! 🐾</button>
+                    <audio id="meowSound" src="https://assets.mixkit.co/sfx/preview/mixkit-cat-meow-117.mp3" preload="auto"></audio>
+                </div>
+                <div class="hero-image">
+                    <img src="https://picsum.photos/id/237/600/400" alt="Cute cat" class="hero-img">
+                </div>
+            </div>
+        </section>
+
+        <section id="breeds" class="section">
+            <div class="container">
+                <h2 class="section-title">Popular Cat Breeds</h2>
+                <div class="breeds-grid">
+                    <div class="breed-card">
+                        <img src="https://picsum.photos/id/219/300/200" alt="Siamese Cat" class="breed-img">
+                        <h3>Siamese</h3>
+                        <p>Known for their striking blue eyes and vocal nature, Siamese cats are intelligent and social companions.</p>
+                    </div>
+                    <div class="breed-card">
+                        <img src="https://picsum.photos/id/222/300/200" alt="Persian Cat" class="breed-img">
+                        <h3>Persian</h3>
+                        <p>With their long, luxurious coats and sweet faces, Persian cats are the epitome of feline elegance.</p>
+                    </div>
+                    <div class="breed-card">
+                        <img src="https://picsum.photos/id/257/300/200" alt="Maine Coon" class="breed-img">
+                        <h3>Maine Coon</h3>
+                        <p>One of the largest domesticated cat breeds, Maine Coons are gentle giants with tufted ears.</p>
+                    </div>
+                    <div class="breed-card">
+                        <img src="https://picsum.photos/id/269/300/200" alt="Bengal Cat" class="breed-img">
+                        <h3>Bengal</h3>
+                        <p>Bengal cats have wild-looking spotted coats and are known for their energetic and playful personalities.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="gallery" class="section section-dark">
+            <div class="container">
+                <h2 class="section-title">Cat Gallery</h2>
+                <div class="gallery">
+                    <div class="gallery-item">
+                        <img src="https://picsum.photos/id/433/400/300" alt="Cat playing" class="gallery-img">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://picsum.photos/id/434/400/300" alt="Sleeping cat" class="gallery-img">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://picsum.photos/id/435/400/300" alt="Curious cat" class="gallery-img">
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://picsum.photos/id/436/400/300" alt="Cat stretching" class="gallery-img">
+                    </div>
+                </div>
+                <button class="btn" id="loadMoreBtn">Load More Cats</button>
+            </div>
+        </section>
+
+        <section id="care" class="section">
+            <div class="container">
+                <h2 class="section-title">Essential Cat Care Tips</h2>
+                <div class="tips">
+                    <div class="tip">
+                        <div class="tip-icon">🍽️</div>
+                        <h3>Nutrition</h3>
+                        <p>Provide high-quality cat food appropriate for your cat's age, health status, and activity level.</p>
+                    </div>
+                    <div class="tip">
+                        <div class="tip-icon">💧</div>
+                        <h3>Hydration</h3>
+                        <p>Always ensure fresh water is available. Consider a cat water fountain to encourage drinking.</p>
+                    </div>
+                    <div class="tip">
+                        <div class="tip-icon">🏥</div>
+                        <h3>Veterinary Care</h3>
+                        <p>Regular check-ups and vaccinations are essential for your cat's health and wellbeing.</p>
+                    </div>
+                    <div class="tip">
+                        <div class="tip-icon">🧶</div>
+                        <h3>Play & Exercise</h3>
+                        <p>Daily play sessions help keep your cat physically fit and mentally stimulated.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="section section-dark">
+            <div class="container">
+                <h2 class="section-title">Join Our Cat Community</h2>
+                <div class="contact-form">
+                    <p>Subscribe to our newsletter for cat care tips, breed information, and adorable cat photos!</p>
+                    <form id="subscribeForm">
+                        <div class="form-group">
+                            <input type="text" id="name" placeholder="Your Name" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="email" placeholder="Your Email" required>
+                        </div>
+                        <div class="form-group">
+                            <select id="catType" required>
+                                <option value="" disabled selected>Do you have a cat?</option>
+                                <option value="yes">Yes, I have a cat</option>
+                                <option value="no">No, but I love cats</option>
+                                <option value="planning">Planning to adopt</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn">Subscribe Now</button>
+                    </form>
+                    <div id="formMessage" class="form-message"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Purrfect Cats. All rights reserved. Made with ❤️ for cat lovers everywhere.</p>
+            <p class="footer-note">This website uses placeholder images from Picsum Photos.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -45,7 +45,7 @@ public class PromptSafetyInputGuardrail implements InputGuardrail {
         String input = userMessage.singleText();
 
         // 1. Check length
-        if (input.length() > 1000) {
+        if (input.length() > 10000) {
             return fatal("Input is too long, please keep it under 1000 characters");
         }
 

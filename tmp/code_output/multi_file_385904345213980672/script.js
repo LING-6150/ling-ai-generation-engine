@@ -1,250 +1,96 @@
-// To-Do List Application
+// Mobile Navigation Toggle
 document.addEventListener('DOMContentLoaded', function() {
-    // DOM Elements
-    const taskInput = document.getElementById('taskInput');
-    const addTaskBtn = document.getElementById('addTaskBtn');
-    const taskList = document.getElementById('taskList');
-    const emptyState = document.getElementById('emptyState');
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    const clearCompletedBtn = document.getElementById('clearCompletedBtn');
-    const clearAllBtn = document.getElementById('clearAllBtn');
+    const menuToggle = document.querySelector('.menu-toggle');
+    const navMenu = document.querySelector('.nav-menu');
     
-    // Stats elements
-    const totalTasksEl = document.getElementById('totalTasks');
-    const pendingTasksEl = document.getElementById('pendingTasks');
-    const completedTasksEl = document.getElementById('completedTasks');
-    
-    // State variables
-    let tasks = [];
-    let currentFilter = 'all';
-    
-    // Initialize the app
-    function init() {
-        loadTasks();
-        renderTasks();
-        updateStats();
-        setupEventListeners();
-    }
-    
-    // Load tasks from localStorage
-    function loadTasks() {
-        const savedTasks = localStorage.getItem('todoTasks');
-        if (savedTasks) {
-            tasks = JSON.parse(savedTasks);
-        }
-    }
-    
-    // Save tasks to localStorage
-    function saveTasks() {
-        localStorage.setItem('todoTasks', JSON.stringify(tasks));
-    }
-    
-    // Update statistics
-    function updateStats() {
-        const total = tasks.length;
-        const completed = tasks.filter(task => task.completed).length;
-        const pending = total - completed;
+    // Toggle mobile menu
+    menuToggle.addEventListener('click', function() {
+        navMenu.classList.toggle('active');
         
-        totalTasksEl.textContent = total;
-        completedTasksEl.textContent = completed;
-        pendingTasksEl.textContent = pending;
-    }
-    
-    // Render tasks based on current filter
-    function renderTasks() {
-        // Clear the task list
-        taskList.innerHTML = '';
-        
-        // Filter tasks based on current filter
-        let filteredTasks = tasks;
-        if (currentFilter === 'pending') {
-            filteredTasks = tasks.filter(task => !task.completed);
-        } else if (currentFilter === 'completed') {
-            filteredTasks = tasks.filter(task => task.completed);
-        }
-        
-        // Show/hide empty state
-        if (filteredTasks.length === 0) {
-            emptyState.style.display = 'block';
+        // Change icon based on menu state
+        const icon = this.querySelector('i');
+        if (navMenu.classList.contains('active')) {
+            icon.classList.remove('fa-bars');
+            icon.classList.add('fa-times');
         } else {
-            emptyState.style.display = 'none';
-            
-            // Create task items
-            filteredTasks.forEach((task, index) => {
-                const taskItem = createTaskElement(task, index);
-                taskList.appendChild(taskItem);
-            });
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
         }
-    }
+    });
     
-    // Create a task element
-    function createTaskElement(task, originalIndex) {
-        const li = document.createElement('li');
-        li.className = `task-item ${task.completed ? 'completed' : ''}`;
-        li.dataset.index = originalIndex;
-        
-        // Checkbox
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.className = 'task-checkbox';
-        checkbox.checked = task.completed;
-        
-        // Task text
-        const taskText = document.createElement('span');
-        taskText.className = 'task-text';
-        taskText.textContent = task.text;
-        
-        // Delete button
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'task-delete';
-        deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
-        
-        // Assemble the task item
-        li.appendChild(checkbox);
-        li.appendChild(taskText);
-        li.appendChild(deleteBtn);
-        
-        return li;
-    }
-    
-    // Add a new task
-    function addTask() {
-        const text = taskInput.value.trim();
-        
-        if (text === '') {
-            alert('Please enter a task');
-            return;
-        }
-        
-        // Create new task object
-        const newTask = {
-            id: Date.now(),
-            text: text,
-            completed: false,
-            createdAt: new Date().toISOString()
-        };
-        
-        // Add to tasks array
-        tasks.push(newTask);
-        
-        // Save, update UI, and clear input
-        saveTasks();
-        renderTasks();
-        updateStats();
-        taskInput.value = '';
-        taskInput.focus();
-    }
-    
-    // Toggle task completion
-    function toggleTaskCompletion(index) {
-        tasks[index].completed = !tasks[index].completed;
-        saveTasks();
-        renderTasks();
-        updateStats();
-    }
-    
-    // Delete a task
-    function deleteTask(index, event) {
-        // Prevent event bubbling to avoid toggling completion
-        event.stopPropagation();
-        
-        if (confirm('Are you sure you want to delete this task?')) {
-            tasks.splice(index, 1);
-            saveTasks();
-            renderTasks();
-            updateStats();
-        }
-    }
-    
-    // Clear all completed tasks
-    function clearCompletedTasks() {
-        const completedCount = tasks.filter(task => task.completed).length;
-        
-        if (completedCount === 0) {
-            alert('No completed tasks to clear');
-            return;
-        }
-        
-        if (confirm(`Clear ${completedCount} completed task(s)?`)) {
-            tasks = tasks.filter(task => !task.completed);
-            saveTasks();
-            renderTasks();
-            updateStats();
-        }
-    }
-    
-    // Clear all tasks
-    function clearAllTasks() {
-        if (tasks.length === 0) {
-            alert('No tasks to clear');
-            return;
-        }
-        
-        if (confirm('Clear all tasks? This action cannot be undone.')) {
-            tasks = [];
-            saveTasks();
-            renderTasks();
-            updateStats();
-        }
-    }
-    
-    // Change filter
-    function changeFilter(filter) {
-        currentFilter = filter;
-        
-        // Update active filter button
-        filterBtns.forEach(btn => {
-            if (btn.dataset.filter === filter) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
+    // Close mobile menu when clicking a link
+    const navLinks = document.querySelectorAll('.nav-menu a');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            navMenu.classList.remove('active');
+            menuToggle.querySelector('i').classList.remove('fa-times');
+            menuToggle.querySelector('i').classList.add('fa-bars');
         });
-        
-        renderTasks();
-    }
+    });
     
-    // Set up event listeners
-    function setupEventListeners() {
-        // Add task button click
-        addTaskBtn.addEventListener('click', addTask);
-        
-        // Add task on Enter key
-        taskInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                addTask();
-            }
-        });
-        
-        // Task list events (delegation)
-        taskList.addEventListener('click', function(e) {
-            const taskItem = e.target.closest('.task-item');
-            if (!taskItem) return;
+    // Contact form submission
+    const messageForm = document.getElementById('messageForm');
+    if (messageForm) {
+        messageForm.addEventListener('submit', function(e) {
+            e.preventDefault();
             
-            const index = parseInt(taskItem.dataset.index);
+            // Get form values
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
             
-            // Check if delete button was clicked
-            if (e.target.closest('.task-delete')) {
-                deleteTask(index, e);
+            // Simple validation
+            if (!name || !email || !message) {
+                alert('Please fill in all fields.');
                 return;
             }
             
-            // Otherwise toggle completion
-            toggleTaskCompletion(index);
+            // In a real application, you would send this data to a server
+            // For this demo, we'll just show a success message
+            alert(`Thank you, ${name}! Your message has been sent. We'll get back to you at ${email} soon.`);
+            
+            // Reset form
+            messageForm.reset();
         });
-        
-        // Filter buttons
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                changeFilter(this.dataset.filter);
-            });
-        });
-        
-        // Clear buttons
-        clearCompletedBtn.addEventListener('click', clearCompletedTasks);
-        clearAllBtn.addEventListener('click', clearAllTasks);
     }
     
-    // Initialize the application
-    init();
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            
+            // Skip if it's just "#"
+            if (href === '#') return;
+            
+            const targetElement = document.querySelector(href);
+            if (targetElement) {
+                e.preventDefault();
+                
+                // Calculate position considering fixed navbar
+                const navbarHeight = document.querySelector('.navbar').offsetHeight;
+                const targetPosition = targetElement.offsetTop - navbarHeight;
+                
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+    
+    // Add scroll effect to navbar
+    window.addEventListener('scroll', function() {
+        const navbar = document.querySelector('.navbar');
+        if (window.scrollY > 50) {
+            navbar.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.1)';
+        } else {
+            navbar.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+        }
+    });
+    
+    // Initialize with navbar shadow
+    const navbar = document.querySelector('.navbar');
+    if (window.scrollY > 50) {
+        navbar.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.1)';
+    }
 });

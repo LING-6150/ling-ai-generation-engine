@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskMaster - To-Do List</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✓</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <h1><span class="checkmark">✓</span> TaskMaster</h1>
+            <p class="subtitle">Your personal productivity companion</p>
+        </header>
+
+        <main class="app-content">
+            <section class="input-section">
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="taskInput" 
+                        placeholder="What needs to be done?"
+                        maxlength="100"
+                        aria-label="New task input"
+                    >
+                    <button id="addTaskBtn" class="btn-primary" aria-label="Add new task">
+                        <span class="btn-icon">+</span> Add Task
+                    </button>
+                </div>
+                <p class="input-hint">Press Enter to add a task</p>
+            </section>
+
+            <section class="stats-section">
+                <div class="stats-container">
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalTasks">0</span>
+                        <span class="stat-label">Total Tasks</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="completedTasks">0</span>
+                        <span class="stat-label">Completed</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="pendingTasks">0</span>
+                        <span class="stat-label">Pending</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="filters-section">
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">All Tasks</button>
+                    <button class="filter-btn" data-filter="pending">Pending</button>
+                    <button class="filter-btn" data-filter="completed">Completed</button>
+                </div>
+            </section>
+
+            <section class="tasks-section">
+                <div class="tasks-header">
+                    <h2>Your Tasks</h2>
+                    <button id="clearCompletedBtn" class="btn-secondary" aria-label="Clear all completed tasks">
+                        Clear Completed
+                    </button>
+                </div>
+                
+                <div class="tasks-container" id="tasksContainer">
+                    <!-- Tasks will be dynamically inserted here -->
+                    <div class="empty-state" id="emptyState">
+                        <div class="empty-icon">📝</div>
+                        <h3>No tasks yet</h3>
+                        <p>Add your first task using the input above</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <p>Made with ❤️ | <span id="currentYear"></span></p>
+            <p class="footer-hint">Double-click a task to edit it</p>
+        </footer>
+    </div>
+
+    <!-- Task template (hidden) -->
+    <template id="taskTemplate">
+        <div class="task-item" data-id="">
+            <div class="task-checkbox">
+                <input type="checkbox" class="task-status" aria-label="Mark task as complete">
+                <span class="checkmark-circle"></span>
+            </div>
+            <div class="task-content">
+                <div class="task-text"></div>
+                <div class="task-date"></div>
+            </div>
+            <div class="task-actions">
+                <button class="action-btn edit-btn" aria-label="Edit task">✏️</button>
+                <button class="action-btn delete-btn" aria-label="Delete task">🗑️</button>
+            </div>
+        </div>
+    </template>
+
+    <script src="script.js"></script>
+</body>
+</html>

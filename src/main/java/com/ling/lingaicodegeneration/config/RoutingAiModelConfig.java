@@ -1,6 +1,7 @@
 package com.ling.lingaicodegeneration.config;
 
 import com.ling.lingaicodegeneration.monitor.AiModelMonitorListener;
+import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import jakarta.annotation.Resource;
 import lombok.Data;
@@ -50,6 +51,26 @@ public class RoutingAiModelConfig {
                 .logRequests(logRequests)
                 .logResponses(logResponses)
                 .listeners(List.of(aiModelMonitorListener))
+                .build();
+    }
+
+    /**
+     * Chat model for image collection service.
+     * Must NOT have response-format: json_object — DeepSeek won't invoke tools
+     * when json_object mode is enabled, it returns JSON directly instead.
+     */
+    @Bean
+    @Scope("prototype")
+    public ChatModel imageCollectionChatModel() {
+        return OpenAiChatModel.builder()
+                .apiKey(apiKey)
+                .baseUrl(baseUrl)
+                .modelName(modelName)
+                .maxTokens(maxTokens)
+                .temperature(temperature)
+                .logRequests(logRequests)
+                .logResponses(logResponses)
+                // 注意：故意不加 responseFormat，让工具调用正常工作
                 .build();
     }
 }
