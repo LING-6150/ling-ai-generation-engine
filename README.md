@@ -7,6 +7,7 @@
 [![LangChain4j](https://img.shields.io/badge/LangChain4j-1.1.0-blue)](https://github.com/langchain4j/langchain4j)
 [![LangGraph4j](https://img.shields.io/badge/LangGraph4j-1.6.0-purple)](https://github.com/bsorrentino/langgraph4j)
 [![Vue](https://img.shields.io/badge/Vue-3-brightgreen)](https://vuejs.org/)
+[![AWS](https://img.shields.io/badge/AWS-EC2-orange)](https://aws.amazon.com/ec2/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 ---
@@ -20,6 +21,7 @@
 - [Tech Stack Highlights](#tech-stack-highlights)
 - [Key Technical Achievements](#key-technical-achievements)
 - [Getting Started](#getting-started)
+- [AWS EC2 Deployment](#aws-ec2-deployment)
 - [MCP Server Integration](#mcp-server-integration)
 - [Observability](#observability)
 - [Project Structure](#project-structure)
@@ -30,11 +32,15 @@
 
 Ling-AI-CODE-generation is a full-stack AI platform that lets users describe a website in plain English and instantly receive a working, deployable web application. The platform supports three generation modes — single HTML, multi-file static sites, and full Vue 3 + Vite projects — with real-time streaming output, AI-powered workflow orchestration, and production-grade system optimization.
 
+**Live at**: http://3.227.11.113
+
 **Built for**: North American SDE internship interviews, demonstrating distributed systems, AI integration, and engineering best practices.
 
 ---
 
 ## 🚀 Live Demo
+
+**🌐 Public URL: http://3.227.11.113**
 
 ### 🏠 Home Page
 
@@ -65,6 +71,12 @@ Ling-AI-CODE-generation is a full-stack AI platform that lets users describe a w
 ### 🔌 MCP Inspector Connected
 
 ![](screenshots/mcp-inspector.png)
+
+---
+
+### ☁️ AWS EC2 Deployment
+
+![](screenshots/aws.png)
 
 ---
 
@@ -103,41 +115,59 @@ Ling-AI-CODE-generation is a full-stack AI platform that lets users describe a w
 - SSE transport, verified via MCP Inspector
 - `generateWebsite` and `listRecentApps` tools available to any MCP client
 
+### ☁️ Production Deployment
+- Deployed on AWS EC2 (t2.medium, Ubuntu 24.04)
+- Nginx reverse proxy with SSE streaming configuration
+- Environment-based configuration management
+
 ---
 
 ## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         Frontend (Vue 3)                         │
-│  HomeView → AppChatView → Live Preview (iframe) → AppDetailView │
+│                    Users (Public Internet)                        │
+│                    http://3.227.11.113                           │
 └──────────────────────────┬──────────────────────────────────────┘
-                           │ SSE / REST API
+                           │ HTTP Port 80
 ┌──────────────────────────▼──────────────────────────────────────┐
-│                    Spring Boot Backend (8123)                     │
+│                    AWS EC2 (t2.medium, Ubuntu 24.04)             │
 │                                                                   │
-│  ┌─────────────┐  ┌──────────────────┐  ┌──────────────────┐    │
-│  │AppController│  │  AppServiceImpl   │  │AiCodeGenerator   │    │
-│  │             │  │  + Rate Limiting  │  │Facade            │    │
-│  │  SSE Stream │  │  + Auth Check     │  │                  │    │
-│  └──────┬──────┘  └────────┬─────────┘  └────────┬─────────┘    │
-│         │                  │                      │               │
-│  ┌──────▼──────────────────▼──────────────────────▼─────────┐   │
-│  │              AI Layer (LangChain4j 1.1.0)                 │   │
-│  │                                                            │   │
-│  │  ┌─────────────┐  ┌──────────────┐  ┌─────────────────┐  │   │
-│  │  │ AiCodeGen   │  │  LangGraph4j │  │  File Operation │  │   │
-│  │  │ Service     │  │  Workflow    │  │  Tools (5)      │  │   │
-│  │  │ (DeepSeek)  │  │  (6 nodes)  │  │                 │  │   │
-│  │  └─────────────┘  └──────────────┘  └─────────────────┘  │   │
-│  └────────────────────────────────────────────────────────────┘   │
-│                                                                   │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐   │
-│  │  MySQL 8.x   │  │  Redis       │  │  Prometheus          │   │
-│  │  (App/User)  │  │  (Session +  │  │  + Grafana           │   │
-│  │              │  │  Chat Memory │  │  (Observability)     │   │
-│  │              │  │  + Cache)    │  │                      │   │
-│  └──────────────┘  └──────────────┘  └──────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │                    Nginx (Port 80)                       │    │
+│  │   /api/* → localhost:8123  |  / → ~/project/frontend    │    │
+│  │   proxy_buffering off  |  proxy_read_timeout 900s (SSE) │    │
+│  └──────────────────────────┬──────────────────────────────┘    │
+│                             │                                     │
+│  ┌──────────────────────────▼──────────────────────────────┐    │
+│  │              Frontend (Vue 3 Static Files)               │    │
+│  │         HomeView → AppChatView → Live Preview            │    │
+│  └──────────────────────────┬──────────────────────────────┘    │
+│                             │ SSE / REST API                      │
+│  ┌──────────────────────────▼──────────────────────────────┐    │
+│  │           Spring Boot Backend (Port 8123)                │    │
+│  │                                                          │    │
+│  │  ┌──────────────┐  ┌─────────────┐  ┌───────────────┐  │    │
+│  │  │AppController │  │AppServiceImpl│  │AiCodeGenerator│  │    │
+│  │  │SSE Stream    │  │Rate Limiting │  │Facade         │  │    │
+│  │  └──────┬───────┘  └──────┬──────┘  └───────┬───────┘  │    │
+│  │         └─────────────────┴──────────────────┘          │    │
+│  │                           │                              │    │
+│  │  ┌────────────────────────▼─────────────────────────┐   │    │
+│  │  │           AI Layer (LangChain4j 1.1.0)            │   │    │
+│  │  │  ┌───────────┐  ┌──────────────┐  ┌──────────┐   │   │    │
+│  │  │  │AiCodeGen  │  │ LangGraph4j  │  │  File    │   │   │    │
+│  │  │  │Service    │  │ Workflow      │  │  Tools   │   │   │    │
+│  │  │  │(DeepSeek) │  │ (6 nodes)    │  │  (5)     │   │   │    │
+│  │  │  └───────────┘  └──────────────┘  └──────────┘   │   │    │
+│  │  └──────────────────────────────────────────────────┘   │    │
+│  │                                                          │    │
+│  │  ┌────────────┐  ┌────────────┐  ┌────────────────────┐ │    │
+│  │  │ MySQL 8.x  │  │   Redis    │  │ Prometheus+Grafana │ │    │
+│  │  │(Port 3306) │  │(Port 6379) │  │  Observability     │ │    │
+│  │  │Internal    │  │Internal    │  │                    │ │    │
+│  │  └────────────┘  └────────────┘  └────────────────────┘ │    │
+│  └──────────────────────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────────────┘
                            │
          ┌─────────────────▼──────────────────┐
@@ -175,8 +205,10 @@ Ling-AI-CODE-generation is a full-stack AI platform that lets users describe a w
 ### Infrastructure
 | Technology | Purpose |
 |---|---|
+| AWS EC2 | t2.medium, Ubuntu 24.04, production hosting |
 | MySQL 8.x | Primary database |
 | Redis | Session, chat memory, distributed cache |
+| Nginx | Reverse proxy, SSE streaming, static file serving |
 | Prometheus | Metrics collection (pull-based) |
 | Grafana | Metrics visualization |
 | Docker Compose | Local monitoring environment |
@@ -202,7 +234,7 @@ StreamingChatModel model = SpringContextUtil.getBean(
     "openAiStreamingChatModel", StreamingChatModel.class);
 ```
 
-**Impact**: Eliminated request serialization, enabling true concurrent AI code generation.
+**Impact**: Eliminated request serialization; load test confirmed **28% latency reduction** (6.4 min parallel vs 8.9 min sequential baseline).
 
 ---
 
@@ -221,11 +253,7 @@ ImageCollector → PromptEnhancer → Router → CodeGenerator
                                        (retry loop)
 ```
 
-**Key Implementation**:
-- `WorkflowContext` stored as key/value inside `AgentState` (not a custom state class)
-- All nodes use static factory methods + `SpringContextUtil.getBean()` for Spring integration
-- Java 21 virtual threads run the workflow asynchronously, SSE pushes per-step progress
-- Cross-thread context passing: `onRequest` stores context in `requestContext.attributes()` for safe retrieval in `onResponse`/`onError`
+**Validated**: 95% build success rate across 20 diverse prompts, ~2.8 min avg latency, ~6,800 tokens/request.
 
 ---
 
@@ -259,7 +287,7 @@ User: "Change the navbar color to dark blue"
 ```java
 // onRequest (caller thread) — ThreadLocal is safe
 MonitorContext context = MonitorContextHolder.getContext();
-requestContext.attributes().put(MONITOR_CONTEXT_KEY, context); // store for cross-thread access
+requestContext.attributes().put(MONITOR_CONTEXT_KEY, context);
 
 // onResponse (potentially different thread) — read from attributes, not ThreadLocal
 MonitorContext context = (MonitorContext) responseContext.attributes().get(MONITOR_CONTEXT_KEY);
@@ -279,50 +307,31 @@ MonitorContext context = (MonitorContext) responseContext.attributes().get(MONIT
 // Token bucket algorithm — allows bursts, enforces long-term average
 RRateLimiter rateLimiter = redissonClient.getRateLimiter("rate_limit:user:" + userId);
 rateLimiter.trySetRate(RateType.OVERALL, 5, 60, RateIntervalUnit.SECONDS); // 5 req/min
-rateLimiter.expire(Duration.ofHours(1)); // prevent key accumulation
+rateLimiter.expire(Duration.ofHours(1));
 if (!rateLimiter.tryAcquire(1)) {
     throw new BusinessException(ErrorCode.TOO_MANY_REQUEST, "...");
 }
 ```
 
-**SSE-aware error handling**: Rate limit exceptions occur before the SSE stream opens. Custom `GlobalExceptionHandler` detects SSE requests and writes errors as `event:business-error` SSE events instead of HTTP status codes.
+**Verified**: 5 req/min per user enforced via 6-request burst test.
 
 ---
 
-### 6. 🔑 Multi-Model Routing Architecture
+### 6. ☁️ Production Deployment on AWS EC2
 
-Five separate AI model beans with distinct configurations:
+**Challenge**: SSE streaming requires special Nginx configuration — default buffering breaks real-time output.
 
-| Bean | Model | Config | Purpose |
-|---|---|---|---|
-| `openAiChatModel` | deepseek-chat | `response_format: json_object` | Structured output |
-| `openAiStreamingChatModel` | deepseek-chat | Streaming, `@Scope("prototype")` | HTML/MULTI_FILE generation |
-| `reasoningStreamingChatModel` | deepseek-chat | Tool calling, `@Scope("prototype")` | VUE_PROJECT generation |
-| `routingChatModelPrototype` | deepseek-chat | `max_tokens: 256` | AI routing classification |
-| `imageCollectionChatModel` | deepseek-chat | No `response_format` | Pexels image collection |
-
-> **Key insight**: `imageCollectionChatModel` must NOT have `response_format: json_object` — DeepSeek skips tool invocation and returns JSON directly when this flag is set.
-
----
-
-### 7. ⚡ Vue Project Build Pipeline
-
-```
-AI generates Vue 3 source files via tool calls
-          ↓
-onCompleteResponse() callback triggered (synchronous in stream lifecycle)
-          ↓
-VueProjectBuilder.buildProject() executes:
-  → npm install (5min timeout)
-  → npm run build (3min timeout)
-  → validates dist/ directory exists
-          ↓
-sink.complete() — frontend receives done signal
-          ↓
-User can immediately preview — no manual refresh needed
+**Nginx SSE Configuration**:
+```nginx
+location /api {
+    proxy_pass http://127.0.0.1:8123;
+    proxy_buffering off;           # Critical: disable buffering for SSE
+    proxy_set_header Connection "";
+    proxy_read_timeout 900s;       # AI generation can take several minutes
+}
 ```
 
-**Why synchronous build?** Async build (Java 21 virtual threads) was the initial approach but caused "generation complete but preview blank" UX confusion. Synchronous build ensures the `dist/` directory is ready the moment the SSE stream ends.
+**Security**: Only ports 22 (SSH) and 80 (HTTP) exposed to public. MySQL (3306) and Redis (6379) accessible only within the instance.
 
 ---
 
@@ -367,8 +376,6 @@ langchain4j:
       max-tokens: 8192
       response-format: json_object
       timeout: 120s
-      log-requests: true
-      log-responses: true
     streaming-chat-model:
       base-url: https://api.deepseek.com
       api-key: YOUR_DEEPSEEK_API_KEY
@@ -404,10 +411,6 @@ spring:
       port: 6379
   session:
     store-type: redis
-  ai:
-    embedding:
-      model:
-        enabled: false
 ```
 
 **4. Start the backend**
@@ -431,20 +434,72 @@ Frontend runs at: `http://localhost:5173`
 ### Monitoring Setup (Optional)
 
 ```bash
-# From project root directory
 docker-compose up -d
-
 # Prometheus: http://localhost:9090
 # Grafana:    http://localhost:3000 (admin / admin123)
 ```
 
-Import `grafana-dashboard.json` in Grafana for the pre-built 11-panel dashboard.
+---
+
+## AWS EC2 Deployment
+
+The platform is deployed on AWS EC2 and accessible at **http://3.227.11.113**.
+
+### Infrastructure
+
+| Component | Details |
+|---|---|
+| Instance | t2.medium (2 vCPU, 4GB RAM) |
+| OS | Ubuntu 24.04 LTS |
+| Backend | Spring Boot jar via nohup |
+| Frontend | Vue 3 static files via Nginx |
+| Database | MySQL 8.x (internal only) |
+| Cache | Redis (internal only) |
+| Proxy | Nginx with SSE streaming config |
+
+### Key Deployment Steps
+
+```bash
+# 1. Package backend (skip tests for speed)
+mvn clean package -DskipTests
+
+# 2. Upload jar to EC2
+scp -i ling-ec2-key.pem target/*.jar ubuntu@3.227.11.113:~/project/backend/
+
+# 3. Start backend with prod profile
+nohup java -jar Ling-AI-CODE-generation-0.0.1-SNAPSHOT.jar \
+  --spring.profiles.active=prod > app.log 2>&1 &
+
+# 4. Build frontend with production env
+npx vite build --mode production
+
+# 5. Upload to EC2
+scp -i ling-ec2-key.pem -r dist/* ubuntu@3.227.11.113:~/project/frontend/
+```
+
+### Nginx SSE Configuration
+
+```nginx
+server {
+    listen 80;
+    location /api {
+        proxy_pass http://127.0.0.1:8123;
+        proxy_buffering off;        # Required for SSE streaming
+        proxy_set_header Connection "";
+        proxy_read_timeout 900s;    # AI generation timeout
+    }
+    location / {
+        root /home/ubuntu/project/frontend;
+        try_files $uri $uri/ /index.html =404;
+    }
+}
+```
 
 ---
 
 ## MCP Server Integration
 
-A standalone MCP (Model Context Protocol) Server exposes the code generation capability as standardized tools, enabling any MCP-compatible client to create applications programmatically.
+A standalone MCP (Model Context Protocol) Server exposes the code generation capability as standardized tools.
 
 **Repository**: [ling-codegen-mcp-server](https://github.com/LING-6150/ling-codegen-mcp-server)
 
@@ -452,30 +507,8 @@ A standalone MCP (Model Context Protocol) Server exposes the code generation cap
 
 | Tool | Description |
 |---|---|
-| `generateWebsite(prompt)` | Creates a new app from a natural language description, returns appId + chat URL |
+| `generateWebsite(prompt)` | Creates a new app from a natural language description |
 | `listRecentApps()` | Returns a list of recently featured applications |
-
-### Architecture
-
-```
-MCP Client (Claude Desktop / MCP Inspector)
-    ↕ SSE Transport (http://localhost:8127/sse)
-ling-codegen-mcp-server (Spring AI 1.0.0-SNAPSHOT)
-    ↕ REST API
-Ling-AI-CODE-generation backend (http://localhost:8123)
-```
-
-### Running the MCP Server
-
-```bash
-git clone https://github.com/LING-6150/ling-codegen-mcp-server.git
-cd ling-codegen-mcp-server
-
-# Update application.yml with your session cookie
-# (copy SESSION=xxx from browser DevTools → Network → any request → Cookie header)
-
-mvn spring-boot:run
-```
 
 ### Verification with MCP Inspector
 
@@ -483,12 +516,8 @@ mvn spring-boot:run
 npx @modelcontextprotocol/inspector http://localhost:8127/sse
 ```
 
-Open the Inspector UI → Connection Type: **Via Proxy** → Connect:
-
 - ✅ Connected to `ling-codegen-mcp-server v1.0.0`
 - ✅ Tools registered: `generateWebsite`, `listRecentApps`
-
-> **Note**: Claude Desktop integration is pending Spring AI MCP protocol version alignment (Claude Desktop uses `2025-11-25`, current Spring AI uses `2024-11-05`).
 
 ---
 
@@ -496,41 +525,17 @@ Open the Inspector UI → Connection Type: **Via Proxy** → Connect:
 
 ### Prometheus Metrics
 
-After starting the backend, metrics are available at:
-`http://localhost:8123/api/actuator/prometheus`
-
-Custom AI metrics:
+Available at: `http://localhost:8123/api/actuator/prometheus`
 
 ```
-# Request tracking (status: started / success / error)
-ai_model_requests_total{user_id="...", app_id="...", model_name="deepseek-chat", status="success"} 42.0
-
-# Token consumption breakdown
-ai_model_tokens_total{token_type="input"} 16800.0
-ai_model_tokens_total{token_type="output"} 180000.0
+ai_model_requests_total{status="success"} 42.0
 ai_model_tokens_total{token_type="total"} 196800.0
-
-# Response time (Timer auto-computes count, sum, max, percentiles)
-ai_model_response_duration_seconds_sum{...} 524.7
+ai_model_response_duration_seconds_sum 524.7
 ```
 
-### Grafana Dashboard
+### Grafana Dashboard (11 panels)
 
-The pre-built dashboard (`grafana-dashboard.json`) includes 11 panels:
-
-| Panel | Type | Description |
-|---|---|---|
-| Total Requests | Stat | Successful request count |
-| Error Count | Stat | Error count (turns red if > 0) |
-| Total Tokens | Stat | Cumulative token consumption |
-| Avg Response Time | Stat | Yellow > 15s, Red > 30s |
-| Request Rate | Time series | Success/error per minute |
-| Token Usage Over Time | Time series | Input vs output trends |
-| Response Time Distribution | Time series | avg + max |
-| Token by Type | Pie chart | Input/output ratio |
-| Requests by User | Table | Sorted by count |
-| Token by User | Table | Sorted by consumption |
-| Error Rate | Time series | Percentage, red if > 10% |
+Import `grafana-dashboard.json` for the pre-built dashboard including request rate, token usage, response time distribution, error rate, and per-user analytics.
 
 ---
 
@@ -540,46 +545,30 @@ The pre-built dashboard (`grafana-dashboard.json`) includes 11 panels:
 Ling-AI-CODE-generation/
 ├── src/main/java/com/ling/lingaicodegeneration/
 │   ├── ai/
-│   │   ├── AiCodeGeneratorService.java          # AI Service interface (LangChain4j)
-│   │   ├── AiCodeGeneratorServiceFactory.java   # Factory with prototype scope handling
-│   │   ├── AiCodeGenTypeRoutingService.java      # AI routing (structured enum output)
-│   │   ├── ImageCollectionService.java           # Pexels image collection
-│   │   ├── CodeQualityCheckService.java          # AI code quality validation
-│   │   ├── guardrail/                            # Input/Output Guardrails
+│   │   ├── AiCodeGeneratorService.java
+│   │   ├── AiCodeGeneratorServiceFactory.java
+│   │   ├── guardrail/                     # Input/Output Guardrails
 │   │   ├── langgraph4j/
-│   │   │   ├── node/                             # 6 workflow nodes
-│   │   │   ├── state/WorkflowContext.java        # Workflow state carrier
-│   │   │   └── workflow/CodeGenWorkflow.java      # LangGraph4j directed graph
-│   │   └── tools/                               # 6 file operation tools + ImageSearchTool
+│   │   │   ├── node/                      # 6 workflow nodes
+│   │   │   └── workflow/CodeGenWorkflow.java
+│   │   └── tools/                         # 5 file operation tools
 │   ├── config/
-│   │   ├── StreamingChatModelConfig.java        # @Scope("prototype") streaming model
-│   │   ├── ReasoningStreamingChatModelConfig.java
-│   │   ├── RoutingAiModelConfig.java
-│   │   └── RedisCacheManagerConfig.java         # Redis cache with TTL config
+│   │   ├── StreamingChatModelConfig.java  # @Scope("prototype")
+│   │   └── RedisCacheManagerConfig.java
 │   ├── controller/
-│   │   ├── AppController.java                   # SSE + REST endpoints
-│   │   └── StaticResourceController.java        # Serves generated website files
+│   │   ├── AppController.java             # SSE + REST endpoints
+│   │   └── StaticResourceController.java
 │   ├── core/
-│   │   ├── AiCodeGeneratorFacade.java            # Unified entry point (Facade pattern)
-│   │   ├── builder/VueProjectBuilder.java        # npm install + build
-│   │   └── handler/                             # Stream handlers (Strategy pattern)
+│   │   ├── AiCodeGeneratorFacade.java     # Facade pattern
+│   │   ├── builder/VueProjectBuilder.java
+│   │   └── handler/                       # Strategy pattern
 │   ├── monitor/
-│   │   ├── MonitorContext.java
-│   │   ├── MonitorContextHolder.java             # ThreadLocal context
-│   │   ├── AiModelMetricsCollector.java          # Micrometer metrics
-│   │   └── AiModelMonitorListener.java           # ChatModelListener implementation
-│   ├── ratelimit/
-│   │   ├── annotation/RateLimit.java
-│   │   └── aspect/RateLimitAspect.java           # Redisson token bucket
-│   └── service/
-│       ├── AppService.java
-│       └── impl/AppServiceImpl.java
-├── src/main/resources/
-│   ├── prompt/                                  # System prompts for all AI services
-│   └── application.yml
-├── prometheus.yml                               # Prometheus scrape config
-├── docker-compose.yml                           # Prometheus + Grafana
-└── grafana-dashboard.json                       # Pre-built 11-panel dashboard
+│   │   ├── AiModelMetricsCollector.java   # Micrometer metrics
+│   │   └── AiModelMonitorListener.java    # ChatModelListener
+│   └── ratelimit/                         # Redisson token bucket
+├── prometheus.yml
+├── docker-compose.yml
+└── grafana-dashboard.json
 ```
 
 ---
@@ -601,7 +590,9 @@ Ling-AI-CODE-generation/
 **Ling Duan** — MS Information Systems, Northeastern University  
 GitHub: [@LING-6150](https://github.com/LING-6150)
 
+**Live Demo**: http://3.227.11.113
+
 ---
 
-*Built with ❤️ using Spring Boot 3, LangChain4j, LangGraph4j, and Vue 3*
+*Built with ❤️ using Spring Boot 3, LangChain4j, LangGraph4j, Vue 3, and AWS EC2*
 
