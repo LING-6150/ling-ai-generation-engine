@@ -25,5 +25,5 @@ public interface AppConstant {
     /**
      * App deploy host
      */
-    String CODE_DEPLOY_HOST = "http://localhost";
+    String CODE_DEPLOY_HOST = "http://3.227.11.113";
 }

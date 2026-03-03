@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechForward 2024 | Innovation Conference</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <header class="header">
+        <nav class="nav container">
+            <div class="nav-logo">
+                <h1>TechForward<span class="logo-accent">2024</span></h1>
+            </div>
+            <button class="nav-toggle" aria-label="Toggle navigation menu">
+                <span class="hamburger"></span>
+            </button>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link active">Home</a></li>
+                <li><a href="#schedule" class="nav-link">Schedule</a></li>
+                <li><a href="#register" class="nav-link">Register</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h2 class="hero-title">Innovate. Connect. Transform.</h2>
+                    <p class="hero-subtitle">Join the premier technology conference of the year</p>
+                    <p class="hero-description">
+                        TechForward 2024 brings together industry leaders, innovators, and visionaries 
+                        to explore the future of technology. Experience three days of inspiring talks, 
+                        hands-on workshops, and unparalleled networking opportunities.
+                    </p>
+                    <div class="hero-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Date</span>
+                            <span class="detail-value">November 15-17, 2024</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Location</span>
+                            <span class="detail-value">San Francisco Convention Center</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Attendees</span>
+                            <span class="detail-value">2,500+ Expected</span>
+                        </div>
+                    </div>
+                    <a href="#register" class="btn btn-primary">Register Now</a>
+                </div>
+                <div class="hero-image">
+                    <img src="https://picsum.photos/600/400?random=1" alt="Conference attendees networking" class="hero-img">
+                </div>
+            </div>
+        </section>
+
+        <!-- Schedule Section -->
+        <section id="schedule" class="schedule">
+            <div class="container">
+                <h2 class="section-title">Conference Schedule</h2>
+                <p class="section-subtitle">Three days of inspiring sessions and workshops</p>
+                
+                <div class="schedule-tabs">
+                    <button class="tab-btn active" data-day="day1">Day 1: Nov 15</button>
+                    <button class="tab-btn" data-day="day2">Day 2: Nov 16</button>
+                    <button class="tab-btn" data-day="day3">Day 3: Nov 17</button>
+                </div>
+
+                <div class="schedule-content">
+                    <!-- Day 1 Schedule -->
+                    <div class="day-schedule active" id="day1">
+                        <div class="schedule-item">
+                            <div class="schedule-time">9:00 AM - 10:30 AM</div>
+                            <div class="schedule-details">
+                                <h3 class="schedule-title">Opening Keynote: The Future of AI</h3>
+                                <p class="schedule-speaker">Dr. Sarah Chen, Chief AI Officer at TechVision</p>
+                                <p class="schedule-description">
+                                    Explore how artificial intelligence is reshaping industries and creating 
+                                    new opportunities for innovation and growth.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="schedule-item">
+                            <div class="schedule-time">11:00 AM - 12:30 PM</div>
+                            <div class="schedule-details">
+                                <h3 class="schedule-title">Web Development in 2024</h3>
+                                <p class="schedule-speaker">Michael Rodriguez, Senior Developer at WebCraft</p>
+                                <p class="schedule-description">
+                                    Latest trends and best practices in modern web development, including 
+                                    performance optimization and accessibility.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="schedule-item">
+                            <div class="schedule-time">2:00 PM - 3:30 PM</div>
+                            <div class="schedule-details">
+                                <h3 class="schedule-title">Cybersecurity Workshop</h3>
+                                <p class="schedule-speaker">Lisa Park, Security Expert at SecureNet</p>
+                                <p class="schedule-description">
+                                    Hands-on workshop covering essential cybersecurity practices for 
+                                    developers and IT professionals.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Day 2 Schedule -->
+                    <div class="day-schedule" id="day2">
+                        <div class="schedule-item">
+                            <div class="schedule-time">9:00 AM - 10:30 AM</div>
+                            <div class="schedule-details">
+                                <h3 class="schedule-title">Cloud Infrastructure</h3>
+                                <p class="schedule-speaker">David Wilson, Cloud Architect at CloudScale</p>
+                                <p class="schedule-description">
+                                    Building scalable and resilient cloud infrastructure for modern applications.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="schedule-item">
+                            <div class="schedule-time">11:00 AM - 12:30 PM</div>
+                            <div class="schedule-details">
+                                <h3 class="schedule-title">Mobile Development Trends</h3>
+                                <p class="schedule-speaker">Alex Thompson, Mobile Lead at AppWorks</p>
+                                <p class="schedule-description">
+                                    Cross-platform development and emerging technologies in the mobile space.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Day 3 Schedule -->
+                    <div class="day-schedule" id="day3">
+                        <div class="schedule-item">
+                            <div class="schedule-time">9:00 AM - 10:30 AM</div>
+                            <div class="schedule-details">
+                                <h3 class="schedule-title">Startup Innovation Panel</h3>
+                                <p class="schedule-speaker">Various industry leaders</p>
+                                <p class="schedule-description">
+                                    Panel discussion on fostering innovation and navigating the startup landscape.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="schedule-item">
+                            <div class="schedule-time">11:00 AM - 12:30 PM</div>
+                            <div class="schedule-details">
+                                <h3 class="schedule-title">Closing Ceremony & Awards</h3>
+                                <p class="schedule-speaker">Conference Organizers</p>
+                                <p class="schedule-description">
+                                    Recognizing outstanding contributions and innovations presented during the conference.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Registration Form -->
+        <section id="register" class="registration">
+            <div class="container">
+                <h2 class="section-title">Register for TechForward 2024</h2>
+                <p class="section-subtitle">Secure your spot at the premier technology conference</p>
+                
+                <form id="registration-form" class="registration-form">
+                    <div class="form-group">
+                        <label for="full-name" class="form-label">Full Name *</label>
+                        <input type="text" id="full-name" name="full-name" class="form-input" required>
+                        <div class="error-message" id="name-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address *</label>
+                        <input type="email" id="email" name="email" class="form-input" required>
+                        <div class="error-message" id="email-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="company" class="form-label">Company / Organization</label>
+                        <input type="text" id="company" name="company" class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ticket-type" class="form-label">Ticket Type *</label>
+                        <select id="ticket-type" name="ticket-type" class="form-select" required>
+                            <option value="">Select ticket type</option>
+                            <option value="standard">Standard Pass - $299</option>
+                            <option value="vip">VIP Pass - $499</option>
+                            <option value="student">Student Pass - $149</option>
+                        </select>
+                        <div class="error-message" id="ticket-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Days Attending *</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="days" value="day1">
+                                <span class="checkbox-custom"></span>
+                                Day 1 (Nov 15)
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="days" value="day2">
+                                <span class="checkbox-custom"></span>
+                                Day 2 (Nov 16)
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="days" value="day3">
+                                <span class="checkbox-custom"></span>
+                                Day 3 (Nov 17)
+                            </label>
+                        </div>
+                        <div class="error-message" id="days-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="comments" class="form-label">Special Requirements or Comments</label>
+                        <textarea id="comments" name="comments" class="form-textarea" rows="4"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="newsletter" name="newsletter">
+                            <span class="checkbox-custom"></span>
+                            Subscribe to conference updates and newsletter
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-submit">Complete Registration</button>
+                </form>
+
+                <div id="success-message" class="success-message hidden">
+                    <h3>Registration Successful!</h3>
+                    <p>Thank you for registering for TechForward 2024. We've sent a confirmation email to your address.</p>
+                    <p>You'll receive detailed information about the conference schedule and venue one week before the event.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h3>TechForward 2024</h3>
+                    <p>Innovation Conference</p>
+                    <p>San Francisco Convention Center</p>
+                    <p>November 15-17, 2024</p>
+                </div>
+                <div class="footer-contact">
+                    <h4>Contact</h4>
+                    <p>info@techforward2024.com</p>
+                    <p>+1 (555) 123-4567</p>
+                </div>
+            </div>
+            <div class="footer-copyright">
+                <p>&copy; 2024 TechForward Conference. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

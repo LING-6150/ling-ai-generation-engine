@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bella Vista Restaurant | Menu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #c62828;
+            --primary-dark: #8e0000;
+            --primary-light: #ff5f52;
+            --secondary-color: #f9a825;
+            --dark-color: #2c2c2c;
+            --light-color: #f8f8f8;
+            --gray-color: #e0e0e0;
+            --text-color: #333;
+            --text-light: #777;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: #fefefe;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 1.5rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            color: var(--secondary-color);
+            font-size: 1.8rem;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: var(--secondary-color);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.5rem 0;
+            position: relative;
+        }
+
+        nav a:hover {
+            color: var(--secondary-color);
+        }
+
+        nav a.active {
+            color: var(--secondary-color);
+        }
+
+        nav a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--secondary-color);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+            padding: 5rem 0;
+            margin-bottom: 3rem;
+        }
+
+        .hero h2 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            opacity: 0.9;
+        }
+
+        /* Menu Filter */
+        .menu-filter {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .filter-btn {
+            padding: 0.7rem 1.5rem;
+            background-color: white;
+            border: 2px solid var(--gray-color);
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .filter-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .filter-btn.active {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Menu Section */
+        .menu-section {
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            position: relative;
+        }
+
+        .section-title h2 {
+            font-size: 2.2rem;
+            color: var(--dark-color);
+            display: inline-block;
+            padding-bottom: 0.5rem;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background-color: var(--primary-color);
+        }
+
+        .menu-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .menu-item {
+            background-color: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            display: flex;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .item-image {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .item-content {
+            padding: 1.2rem;
+            flex-grow: 1;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.8rem;
+        }
+
+        .item-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--dark-color);
+        }
+
+        .item-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .item-description {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .item-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.7rem;
+            border-radius: 50px;
+            font-weight: 600;
+        }
+
+        .tag.spicy {
+            background-color: #ffebee;
+            color: var(--primary-color);
+        }
+
+        .tag.vegetarian {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .tag.gluten-free {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .tag.chef-special {
+            background-color: #fff3e0;
+            color: #ef6c00;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 3rem 0 2rem;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary-color);
+        }
+
+        .footer-section p {
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-icons a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .social-icons a:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .menu-items {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 1.5rem;
+            }
+
+            .hero h2 {
+                font-size: 2.5rem;
+            }
+
+            .menu-items {
+                grid-template-columns: 1fr;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+                position: absolute;
+                top: 1.5rem;
+                right: 20px;
+            }
+
+            nav {
+                width: 100%;
+                display: none;
+            }
+
+            nav.active {
+                display: block;
+            }
+
+            nav ul {
+                flex-direction: column;
+                text-align: center;
+                gap: 0;
+            }
+
+            nav li {
+                padding: 0.8rem 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            nav a.active::after {
+                display: none;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero {
+                padding: 3rem 0;
+            }
+
+            .hero h2 {
+                font-size: 2rem;
+            }
+
+            .menu-filter {
+                gap: 0.5rem;
+            }
+
+            .filter-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .menu-item {
+                flex-direction: column;
+            }
+
+            .item-image {
+                width: 100%;
+                height: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-utensils logo-icon"></i>
+                <h1>Bella <span>Vista</span></h1>
+            </div>
+            
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <nav id="mainNav">
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#" class="active">Menu</a></li>
+                    <li><a href="#">About</a></li>
+                    <li><a href="#">Reservations</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h2>Our Exquisite Menu</h2>
+            <p>Discover our carefully crafted dishes made with the finest ingredients, inspired by both traditional and contemporary culinary techniques.</p>
+        </div>
+    </section>
+
+    <!-- Menu Filter -->
+    <div class="container">
+        <div class="menu-filter" id="menuFilter">
+            <button class="filter-btn active" data-filter="all">All Items</button>
+            <button class="filter-btn" data-filter="appetizers">Appetizers</button>
+            <button class="filter-btn" data-filter="main-courses">Main Courses</button>
+            <button class="filter-btn" data-filter="desserts">Desserts</button>
+            <button class="filter-btn" data-filter="drinks">Drinks</button>
+        </div>
+    </div>
+
+    <!-- Menu Sections -->
+    <main class="container">
+        <!-- Appetizers Section -->
+        <section class="menu-section" id="appetizers">
+            <div class="section-title">
+                <h2>Appetizers</h2>
+            </div>
+            
+            <div class="menu-items">
+                <!-- Item 1 -->
+                <div class="menu-item" data-category="appetizers">
+                    <img src="https://images.unsplash.com/photo-1563379091339-03246963d9d6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Bruschetta" class="item-image">
+                    <div class="item-content">
+                        <div class="item-header">
+                            <h3 class="item-title">Tomato Bruschetta</h3>
+                            <span class="item-price">$12.50</span>
+                        </div>
+                        <p class="item-description">Toasted bread topped with tomatoes, garlic, fresh basil, and extra virgin olive oil.</p>
+                        <div class="item-tags">
+                            <span class="tag vegetarian">Vegetarian</span>
+                            <span class="tag gluten-free">Gluten-Free Option</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Item 2 -->
+                <div class="menu-item" data-category="appetizers">
+                    <img src="https://images.unsplash.com/photo-1626645738675-4a62f6e85e30?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Calamari" class="item-image">
+                    <div class="item-content">
+                        <div class="item-header">
+                            <h3 class="item-title">Crispy Calamari</h3>
+                            <span class="item-price">$16.00</span>
+                        </div>
+                        <p class="item-description">Lightly battered squid rings served with lemon aioli and spicy marinara sauce.</p>
+                        <div class="item-tags">
+                            <span class="tag spicy">Spicy</span>
+                            <span class="tag chef-special">Chef's Special</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Item 3 -->
+                <div class="menu-item" data-category="appetizers">
+                    <img src="https://images.unsplash.com/photo-1606755962773-324cc5a3cda6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Caprese Salad" class="item-image">
+                    <div class="item-content">
+                        <div class="item-header">
+                            <h3 class="item-title">Caprese Salad</h3>
+                            <span class="item-price">$14.50</span>
+                        </div>
+                        <p class="item-description">Fresh mozzarella, tomatoes, and basil drizzled with balsamic glaze and olive oil.</p>
+                        <div class="item-tags">
+                            <span class="tag vegetarian">Vegetarian</span>
+                            <span class="tag gluten-free">Gluten-Free</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Main Courses Section -->
+        <section class="menu-section" id="main-courses">
+            <div class="section-title">
+                <h2>Main Courses</h2>
+            </div>
+            
+            <div class="menu-items">
+                <!-- Item 1 -->
+                <div class="menu-item" data-category="main-courses">
+                    <img src="https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Grilled Salmon" class="item-image">
+                    <div class="item-content">
+                        <div class="item-header">
+                            <h3 class="item-title">Grilled Salmon</h3>
+                            <span class="item-price">$28.50</span>
+                        </div>
+                        <p class="item-description">Atlantic salmon fillet with lemon butter sauce, served with roasted vegetables and wild rice.</p>
+                        <div class="item-tags">
+                            <span class="tag gluten-free">Gluten-Free</span>
+                            <span class="tag chef-special">Chef's Special</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Item 2 -->
+                <div class="menu-item" data-category="main-courses">
+                    <img src="https://images.unsplash.com/photo-1600891964092-4316c288032e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Filet Mignon" class="item-image">
+                    <div class="item-content">
+                        <div class="item-header">
+                            <h3 class="item-title">Filet Mignon</h3>
+                            <span class="item-price">$42.00</span>
+                        </div>
+                        <p class="item-description">8oz tender beef filet with red wine reduction, garlic mashed potatoes, and asparagus.</p>
+                        <div class="item-tags">
+                            <span class="tag gluten-free">Gluten-Free</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Item 3 -->
+                <div class="menu-item" data-category="main-courses">
+                    <img src="https://images.unsplash.com/photo-1563379926898-05f4575a45d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Mushroom Risotto" class="item-image">
+                    <div class="item-content">
+                        <div class="item-header">
+                            <h3 class="item-title">Mushroom Risotto</h3>
+                            <span class="item-price">$22.50</span>
+                        </div>
+                        <p class="item-description">Creamy arborio rice with wild mushrooms, parmesan cheese, and truffle oil.</p>
+                        <div class="item-tags">
+                            <span class="tag vegetarian">Vegetarian</span>
+                            <span class="tag gluten-free">Gluten-Free</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Desserts Section -->
+        <section class="menu-section" id="desserts">
+            <div class="section-title">
+                <h2>Desserts</h2>
+            </div>
+            
+            <div class="menu-items">
+                <!-- Item 1 -->
+                <div class="menu-item" data-category="desserts">
+                    <img src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80" alt="Tiramisu" class="item-image">
+                    <div class="item-content">
+                        <div class="item-header">
+                            <h3 class="item-title">Classic Tiramisu</h3>
+                            <span class="item-price">$10.50</span>
+                        </div>
+                        <p class="item-description">Layers of coffee-soaked ladyfingers and mascarpone cream, dusted with cocoa powder.</p>
+                        <div class="item-tags">
+                            <span class="tag chef-special">Chef's Special</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Item 2 -->
+                <div class="menu-item" data-category="desserts">
+                    <img src="https://images.unsplash.com/photo-1499636136210-6f4ee915583e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1364&q=80" alt="Chocolate Lava Cake" class="item-image">
+                    <div class="item-content">
+                        <div class="item-header">
+                            <h3 class="item-title">Chocolate Lava Cake</h3>
+                            <span class="item-price">$12.00</span>
+                        </div>
+                        <p class="item-description">Warm chocolate cake with a molten center, served with vanilla ice cream.</p>
+                        <div class="item-tags">
+                            <span class="tag vegetarian">Vegetarian</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Item 3 -->
+                <div class="menu-item" data-category="desserts">
+                    <img src="https://images.unsplash.com/photo-1568307977363-9e1f2f6c6f4d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80" alt="Cheesecake" class="item-image">
+                    <div class="item-content">
+                        <div class="item-header">
+                            <h3 class="item-title">New York Cheesecake</h3>
+                            <span class="item-price">$11.50</span>
+                        </div>
+                        <p class="item-description">Creamy cheesecake with graham cracker crust, topped with berry compote.</p>
+                        <div class="item-tags">
+                            <span class="tag vegetarian">Vegetarian</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Drinks Section -->
+        <section class="menu-section" id="drinks">
+            <div class="section-title">
+                <h2>Drinks</h2>
+            </div>
+            
+            <div class="menu-items">
+                <!-- Item 1 -->
+                <div class="menu-item" data-category="drinks">
+                    <img src="https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80" alt="Cocktail" class="item-image">
+                    <div class="item-content">
+                        <div class="item-header">
+                            <h3 class="item-title">Bella Vista Sunset</h3>
+                            <span class="item-price">$14.00</span>
+                        </div>
+                        <p class="item-description">Vodka, elderflower liqueur, fresh lime juice, and cranberry juice with a splash of soda.</p>
+                        <div class="item-tags">
+                            <span class="tag chef-special">Signature Cocktail</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Item 2 -->
+                <div class="menu-item" data-category="drinks">
+                    <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80" alt="Wine" class="item-image">
+                    <div class="item-content">
+                        <div class="item-header">
+                            <h3 class="item-title">House Red Wine</h3>
+                            <span class="item-price">$9.50/glass</span>
+                        </div>
+                        <p class="item-description">Medium-bodied Cabernet Sauvignon with notes of black cherry and vanilla.</p>
+                        <div class="item-tags">
+                            <span class="tag gluten-free">Gluten-Free</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Item 3 -->
+                <div class="menu-item" data-category="drinks">
+                    <img src="https://images.unsplash.com/photo-1629203851122-3726ecdf080e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1369&q=80" alt="Mocktail" class="item-image">
+                    <div class="item-content">
+                        <div class="item-header">
+                            <h3 class="item-title">Tropical Breeze</h3>
+                            <span class="item-price">$8.00</span>
+                        </div>
+                        <p class="item-description">Pineapple juice, coconut cream, and lime with a hint of mint. Non-alcoholic.</p>
+                        <div class="item-tags">
+                            <span class="tag vegetarian">Non-Alcoholic</span>
+                            <span class="tag gluten-free">Gluten-Free</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Bella Vista Restaurant</h3>
+                    <p>Experience fine dining with a breathtaking view. Our menu features seasonal ingredients sourced from local farms.</p>
+                    <p><i class="fas fa-map-marker-alt"></i> 123 Gourmet Avenue, Culinary City</p>
+                    <p><i class="fas fa-phone"></i> (555) 123-4567</p>
+                    <p><i class="fas fa-envelope"></i> info@bellavista.com</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Hours</h3>
+                    <p><strong>Monday - Thursday:</strong> 5:00 PM - 10:00 PM</p>
+                    <p><strong>Friday - Saturday:</strong> 4:00 PM - 11:00 PM</p>
+                    <p><strong>Sunday:</strong> 4:00 PM - 9:00 PM</p>
+                    <p>Reservations recommended for weekends.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <p>Stay updated on our specials and events.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-tripadvisor"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2023 Bella Vista Restaurant. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mainNav = document.getElementById('mainNav');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            mainNav.classList.toggle('active');
+            const icon = mobileMenuBtn.querySelector('i');
+            if (mainNav.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+        
+        // Menu Filter Functionality
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const menuItems = document.querySelectorAll('.menu-item');
+        
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                
+                // Add active class to clicked button
+                button.classList.add('active');
+                
+                const filterValue = button.getAttribute('data-filter');
+                
+                // Show/hide menu items based on filter
+                menuItems.forEach(item => {
+                    if (filterValue === 'all' || item.getAttribute('data-category') === filterValue) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+                
+                // Show/hide entire sections based on filter
+                const menuSections = document.querySelectorAll('.menu-section');
+                menuSections.forEach(section => {
+                    const sectionId = section.getAttribute('id');
+                    
+                    // Check if this section has any visible items
+                    const sectionItems = section.querySelectorAll('.menu-item');
+                    let hasVisibleItems = false;
+                    
+                    sectionItems.forEach(item => {
+                        if (filterValue === 'all' || item.getAttribute('data-category') === filterValue) {
+                            hasVisibleItems = true;
+                        }
+                    });
+                    
+                    // Show/hide section based on visible items
+                    if (hasVisibleItems) {
+                        section.style.display = 'block';
+                    } else {
+                        section.style.display = 'none';
+                    }
+                });
+            });
+        });
+        
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId && targetId !== '#') {
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 100,
+                            behavior: 'smooth'
+                        });
+                        
+                        // Close mobile menu if open
+                        if (mainNav.classList.contains('active')) {
+                            mainNav.classList.remove('active');
+                            const icon = mobileMenuBtn.querySelector('i');
+                            icon.classList.remove('fa-times');
+                            icon.classList.add('fa-bars');
+                        }
+                    }
+                }
+            });
+        });
+        
+        // Add hover effect to menu items
+        menuItems.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+        
+        // Initialize the page with all items visible
+        window.addEventListener('DOMContentLoaded', () => {
+            // Ensure all sections are visible on page load
+            const menuSections = document.querySelectorAll('.menu-section');
+            menuSections.forEach(section => {
+                section.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>

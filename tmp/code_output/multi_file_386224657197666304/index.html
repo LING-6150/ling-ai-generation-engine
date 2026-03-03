@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Blog</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <a href="#" id="home-link">My Personal Blog</a>
+            </div>
+            <div class="nav-links">
+                <a href="#" id="all-posts-link">All Posts</a>
+                <a href="#" id="about-link">About</a>
+                <a href="#" id="contact-link">Contact</a>
+            </div>
+            <button class="mobile-menu-btn" id="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Article List View (Default) -->
+        <section class="article-list-view" id="article-list-view">
+            <div class="page-header">
+                <h1>Latest Articles</h1>
+                <p class="subtitle">Thoughts, ideas, and stories</p>
+            </div>
+            
+            <div class="articles-container" id="articles-container">
+                <!-- Articles will be dynamically loaded here -->
+            </div>
+        </section>
+
+        <!-- Post Detail View (Hidden by default) -->
+        <section class="post-detail-view" id="post-detail-view">
+            <div class="post-detail-container">
+                <button class="back-btn" id="back-btn">
+                    <i class="fas fa-arrow-left"></i> Back to Articles
+                </button>
+                <article class="post-detail" id="post-detail">
+                    <!-- Post content will be dynamically loaded here -->
+                </article>
+            </div>
+        </section>
+
+        <!-- About Section (Hidden by default) -->
+        <section class="about-view" id="about-view">
+            <div class="about-container">
+                <button class="back-btn" id="back-from-about-btn">
+                    <i class="fas fa-arrow-left"></i> Back to Articles
+                </button>
+                <h1>About Me</h1>
+                <div class="about-content">
+                    <div class="about-image">
+                        <img src="https://picsum.photos/400/400?random=1" alt="Profile Picture">
+                    </div>
+                    <div class="about-text">
+                        <h2>Hello, I'm Alex</h2>
+                        <p>Welcome to my personal blog! I'm a passionate writer and technology enthusiast who loves sharing thoughts on various topics including web development, design, productivity, and life lessons.</p>
+                        <p>This blog serves as my digital journal where I document my learning journey, share insights, and connect with like-minded individuals. I believe in the power of sharing knowledge and experiences.</p>
+                        <p>When I'm not writing or coding, you can find me hiking in the mountains, reading science fiction novels, or experimenting with new recipes in the kitchen.</p>
+                        <p>Feel free to explore my articles and don't hesitate to reach out if you'd like to connect!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section (Hidden by default) -->
+        <section class="contact-view" id="contact-view">
+            <div class="contact-container">
+                <button class="back-btn" id="back-from-contact-btn">
+                    <i class="fas fa-arrow-left"></i> Back to Articles
+                </button>
+                <h1>Get In Touch</h1>
+                <div class="contact-content">
+                    <div class="contact-info">
+                        <h2>Contact Information</h2>
+                        <p><i class="fas fa-envelope"></i> hello@personalblog.com</p>
+                        <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
+                        <p><i class="fas fa-map-marker-alt"></i> San Francisco, CA</p>
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-github"></i></a>
+                            <a href="#"><i class="fab fa-linkedin"></i></a>
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                    <div class="contact-form">
+                        <h2>Send a Message</h2>
+                        <form id="contact-form">
+                            <div class="form-group">
+                                <input type="text" id="name" placeholder="Your Name" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="email" id="email" placeholder="Your Email" required>
+                            </div>
+                            <div class="form-group">
+                                <textarea id="message" rows="5" placeholder="Your Message" required></textarea>
+                            </div>
+                            <button type="submit" class="submit-btn">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2023 Personal Blog. All rights reserved.</p>
+            <p>Made with <i class="fas fa-heart"></i> and vanilla JavaScript</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

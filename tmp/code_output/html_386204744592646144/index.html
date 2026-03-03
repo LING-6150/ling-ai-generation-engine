@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Blog | Home</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
+    <style>
+        /* CSS Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --light-color: #f9f9f9;
+            --dark-color: #333;
+            --gray-color: #95a5a6;
+            --border-color: #ecf0f1;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background-color: #f5f7fa;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--primary-color);
+            transition: var(--transition);
+        }
+
+        a:hover {
+            color: var(--secondary-color);
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: white;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+        }
+
+        .logo span {
+            color: var(--primary-color);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav li {
+            margin-left: 30px;
+        }
+
+        nav a {
+            color: var(--dark-color);
+            font-weight: 500;
+        }
+
+        nav a:hover {
+            color: var(--primary-color);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--secondary-color);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 30px;
+            opacity: 0.9;
+        }
+
+        /* Main Content Layout */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        /* Featured Posts */
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            color: var(--secondary-color);
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background-color: var(--primary-color);
+        }
+
+        .featured-posts {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .post-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .post-image {
+            height: 200px;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        .post-content {
+            padding: 25px;
+        }
+
+        .post-category {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .post-title {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+
+        .post-title a {
+            color: var(--secondary-color);
+        }
+
+        .post-title a:hover {
+            color: var(--primary-color);
+        }
+
+        .post-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--gray-color);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .post-excerpt {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        /* Recent Posts */
+        .recent-post {
+            display: flex;
+            margin-bottom: 25px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .recent-post:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+        }
+
+        .recent-post-image {
+            width: 100px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 15px;
+        }
+
+        .recent-post-content h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .recent-post-meta {
+            font-size: 0.85rem;
+            color: var(--gray-color);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            height: fit-content;
+        }
+
+        .sidebar-widget {
+            margin-bottom: 40px;
+        }
+
+        .sidebar-widget:last-child {
+            margin-bottom: 0;
+        }
+
+        .widget-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .widget-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+
+        .categories-list {
+            list-style: none;
+        }
+
+        .categories-list li {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .categories-list li:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+        }
+
+        .categories-list a {
+            display: flex;
+            justify-content: space-between;
+            color: var(--dark-color);
+        }
+
+        .categories-list a:hover {
+            color: var(--primary-color);
+        }
+
+        .tag-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 5px 12px;
+            background-color: var(--light-color);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--dark-color);
+            transition: var(--transition);
+        }
+
+        .tag:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Newsletter Form */
+        .newsletter-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .newsletter-form input {
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .newsletter-form input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 60px 0 30px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-widget h3 {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            color: white;
+        }
+
+        .footer-widget p {
+            opacity: 0.8;
+            margin-bottom: 20px;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .footer-links a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            transition: var(--transition);
+        }
+
+        .social-link:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero h1 {
+                font-size: 2.4rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            nav {
+                width: 100%;
+                margin-top: 20px;
+                display: none;
+            }
+            
+            nav.active {
+                display: block;
+            }
+            
+            nav ul {
+                flex-direction: column;
+            }
+            
+            nav li {
+                margin: 0 0 15px 0;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+                position: absolute;
+                top: 25px;
+                right: 20px;
+            }
+            
+            .hero {
+                padding: 60px 0;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .featured-posts {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            .hero {
+                padding: 40px 0;
+            }
+            
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+            }
+            
+            .post-content {
+                padding: 20px;
+            }
+            
+            .recent-post {
+                flex-direction: column;
+            }
+            
+            .recent-post-image {
+                width: 100%;
+                height: 150px;
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <div class="logo">Simple<span>Blog</span></div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+            <nav id="mainNav">
+                <ul>
+                    <li><a href="#" class="active">Home</a></li>
+                    <li><a href="#">Categories</a></li>
+                    <li><a href="#">About</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">Archives</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Welcome to Simple Blog</h1>
+            <p>Discover insightful articles, tutorials, and thoughts on technology, design, and creative writing. Join our community of readers and writers.</p>
+            <a href="#" class="btn">Start Reading</a>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Featured Posts -->
+        <section class="featured-section">
+            <h2 class="section-title">Featured Posts</h2>
+            <div class="featured-posts" id="featuredPosts">
+                <!-- Featured posts will be populated by JavaScript -->
+            </div>
+        </section>
+
+        <div class="main-content">
+            <!-- Recent Posts -->
+            <section class="recent-posts">
+                <h2 class="section-title">Recent Articles</h2>
+                <div id="recentPosts">
+                    <!-- Recent posts will be populated by JavaScript -->
+                </div>
+                <div style="text-align: center; margin-top: 40px;">
+                    <a href="#" class="btn btn-outline">View All Posts</a>
+                </div>
+            </section>
+
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-widget">
+                    <h3 class="widget-title">About</h3>
+                    <p>Simple Blog is a platform for sharing ideas, knowledge, and inspiration. We cover a wide range of topics from technology to creative writing.</p>
+                </div>
+
+                <div class="sidebar-widget">
+                    <h3 class="widget-title">Categories</h3>
+                    <ul class="categories-list" id="categoriesList">
+                        <!-- Categories will be populated by JavaScript -->
+                    </ul>
+                </div>
+
+                <div class="sidebar-widget">
+                    <h3 class="widget-title">Newsletter</h3>
+                    <p>Subscribe to get the latest posts delivered to your inbox.</p>
+                    <form class="newsletter-form" id="newsletterForm">
+                        <input type="email" placeholder="Your email address" required>
+                        <button type="submit" class="btn">Subscribe</button>
+                    </form>
+                </div>
+
+                <div class="sidebar-widget">
+                    <h3 class="widget-title">Popular Tags</h3>
+                    <div class="tag-cloud" id="tagCloud">
+                        <!-- Tags will be populated by JavaScript -->
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-widget">
+                    <h3>Simple Blog</h3>
+                    <p>A platform for sharing ideas, knowledge, and inspiration. Join our community of readers and writers.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link">📘</a>
+                        <a href="#" class="social-link">🐦</a>
+                        <a href="#" class="social-link">📷</a>
+                        <a href="#" class="social-link">📺</a>
+                    </div>
+                </div>
+                <div class="footer-widget">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Categories</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div class="footer-widget">
+                    <h3>Contact Info</h3>
+                    <p>123 Blog Street<br>Creative City, CC 10001</p>
+                    <p>Email: info@simpleblog.com</p>
+                    <p>Phone: (123) 456-7890</p>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 Simple Blog. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Blog Data - In a real application, this would come from an API
+        const blogData = {
+            featuredPosts: [
+                {
+                    id: 1,
+                    title: "The Future of Web Development in 2024",
+                    excerpt: "Exploring the latest trends and technologies that are shaping the future of web development and how developers can stay ahead.",
+                    category: "Technology",
+                    date: "March 15, 2024",
+                    readTime: "5 min read",
+                    image: "https://picsum.photos/600/400?random=1"
+                },
+                {
+                    id: 2,
+                    title: "Minimalist Design Principles for Modern Websites",
+                    excerpt: "Learn how to apply minimalist design principles to create clean, effective, and user-friendly websites that stand out.",
+                    category: "Design",
+                    date: "March 10, 2024",
+                    readTime: "4 min read",
+                    image: "https://picsum.photos/600/400?random=2"
+                },
+                {
+                    id: 3,
+                    title: "Building a Personal Brand as a Creative Professional",
+                    excerpt: "A comprehensive guide to building and maintaining a strong personal brand that attracts opportunities and builds credibility.",
+                    category: "Career",
+                    date: "March 5, 2024",
+                    readTime: "6 min read",
+                    image: "https://picsum.photos/600/400?random=3"
+                }
+            ],
+            recentPosts: [
+                {
+                    id: 4,
+                    title: "Understanding JavaScript Closures",
+                    excerpt: "A deep dive into JavaScript closures, how they work, and practical examples of using them in your code.",
+                    category: "Programming",
+                    date: "March 18, 2024",
+                    readTime: "4 min read",
+                    image: "https://picsum.photos/200/150?random=4"
+                },
+                {
+                    id: 5,
+                    title: "The Art of Storytelling in Blog Writing",
+                    excerpt: "How to incorporate storytelling techniques into your blog posts to engage readers and make your content memorable.",
+                    category: "Writing",
+                    date: "March 16, 2024",
+                    readTime: "5 min read",
+                    image: "https://picsum.photos/200/150?random=5"
+                },
+                {
+                    id: 6,
+                    title: "Responsive CSS Grid Layouts Made Simple",
+                    excerpt: "Learn how to create complex, responsive layouts with CSS Grid without the headache.",
+                    category: "Web Design",
+                    date: "March 14, 2024",
+                    readTime: "3 min read",
+                    image: "https://picsum.photos/200/150?random=6"
+                },
+                {
+                    id: 7,
+                    title: "Productivity Tips for Remote Workers",
+                    excerpt: "Effective strategies and tools to stay productive and maintain work-life balance while working remotely.",
+                    category: "Productivity",
+                    date: "March 12, 2024",
+                    readTime: "5 min read",
+                    image: "https://picsum.photos/200/150?random=7"
+                },
+                {
+                    id: 8,
+                    title: "Introduction to Machine Learning Concepts",
+                    excerpt: "A beginner-friendly introduction to the fundamental concepts of machine learning and AI.",
+                    category: "Technology",
+                    date: "March 8, 2024",
+                    readTime: "7 min read",
+                    image: "https://picsum.photos/200/150?random=8"
+                }
+            ],
+            categories: [
+                { name: "Technology", count: 12 },
+                { name: "Design", count: 8 },
+                { name: "Programming", count: 15 },
+                { name: "Writing", count: 6 },
+                { name: "Productivity", count: 9 },
+                { name: "Career", count: 7 },
+                { name: "Web Design", count: 11 }
+            ],
+            tags: [
+                "JavaScript", "CSS", "HTML", "React", "Vue", "Design", "UI/UX", 
+                "Productivity", "Tutorial", "Beginners", "Advanced", "Career", 
+                "Freelancing", "Remote Work", "Writing", "Blogging", "SEO"
+            ]
+        };
+
+        // DOM Elements
+        const featuredPostsContainer = document.getElementById('featuredPosts');
+        const recentPostsContainer = document.getElementById('recentPosts');
+        const categoriesList = document.getElementById('categoriesList');
+        const tagCloud = document.getElementById('tagCloud');
+        const newsletterForm = document.getElementById('newsletterForm');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mainNav = document.getElementById('mainNav');
+
+        // Initialize the blog
+        document.addEventListener('DOMContentLoaded', function() {
+            renderFeaturedPosts();
+            renderRecentPosts();
+            renderCategories();
+            renderTags();
+            setupEventListeners();
+        });
+
+        // Render featured posts
+        function renderFeaturedPosts() {
+            featuredPostsContainer.innerHTML = '';
+            
+            blogData.featuredPosts.forEach(post => {
+                const postElement = document.createElement('article');
+                postElement.className = 'post-card';
+                postElement.innerHTML = `
+                    <img src="${post.image}" alt="${post.title}" class="post-image">
+                    <div class="post-content">
+                        <span class="post-category">${post.category}</span>
+                        <h3 class="post-title"><a href="#">${post.title}</a></h3>
+                        <div class="post-meta">
+                            <span>${post.date}</span>
+                            <span>${post.readTime}</span>
+                        </div>
+                        <p class="post-excerpt">${post.excerpt}</p>
+                        <a href="#" class="btn btn-outline">Read More</a>
+                    </div>
+                `;
+                featuredPostsContainer.appendChild(postElement);
+            });
+        }
+
+        // Render recent posts
+        function renderRecentPosts() {
+            recentPostsContainer.innerHTML = '';
+            
+            blogData.recentPosts.forEach(post => {
+                const postElement = document.createElement('article');
+                postElement.className = 'recent-post';
+                postElement.innerHTML = `
+                    <img src="${post.image}" alt="${post.title}" class="recent-post-image">
+                    <div class="recent-post-content">
+                        <h3><a href="#">${post.title}</a></h3>
+                        <div class="recent-post-meta">
+                            <span>${post.date} • ${post.category} • ${post.readTime}</span>
+                        </div>
+                        <p>${post.excerpt}</p>
+                    </div>
+                `;
+                recentPostsContainer.appendChild(postElement);
+            });
+        }
+
+        // Render categories
+        function renderCategories() {
+            categoriesList.innerHTML = '';
+            
+            blogData.categories.forEach(category => {
+                const categoryElement = document.createElement('li');
+                categoryElement.innerHTML = `
+                    <a href="#">
+                        ${category.name}
+                        <span>(${category.count})</span>
+                    </a>
+                `;
+                categoriesList.appendChild(categoryElement);
+            });
+        }
+
+        // Render tags
+        function renderTags() {
+            tagCloud.innerHTML = '';
+            
+            blogData.tags.forEach(tag => {
+                const tagElement = document.createElement('a');
+                tagElement.href = '#';
+                tagElement.className = 'tag';
+                tagElement.textContent = tag;
+                tagCloud.appendChild(tagElement);
+            });
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Mobile menu toggle
+            mobileMenuBtn.addEventListener('click', function() {
+                mainNav.classList.toggle('active');
+                mobileMenuBtn.textContent = mainNav.classList.contains('active') ? '✕' : '☰';
+            });
+
+            // Newsletter form submission
+            newsletterForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const emailInput = this.querySelector('input[type="email"]');
+                const email = emailInput.value.trim();
+                
+                if (email) {
+                    // In a real app, you would send this to a server
+                    alert(`Thank you for subscribing with email: ${email}`);
+                    emailInput.value = '';
+                }
+            });
+
+            // Close mobile menu when clicking on a link
+            const navLinks = document.querySelectorAll('nav a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        mainNav.classList.remove('active');
+                        mobileMenuBtn.textContent = '☰';
+                    }
+                });
+            });
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                mainNav.classList.remove('active');
+                mobileMenuBtn.textContent = '☰';
+            }
+        });
+    </script>
+</body>
+</html>

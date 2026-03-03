@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viewfinder | Photography Gallery</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📷</text></svg>">
+    <style>
+        /* CSS Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --gray-color: #95a5a6;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+        
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .btn.active {
+            background-color: var(--accent-color);
+        }
+        
+        /* Header Styles */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo-icon {
+            font-size: 2rem;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+        }
+        
+        nav a {
+            font-weight: 600;
+            padding: 5px 0;
+            position: relative;
+        }
+        
+        nav a:hover {
+            color: var(--secondary-color);
+        }
+        
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--secondary-color);
+            transition: var(--transition);
+        }
+        
+        nav a:hover::after {
+            width: 100%;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://picsum.photos/1200/600?grayscale');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+            padding: 100px 20px;
+            margin-bottom: 60px;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 30px;
+            opacity: 0.9;
+        }
+        
+        /* Gallery Filter */
+        .gallery-filter {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        /* Gallery Grid */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 60px;
+        }
+        
+        .gallery-item {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            background-color: white;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .gallery-img {
+            height: 250px;
+            width: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+        
+        .gallery-item:hover .gallery-img {
+            transform: scale(1.05);
+        }
+        
+        .gallery-info {
+            padding: 20px;
+        }
+        
+        .gallery-info h3 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .gallery-info p {
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+        
+        /* Lightbox Modal */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .lightbox.active {
+            display: flex;
+        }
+        
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+        
+        .lightbox-img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 4px;
+        }
+        
+        .lightbox-info {
+            color: white;
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .lightbox-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 2.5rem;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.5);
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: none;
+        }
+        
+        .lightbox-nav.prev {
+            left: 20px;
+        }
+        
+        .lightbox-nav.next {
+            right: 20px;
+        }
+        
+        .lightbox-nav:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 40px 0 20px;
+            text-align: center;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        
+        .footer-section {
+            flex: 1;
+            min-width: 250px;
+            margin-bottom: 30px;
+            padding: 0 20px;
+        }
+        
+        .footer-section h3 {
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+        
+        .social-icon:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-5px);
+        }
+        
+        .copyright {
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            nav ul {
+                gap: 15px;
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 20px;
+            }
+            
+            .lightbox-nav {
+                width: 50px;
+                height: 50px;
+                font-size: 2rem;
+            }
+            
+            .lightbox-nav.prev {
+                left: 10px;
+            }
+            
+            .lightbox-nav.next {
+                right: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero {
+                padding: 70px 20px;
+            }
+            
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            
+            .filter-buttons {
+                gap: 8px;
+            }
+            
+            .btn {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-section {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <span class="logo-icon">📷</span>
+                <span>Viewfinder Gallery</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#gallery">Gallery</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <h1>Capturing Moments, Creating Memories</h1>
+            <p>Explore our curated collection of stunning photographs from talented artists around the world. From breathtaking landscapes to intimate portraits, discover the beauty of visual storytelling.</p>
+            <a href="#gallery" class="btn">View Gallery</a>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section class="container" id="gallery">
+        <div class="gallery-filter">
+            <h2>Photography Gallery</h2>
+            <p>Filter by category to explore different photography styles</p>
+            <div class="filter-buttons">
+                <button class="btn active" data-filter="all">All Photos</button>
+                <button class="btn" data-filter="nature">Nature</button>
+                <button class="btn" data-filter="portrait">Portrait</button>
+                <button class="btn" data-filter="urban">Urban</button>
+                <button class="btn" data-filter="wildlife">Wildlife</button>
+            </div>
+        </div>
+
+        <div class="gallery-grid" id="gallery-container">
+            <!-- Gallery items will be generated by JavaScript -->
+        </div>
+    </section>
+
+    <!-- Lightbox Modal -->
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" id="lightbox-close">&times;</button>
+        <button class="lightbox-nav prev" id="lightbox-prev">&#10094;</button>
+        <div class="lightbox-content">
+            <img class="lightbox-img" id="lightbox-img" src="" alt="">
+            <div class="lightbox-info">
+                <h3 id="lightbox-title"></h3>
+                <p id="lightbox-description"></p>
+            </div>
+        </div>
+        <button class="lightbox-nav next" id="lightbox-next">&#10095;</button>
+    </div>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section" id="about">
+                    <h3>About Viewfinder</h3>
+                    <p>Viewfinder is a curated photography gallery showcasing exceptional work from both emerging and established photographers. Our mission is to celebrate visual storytelling and connect artists with appreciative audiences.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul style="list-style: none;">
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#gallery">Gallery</a></li>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Connect With Us</h3>
+                    <p>Follow us on social media for updates and featured photographers.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-icon">📘</a>
+                        <a href="#" class="social-icon">📷</a>
+                        <a href="#" class="social-icon">🐦</a>
+                        <a href="#" class="social-icon">📹</a>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 Viewfinder Photography Gallery. All rights reserved. | All images are used for demonstration purposes.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Gallery data - in a real app this would come from an API or database
+        const galleryData = [
+            {
+                id: 1,
+                title: "Mountain Sunrise",
+                description: "A breathtaking view of the sun rising over snow-capped peaks.",
+                category: "nature",
+                imageUrl: "https://picsum.photos/600/400?random=1"
+            },
+            {
+                id: 2,
+                title: "Urban Reflections",
+                description: "Modern architecture reflected in a city puddle after rain.",
+                category: "urban",
+                imageUrl: "https://picsum.photos/600/400?random=2"
+            },
+            {
+                id: 3,
+                title: "Portrait of Wisdom",
+                description: "An intimate portrait capturing the lines of experience on an elder's face.",
+                category: "portrait",
+                imageUrl: "https://picsum.photos/600/400?random=3"
+            },
+            {
+                id: 4,
+                title: "Forest Pathway",
+                description: "A winding path through a dense, green forest with sunlight filtering through the canopy.",
+                category: "nature",
+                imageUrl: "https://picsum.photos/600/400?random=4"
+            },
+            {
+                id: 5,
+                title: "City Lights at Dusk",
+                description: "The vibrant lights of a city coming to life as the sun sets.",
+                category: "urban",
+                imageUrl: "https://picsum.photos/600/400?random=5"
+            },
+            {
+                id: 6,
+                title: "Elephant in the Wild",
+                description: "A majestic African elephant in its natural habitat.",
+                category: "wildlife",
+                imageUrl: "https://picsum.photos/600/400?random=6"
+            },
+            {
+                id: 7,
+                title: "Beach Portrait",
+                description: "A candid portrait of a person walking along a sandy beach at sunset.",
+                category: "portrait",
+                imageUrl: "https://picsum.photos/600/400?random=7"
+            },
+            {
+                id: 8,
+                title: "Desert Dunes",
+                description: "The endless rolling sand dunes of a vast desert landscape.",
+                category: "nature",
+                imageUrl: "https://picsum.photos/600/400?random=8"
+            },
+            {
+                id: 9,
+                title: "Street Market",
+                description: "Vibrant colors and activity in a bustling urban street market.",
+                category: "urban",
+                imageUrl: "https://picsum.photos/600/400?random=9"
+            },
+            {
+                id: 10,
+                title: "Tiger's Gaze",
+                description: "A powerful close-up of a tiger's intense gaze in the wild.",
+                category: "wildlife",
+                imageUrl: "https://picsum.photos/600/400?random=10"
+            },
+            {
+                id: 11,
+                title: "Waterfall Majesty",
+                description: "A powerful waterfall cascading down a rocky cliff into a misty pool below.",
+                category: "nature",
+                imageUrl: "https://picsum.photos/600/400?random=11"
+            },
+            {
+                id: 12,
+                title: "Abstract Portrait",
+                description: "An artistic portrait with creative lighting and composition.",
+                category: "portrait",
+                imageUrl: "https://picsum.photos/600/400?random=12"
+            }
+        ];
+
+        // DOM Elements
+        const galleryContainer = document.getElementById('gallery-container');
+        const filterButtons = document.querySelectorAll('.filter-buttons .btn');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxTitle = document.getElementById('lightbox-title');
+        const lightboxDescription = document.getElementById('lightbox-description');
+        const lightboxClose = document.getElementById('lightbox-close');
+        const lightboxPrev = document.getElementById('lightbox-prev');
+        const lightboxNext = document.getElementById('lightbox-next');
+
+        // Current state
+        let currentFilter = 'all';
+        let currentImageIndex = 0;
+        let filteredGalleryData = [...galleryData];
+
+        // Initialize the gallery
+        function initGallery() {
+            renderGallery();
+            setupEventListeners();
+        }
+
+        // Render gallery items based on current filter
+        function renderGallery() {
+            galleryContainer.innerHTML = '';
+            
+            filteredGalleryData.forEach((item, index) => {
+                const galleryItem = document.createElement('div');
+                galleryItem.className = `gallery-item ${item.category}`;
+                galleryItem.dataset.category = item.category;
+                galleryItem.dataset.index = index;
+                
+                galleryItem.innerHTML = `
+                    <img src="${item.imageUrl}" alt="${item.title}" class="gallery-img">
+                    <div class="gallery-info">
+                        <h3>${item.title}</h3>
+                        <p>${item.description}</p>
+                    </div>
+                `;
+                
+                galleryContainer.appendChild(galleryItem);
+            });
+            
+            // Add click event to each gallery item
+            document.querySelectorAll('.gallery-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const index = parseInt(this.dataset.index);
+                    openLightbox(index);
+                });
+            });
+        }
+
+        // Filter gallery by category
+        function filterGallery(category) {
+            currentFilter = category;
+            
+            // Update active button
+            filterButtons.forEach(button => {
+                if (button.dataset.filter === category) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+            
+            // Filter data
+            if (category === 'all') {
+                filteredGalleryData = [...galleryData];
+            } else {
+                filteredGalleryData = galleryData.filter(item => item.category === category);
+            }
+            
+            // Re-render gallery
+            renderGallery();
+        }
+
+        // Open lightbox with specific image
+        function openLightbox(index) {
+            currentImageIndex = index;
+            const item = filteredGalleryData[currentImageIndex];
+            
+            lightboxImg.src = item.imageUrl;
+            lightboxImg.alt = item.title;
+            lightboxTitle.textContent = item.title;
+            lightboxDescription.textContent = item.description;
+            
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+        }
+
+        // Close lightbox
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
+        }
+
+        // Navigate to previous image in lightbox
+        function prevImage() {
+            currentImageIndex = (currentImageIndex - 1 + filteredGalleryData.length) % filteredGalleryData.length;
+            const item = filteredGalleryData[currentImageIndex];
+            
+            lightboxImg.src = item.imageUrl;
+            lightboxImg.alt = item.title;
+            lightboxTitle.textContent = item.title;
+            lightboxDescription.textContent = item.description;
+        }
+
+        // Navigate to next image in lightbox
+        function nextImage() {
+            currentImageIndex = (currentImageIndex + 1) % filteredGalleryData.length;
+            const item = filteredGalleryData[currentImageIndex];
+            
+            lightboxImg.src = item.imageUrl;
+            lightboxImg.alt = item.title;
+            lightboxTitle.textContent = item.title;
+            lightboxDescription.textContent = item.description;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Filter button events
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const filter = this.dataset.filter;
+                    filterGallery(filter);
+                });
+            });
+            
+            // Lightbox events
+            lightboxClose.addEventListener('click', closeLightbox);
+            lightboxPrev.addEventListener('click', prevImage);
+            lightboxNext.addEventListener('click', nextImage);
+            
+            // Close lightbox when clicking outside the image
+            lightbox.addEventListener('click', function(e) {
+                if (e.target === lightbox) {
+                    closeLightbox();
+                }
+            });
+            
+            // Keyboard navigation for lightbox
+            document.addEventListener('keydown', function(e) {
+                if (!lightbox.classList.contains('active')) return;
+                
+                switch(e.key) {
+                    case 'Escape':
+                        closeLightbox();
+                        break;
+                    case 'ArrowLeft':
+                        prevImage();
+                        break;
+                    case 'ArrowRight':
+                        nextImage();
+                        break;
+                }
+            });
+            
+            // Smooth scrolling for navigation links
+            document.querySelectorAll('nav a, .hero .btn').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+                    
+                    // Only handle internal links
+                    if (href.startsWith('#')) {
+                        e.preventDefault();
+                        const targetId = href.substring(1);
+                        const targetElement = document.getElementById(targetId);
+                        
+                        if (targetElement) {
+                            window.scrollTo({
+                                top: targetElement.offsetTop - 80,
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                });
+            });
+        }
+
+        // Initialize the gallery when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initGallery);
+    </script>
+</body>
+</html>

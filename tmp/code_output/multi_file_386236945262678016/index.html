@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List App</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <h1><i class="fas fa-tasks"></i> Todo List</h1>
+            <p class="subtitle">Organize your tasks efficiently</p>
+        </header>
+
+        <main class="app-main">
+            <section class="add-task-section">
+                <div class="input-group">
+                    <input type="text" id="taskInput" placeholder="Add a new task..." maxlength="100">
+                    <button id="addTaskBtn" class="btn-primary">
+                        <i class="fas fa-plus"></i> Add Task
+                    </button>
+                </div>
+                <div class="task-options">
+                    <div class="priority-selector">
+                        <label for="prioritySelect">Priority:</label>
+                        <select id="prioritySelect">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="due-date">
+                        <label for="dueDate">Due Date:</label>
+                        <input type="date" id="dueDate">
+                    </div>
+                </div>
+            </section>
+
+            <section class="filter-section">
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">All Tasks</button>
+                    <button class="filter-btn" data-filter="active">Active</button>
+                    <button class="filter-btn" data-filter="completed">Completed</button>
+                </div>
+                <div class="stats">
+                    <span id="taskCount">0 tasks remaining</span>
+                    <button id="clearCompletedBtn" class="btn-secondary">Clear Completed</button>
+                </div>
+            </section>
+
+            <section class="tasks-section">
+                <div class="tasks-container">
+                    <ul id="taskList">
+                        <!-- Tasks will be dynamically added here -->
+                    </ul>
+                    <div id="emptyState" class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>No tasks yet</h3>
+                        <p>Add a task above to get started!</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <p>Double-click to edit tasks • Tasks are saved automatically</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

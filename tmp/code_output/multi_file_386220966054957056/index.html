@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bella Vista Restaurant</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="logo">
+                <h1>Bella Vista</h1>
+                <p class="tagline">Fine Italian Dining</p>
+            </div>
+            <button class="menu-toggle" aria-label="Toggle navigation menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-links">
+                <li><a href="#home" class="nav-link active">Home</a></li>
+                <li><a href="#menu" class="nav-link">Menu</a></li>
+                <li><a href="#reservation" class="nav-link">Reservations</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <!-- Hero Section -->
+        <section id="home" class="hero-section">
+            <div class="hero-content">
+                <h2 class="hero-title">Authentic Italian Cuisine</h2>
+                <p class="hero-subtitle">Experience the taste of Italy in every bite</p>
+                <a href="#reservation" class="cta-button">Book a Table</a>
+            </div>
+        </section>
+
+        <!-- Menu Section -->
+        <section id="menu" class="menu-section">
+            <div class="container">
+                <h2 class="section-title">Our Menu</h2>
+                <p class="section-subtitle">Crafted with passion, served with love</p>
+                
+                <div class="menu-categories">
+                    <button class="category-btn active" data-category="appetizers">Appetizers</button>
+                    <button class="category-btn" data-category="main-courses">Main Courses</button>
+                    <button class="category-btn" data-category="desserts">Desserts</button>
+                    <button class="category-btn" data-category="drinks">Drinks</button>
+                </div>
+
+                <div class="menu-items">
+                    <!-- Appetizers (default visible) -->
+                    <div class="menu-category active" id="appetizers">
+                        <div class="menu-item">
+                            <div class="item-info">
+                                <h3 class="item-name">Bruschetta Classica</h3>
+                                <p class="item-description">Toasted bread topped with tomatoes, garlic, fresh basil, and extra virgin olive oil</p>
+                            </div>
+                            <span class="item-price">$12</span>
+                        </div>
+                        <div class="menu-item">
+                            <div class="item-info">
+                                <h3 class="item-name">Calamari Fritti</h3>
+                                <p class="item-description">Crispy fried squid served with lemon aioli and marinara sauce</p>
+                            </div>
+                            <span class="item-price">$16</span>
+                        </div>
+                        <div class="menu-item">
+                            <div class="item-info">
+                                <h3 class="item-name">Caprese Salad</h3>
+                                <p class="item-description">Fresh mozzarella, tomatoes, and basil drizzled with balsamic reduction</p>
+                            </div>
+                            <span class="item-price">$14</span>
+                        </div>
+                    </div>
+
+                    <!-- Main Courses -->
+                    <div class="menu-category" id="main-courses">
+                        <div class="menu-item">
+                            <div class="item-info">
+                                <h3 class="item-name">Spaghetti Carbonara</h3>
+                                <p class="item-description">Classic Roman pasta with eggs, pecorino cheese, pancetta, and black pepper</p>
+                            </div>
+                            <span class="item-price">$24</span>
+                        </div>
+                        <div class="menu-item">
+                            <div class="item-info">
+                                <h3 class="item-name">Osso Buco</h3>
+                                <p class="item-description">Braised veal shanks with gremolata, served with saffron risotto</p>
+                            </div>
+                            <span class="item-price">$38</span>
+                        </div>
+                        <div class="menu-item">
+                            <div class="item-info">
+                                <h3 class="item-name">Chicken Parmesan</h3>
+                                <p class="item-description">Breaded chicken breast topped with marinara sauce and melted mozzarella</p>
+                            </div>
+                            <span class="item-price">$26</span>
+                        </div>
+                    </div>
+
+                    <!-- Desserts -->
+                    <div class="menu-category" id="desserts">
+                        <div class="menu-item">
+                            <div class="item-info">
+                                <h3 class="item-name">Tiramisu</h3>
+                                <p class="item-description">Layers of coffee-soaked ladyfingers and mascarpone cream</p>
+                            </div>
+                            <span class="item-price">$10</span>
+                        </div>
+                        <div class="menu-item">
+                            <div class="item-info">
+                                <h3 class="item-name">Panna Cotta</h3>
+                                <p class="item-description">Vanilla cream custard with fresh berry compote</p>
+                            </div>
+                            <span class="item-price">$9</span>
+                        </div>
+                        <div class="menu-item">
+                            <div class="item-info">
+                                <h3 class="item-name">Cannoli</h3>
+                                <p class="item-description">Crispy pastry shells filled with sweet ricotta cream and chocolate chips</p>
+                            </div>
+                            <span class="item-price">$8</span>
+                        </div>
+                    </div>
+
+                    <!-- Drinks -->
+                    <div class="menu-category" id="drinks">
+                        <div class="menu-item">
+                            <div class="item-info">
+                                <h3 class="item-name">House Red Wine</h3>
+                                <p class="item-description">Glass of our signature Chianti Classico</p>
+                            </div>
+                            <span class="item-price">$12</span>
+                        </div>
+                        <div class="menu-item">
+                            <div class="item-info">
+                                <h3 class="item-name">Limoncello Spritz</h3>
+                                <p class="item-description">Prosecco, limoncello, and soda with fresh mint</p>
+                            </div>
+                            <span class="item-price">$14</span>
+                        </div>
+                        <div class="menu-item">
+                            <div class="item-info">
+                                <h3 class="item-name">Italian Coffee</h3>
+                                <p class="item-description">Authentic espresso or cappuccino</p>
+                            </div>
+                            <span class="item-price">$5</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reservation Section -->
+        <section id="reservation" class="reservation-section">
+            <div class="container">
+                <h2 class="section-title">Make a Reservation</h2>
+                <p class="section-subtitle">Book your table for an unforgettable dining experience</p>
+                
+                <form id="reservation-form" class="reservation-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Full Name *</label>
+                            <input type="text" id="name" name="name" required>
+                            <div class="error-message" id="name-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" name="email" required>
+                            <div class="error-message" id="email-error"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone">Phone Number *</label>
+                            <input type="tel" id="phone" name="phone" required>
+                            <div class="error-message" id="phone-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="guests">Number of Guests *</label>
+                            <select id="guests" name="guests" required>
+                                <option value="">Select...</option>
+                                <option value="1">1 Person</option>
+                                <option value="2">2 People</option>
+                                <option value="3">3 People</option>
+                                <option value="4">4 People</option>
+                                <option value="5">5 People</option>
+                                <option value="6">6 People</option>
+                                <option value="7">7+ People</option>
+                            </select>
+                            <div class="error-message" id="guests-error"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="date">Date *</label>
+                            <input type="date" id="date" name="date" required>
+                            <div class="error-message" id="date-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="time">Time *</label>
+                            <select id="time" name="time" required>
+                                <option value="">Select...</option>
+                                <option value="17:00">5:00 PM</option>
+                                <option value="17:30">5:30 PM</option>
+                                <option value="18:00">6:00 PM</option>
+                                <option value="18:30">6:30 PM</option>
+                                <option value="19:00">7:00 PM</option>
+                                <option value="19:30">7:30 PM</option>
+                                <option value="20:00">8:00 PM</option>
+                                <option value="20:30">8:30 PM</option>
+                            </select>
+                            <div class="error-message" id="time-error"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="special-requests">Special Requests</label>
+                        <textarea id="special-requests" name="special-requests" rows="4" placeholder="Any dietary restrictions, allergies, or special occasions..."></textarea>
+                    </div>
+                    
+                    <div class="form-submit">
+                        <button type="submit" class="submit-btn">Book Table</button>
+                    </div>
+                    
+                    <div id="form-message" class="form-message"></div>
+                </form>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="about-section">
+            <div class="container">
+                <h2 class="section-title">Our Story</h2>
+                <div class="about-content">
+                    <div class="about-text">
+                        <p>Founded in 1995, Bella Vista brings authentic Italian cuisine to your table. Our recipes have been passed down through generations, using only the finest ingredients imported directly from Italy.</p>
+                        <p>Our chefs combine traditional techniques with modern creativity to deliver an unforgettable dining experience. Every dish tells a story of passion, heritage, and culinary excellence.</p>
+                    </div>
+                    <div class="about-image">
+                        <img src="https://picsum.photos/600/400?random=1" alt="Restaurant interior">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="contact-section">
+            <div class="container">
+                <h2 class="section-title">Contact Us</h2>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <h3>Address</h3>
+                        <p>123 Italian Street<br>New York, NY 10001</p>
+                    </div>
+                    <div class="contact-item">
+                        <h3>Hours</h3>
+                        <p>Monday - Thursday: 5PM - 10PM<br>Friday - Sunday: 4PM - 11PM</p>
+                    </div>
+                    <div class="contact-item">
+                        <h3>Contact</h3>
+                        <p>Phone: (555) 123-4567<br>Email: info@bellavista.com</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Bella Vista Restaurant. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

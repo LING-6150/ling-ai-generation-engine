@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lens & Light | Photography Portfolio</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">Lens & Light</a>
+            <button class="menu-toggle" aria-label="Toggle navigation menu">
+                <span class="hamburger"></span>
+            </button>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link active">Home</a></li>
+                <li><a href="#gallery" class="nav-link">Gallery</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="content-container">
+        <!-- Home Section -->
+        <section id="home" class="page-section active">
+            <div class="hero">
+                <div class="hero-content">
+                    <h1 class="hero-title">Capturing Moments, Creating Memories</h1>
+                    <p class="hero-subtitle">Professional photography for life's most precious moments</p>
+                    <a href="#gallery" class="btn btn-primary">View Gallery</a>
+                </div>
+                <div class="hero-image">
+                    <img src="https://picsum.photos/800/600?random=1" alt="Photography hero image">
+                </div>
+            </div>
+            
+            <div class="featured-work">
+                <h2>Featured Work</h2>
+                <div class="featured-grid">
+                    <div class="featured-item">
+                        <img src="https://picsum.photos/400/300?random=2" alt="Portrait photography">
+                        <h3>Portraits</h3>
+                    </div>
+                    <div class="featured-item">
+                        <img src="https://picsum.photos/400/300?random=3" alt="Landscape photography">
+                        <h3>Landscapes</h3>
+                    </div>
+                    <div class="featured-item">
+                        <img src="https://picsum.photos/400/300?random=4" alt="Event photography">
+                        <h3>Events</h3>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+        <section id="gallery" class="page-section">
+            <div class="section-header">
+                <h2>Photo Gallery</h2>
+                <p>A collection of my favorite shots across different categories</p>
+            </div>
+            
+            <div class="gallery-controls">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="portrait">Portraits</button>
+                <button class="filter-btn" data-filter="landscape">Landscapes</button>
+                <button class="filter-btn" data-filter="urban">Urban</button>
+                <button class="filter-btn" data-filter="nature">Nature</button>
+            </div>
+            
+            <div class="gallery-grid">
+                <!-- Gallery items will be populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="page-section">
+            <div class="about-container">
+                <div class="about-image">
+                    <img src="https://picsum.photos/500/600?random=10" alt="Photographer portrait">
+                </div>
+                <div class="about-content">
+                    <h2>About Me</h2>
+                    <p>Hello! I'm Alex Morgan, a professional photographer with over 10 years of experience capturing life's beautiful moments. My passion lies in finding the perfect light and composition to tell stories through images.</p>
+                    
+                    <p>My journey began with a simple point-and-shoot camera during my travels, and it has evolved into a lifelong pursuit of visual storytelling. I believe that every photograph should evoke emotion and preserve a memory that lasts forever.</p>
+                    
+                    <h3>My Philosophy</h3>
+                    <p>I approach photography with a documentary eye and an artistic heart. Whether I'm shooting a wedding, a portrait session, or a landscape, my goal is to capture authentic moments that reflect the true essence of the subject.</p>
+                    
+                    <h3>Equipment & Style</h3>
+                    <p>I work with professional-grade equipment but believe that the photographer's eye is more important than the gear. My style is natural, timeless, and focused on genuine interactions rather than posed perfection.</p>
+                    
+                    <div class="experience">
+                        <div class="exp-item">
+                            <span class="exp-number">10+</span>
+                            <span class="exp-label">Years Experience</span>
+                        </div>
+                        <div class="exp-item">
+                            <span class="exp-number">500+</span>
+                            <span class="exp-label">Projects Completed</span>
+                        </div>
+                        <div class="exp-item">
+                            <span class="exp-number">25+</span>
+                            <span class="exp-label">Countries Visited</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="page-section">
+            <div class="section-header">
+                <h2>Get In Touch</h2>
+                <p>Ready to capture your special moments? Let's connect!</p>
+            </div>
+            
+            <div class="contact-container">
+                <div class="contact-info">
+                    <h3>Contact Information</h3>
+                    <div class="contact-item">
+                        <span class="contact-icon">📧</span>
+                        <span>hello@lensandlight.com</span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-icon">📱</span>
+                        <span>+1 (555) 123-4567</span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-icon">📍</span>
+                        <span>123 Photography Ave, Studio 45<br>New York, NY 10001</span>
+                    </div>
+                </div>
+                
+                <form class="contact-form" id="contactForm">
+                    <div class="form-group">
+                        <input type="text" id="name" placeholder="Your Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="email" placeholder="Your Email" required>
+                    </div>
+                    <div class="form-group">
+                        <select id="service" required>
+                            <option value="" disabled selected>Select Service</option>
+                            <option value="portrait">Portrait Session</option>
+                            <option value="wedding">Wedding Photography</option>
+                            <option value="event">Event Coverage</option>
+                            <option value="landscape">Landscape Photography</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <textarea id="message" rows="5" placeholder="Your Message" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">Lens & Light</div>
+            <p class="footer-tagline">Capturing the world, one frame at a time</p>
+            <div class="social-links">
+                <a href="#" aria-label="Instagram">📷</a>
+                <a href="#" aria-label="Facebook">📘</a>
+                <a href="#" aria-label="Twitter">🐦</a>
+                <a href="#" aria-label="Pinterest">📌</a>
+            </div>
+            <p class="copyright">&copy; 2024 Lens & Light Photography. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Lightbox Modal -->
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" aria-label="Close lightbox">&times;</button>
+        <button class="lightbox-nav prev" aria-label="Previous image">‹</button>
+        <button class="lightbox-nav next" aria-label="Next image">›</button>
+        <div class="lightbox-content">
+            <img src="" alt="" class="lightbox-image">
+            <div class="lightbox-caption">
+                <h3 class="lightbox-title"></h3>
+                <p class="lightbox-category"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List App</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <h1><i class="fas fa-tasks"></i> My Todo List</h1>
+            <p class="subtitle">Organize your tasks efficiently</p>
+        </header>
+
+        <main class="app-main">
+            <section class="input-section">
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="todoInput" 
+                        placeholder="Add a new task..." 
+                        maxlength="100"
+                        autocomplete="off"
+                    >
+                    <button id="addBtn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Task
+                    </button>
+                </div>
+                <div class="filter-group">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="active">Active</button>
+                    <button class="filter-btn" data-filter="completed">Completed</button>
+                </div>
+            </section>
+
+            <section class="stats-section">
+                <div class="stats">
+                    <span class="stat-item">
+                        <strong id="totalTasks">0</strong> Total
+                    </span>
+                    <span class="stat-item">
+                        <strong id="activeTasks">0</strong> Active
+                    </span>
+                    <span class="stat-item">
+                        <strong id="completedTasks">0</strong> Completed
+                    </span>
+                </div>
+            </section>
+
+            <section class="todos-section">
+                <ul id="todoList" class="todo-list">
+                    <!-- Todo items will be dynamically added here -->
+                </ul>
+                <div id="emptyState" class="empty-state">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>No tasks yet</h3>
+                    <p>Add your first task using the input above</p>
+                </div>
+            </section>
+
+            <section class="actions-section">
+                <button id="clearCompletedBtn" class="btn btn-secondary">
+                    <i class="fas fa-trash"></i> Clear Completed
+                </button>
+                <button id="clearAllBtn" class="btn btn-danger">
+                    <i class="fas fa-broom"></i> Clear All
+                </button>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <p>Double-click to edit tasks • Drag to reorder</p>
+            <p class="copyright">© 2023 Todo List App</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
