@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brew & Bean Café</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="logo">
+                <h1>Brew & Bean</h1>
+                <p class="tagline">Artisanal Coffee & Pastries</p>
+            </div>
+            <button class="menu-toggle" aria-label="Toggle navigation menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link active">Home</a></li>
+                <li><a href="#menu" class="nav-link">Menu</a></li>
+                <li><a href="#reservation" class="nav-link">Reservation</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h2>Welcome to Brew & Bean</h2>
+            <p>Where every cup tells a story</p>
+            <a href="#reservation" class="btn">Book a Table</a>
+        </div>
+    </section>
+
+    <!-- Menu Section -->
+    <section id="menu" class="menu-section">
+        <div class="container">
+            <h2 class="section-title">Our Menu</h2>
+            <p class="section-subtitle">Freshly prepared with love and care</p>
+            
+            <div class="menu-categories">
+                <button class="category-btn active" data-category="coffee">Coffee</button>
+                <button class="category-btn" data-category="tea">Tea</button>
+                <button class="category-btn" data-category="pastries">Pastries</button>
+                <button class="category-btn" data-category="sandwiches">Sandwiches</button>
+            </div>
+            
+            <div class="menu-items">
+                <!-- Coffee Items (default visible) -->
+                <div class="menu-category coffee active">
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h3>Espresso</h3>
+                            <p>Strong, concentrated coffee served in a small cup</p>
+                        </div>
+                        <span class="item-price">$3.50</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h3>Cappuccino</h3>
+                            <p>Espresso with steamed milk and a thick layer of foam</p>
+                        </div>
+                        <span class="item-price">$4.50</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h3>Latte</h3>
+                            <p>Espresso with steamed milk and a light layer of foam</p>
+                        </div>
+                        <span class="item-price">$5.00</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h3>Americano</h3>
+                            <p>Espresso diluted with hot water</p>
+                        </div>
+                        <span class="item-price">$4.00</span>
+                    </div>
+                </div>
+                
+                <!-- Tea Items (hidden by default) -->
+                <div class="menu-category tea">
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h3>Earl Grey</h3>
+                            <p>Black tea flavored with bergamot oil</p>
+                        </div>
+                        <span class="item-price">$3.50</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h3>Green Tea</h3>
+                            <p>Light, refreshing tea with antioxidants</p>
+                        </div>
+                        <span class="item-price">$3.50</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h3>Chamomile</h3>
+                            <p>Herbal tea known for its calming properties</p>
+                        </div>
+                        <span class="item-price">$3.50</span>
+                    </div>
+                </div>
+                
+                <!-- Pastries Items (hidden by default) -->
+                <div class="menu-category pastries">
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h3>Croissant</h3>
+                            <p>Buttery, flaky pastry</p>
+                        </div>
+                        <span class="item-price">$3.00</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h3>Blueberry Muffin</h3>
+                            <p>Fresh muffin with blueberries</p>
+                        </div>
+                        <span class="item-price">$3.50</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h3>Chocolate Chip Cookie</h3>
+                            <p>Soft cookie with chocolate chips</p>
+                        </div>
+                        <span class="item-price">$2.50</span>
+                    </div>
+                </div>
+                
+                <!-- Sandwiches Items (hidden by default) -->
+                <div class="menu-category sandwiches">
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h3>Turkey & Avocado</h3>
+                            <p>Turkey, avocado, lettuce, tomato on whole wheat</p>
+                        </div>
+                        <span class="item-price">$8.50</span>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h3>Caprese</h3>
+                            <p>Mozzarella, tomato, basil, balsamic glaze on ciabatta</p>
+                        </div>
+                        <span class="item-price">$9.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reservation Section -->
+    <section id="reservation" class="reservation-section">
+        <div class="container">
+            <h2 class="section-title">Make a Reservation</h2>
+            <p class="section-subtitle">Book your table in advance</p>
+            
+            <form id="reservation-form" class="reservation-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input type="text" id="name" name="name" required>
+                        <div class="error-message" id="name-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" required>
+                        <div class="error-message" id="email-error"></div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone">Phone Number *</label>
+                        <input type="tel" id="phone" name="phone" required>
+                        <div class="error-message" id="phone-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="date">Reservation Date *</label>
+                        <input type="date" id="date" name="date" required>
+                        <div class="error-message" id="date-error"></div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="time">Reservation Time *</label>
+                        <select id="time" name="time" required>
+                            <option value="">Select a time</option>
+                            <option value="08:00">8:00 AM</option>
+                            <option value="09:00">9:00 AM</option>
+                            <option value="10:00">10:00 AM</option>
+                            <option value="11:00">11:00 AM</option>
+                            <option value="12:00">12:00 PM</option>
+                            <option value="13:00">1:00 PM</option>
+                            <option value="14:00">2:00 PM</option>
+                            <option value="15:00">3:00 PM</option>
+                            <option value="16:00">4:00 PM</option>
+                            <option value="17:00">5:00 PM</option>
+                            <option value="18:00">6:00 PM</option>
+                        </select>
+                        <div class="error-message" id="time-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="guests">Number of Guests *</label>
+                        <select id="guests" name="guests" required>
+                            <option value="">Select number</option>
+                            <option value="1">1 person</option>
+                            <option value="2">2 people</option>
+                            <option value="3">3 people</option>
+                            <option value="4">4 people</option>
+                            <option value="5">5 people</option>
+                            <option value="6">6 people</option>
+                            <option value="7">7 people</option>
+                            <option value="8">8+ people</option>
+                        </select>
+                        <div class="error-message" id="guests-error"></div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="special-requests">Special Requests</label>
+                    <textarea id="special-requests" name="special-requests" rows="4" placeholder="Any dietary restrictions, allergies, or special occasions?"></textarea>
+                </div>
+                
+                <button type="submit" class="btn submit-btn">Book Table</button>
+                <div id="form-message" class="form-message"></div>
+            </form>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+        <div class="container">
+            <h2 class="section-title">Our Story</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>Brew & Bean Café was founded in 2015 with a simple mission: to serve exceptional coffee and create a welcoming space for our community.</p>
+                    <p>We source our beans directly from sustainable farms and roast them in-house to ensure the freshest cup possible. Our pastries are baked fresh daily using locally sourced ingredients.</p>
+                    <p>Whether you're looking for a quiet spot to work, a place to catch up with friends, or just a great cup of coffee, we'd love to welcome you.</p>
+                </div>
+                <div class="about-image">
+                    <img src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Café interior">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <h2 class="section-title">Visit Us</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <h3>Address</h3>
+                            <p>123 Coffee Street<br>Brewville, CA 90210</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <h3>Hours</h3>
+                            <p>Monday - Friday: 7am - 8pm<br>Saturday - Sunday: 8am - 9pm</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <h3>Phone</h3>
+                            <p>(555) 123-4567</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h3>Email</h3>
+                            <p>hello@brewandbean.com</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h2>Brew & Bean</h2>
+                    <p>Artisanal Coffee & Pastries</p>
+                </div>
+                <div class="social-links">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                </div>
+                <p class="copyright">&copy; 2023 Brew & Bean Café. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

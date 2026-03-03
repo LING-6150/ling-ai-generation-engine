@@ -144,6 +144,7 @@ const loginUserStore = useLoginUserStore()
 
 const appId = route.params.appId as string
 const appInfo = ref<API.AppVO>()
+const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8123/api'
 
 // Messages
 interface Message {
@@ -289,7 +290,8 @@ const generateCode = async (userMessage: string, aiMessageIndex: number) => {
       message: userMessage,
       agent: agentMode.value ? 'true' : 'false',
     })
-    const url = `http://localhost:8123/api/app/chat/gen/code?${params}`
+    // 第1个
+    const url = `${baseUrl}/app/chat/gen/code?${params}`
 
     eventSource = new EventSource(url, { withCredentials: true })
 
@@ -383,10 +385,13 @@ const handleError = (error: unknown, aiMessageIndex: number) => {
 const updatePreview = () => {
   if (appId) {
     const codeGenType = appInfo.value?.codeGenType ?? 'multi_file'
-    let previewPath = `http://localhost:8123/api/static/${codeGenType}_${appId}/`
+    // 第2个
+    let previewPath = `${baseUrl}/static/${codeGenType}_${appId}/`
+    // 第3个
     if (codeGenType === 'vue_project') {
-      previewPath = `http://localhost:8123/api/static/${codeGenType}_${appId}/dist/index.html`
+      previewPath = `${baseUrl}/static/${codeGenType}_${appId}/dist/index.html`
     }
+
     previewUrl.value = previewPath + `?t=${Date.now()}`
   }
 }
@@ -415,7 +420,8 @@ const downloadCode = async () => {
   if (!appId) return
   downloading.value = true
   try {
-    const url = `http://localhost:8123/api/app/download/${appId}`
+    // 第4个
+    const url = `${baseUrl}/app/download/${appId}`
     const response = await fetch(url, {
       method: 'GET',
       credentials: 'include',
