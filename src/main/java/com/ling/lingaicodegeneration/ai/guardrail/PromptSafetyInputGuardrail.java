@@ -46,7 +46,7 @@ public class PromptSafetyInputGuardrail implements InputGuardrail {
 
         // 1. Check length
         if (input.length() > 10000) {
-            return fatal("Input is too long, please keep it under 1000 characters");
+            return fatal("Input is too long, please keep it under 10000 characters");
         }
 
         // 2. Check for empty input
