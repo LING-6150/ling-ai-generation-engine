@@ -29,6 +29,15 @@ public class CodeFileSaver {
         return new File(baseDirPath);
     }
 
+    /**
+     * Single source of truth for the output directory of a code generation job.
+     * OrchestratorAgent uses this to derive generatedCodeDir after CodeGenAgent completes,
+     * instead of each caller duplicating the path-building logic.
+     */
+    public static String resolveOutputDir(CodeGenTypeEnum type, Long appId) {
+        return FILE_SAVE_ROOT_DIR + File.separator + type.getValue() + "_" + appId;
+    }
+
     private static String buildUniqueDir(String bizType, Long appId) {
         String uniqueDirName = StrUtil.format("{}_{}", bizType, appId);
         String dirPath = FILE_SAVE_ROOT_DIR + File.separator + uniqueDirName;
