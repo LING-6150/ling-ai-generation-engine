@@ -23,6 +23,11 @@ public interface ChatHistoryService extends IService<ChatHistory> {
     boolean addChatMessage(Long appId, String message, String messageType, Long userId);
 
     /**
+     * 新增结构化消息（AI_SUMMARY 或 AI_REVIEW_REPORT 类型）
+     */
+    boolean addStructuredMessage(Long appId, String content, String messageType, Long userId);
+
+    /**
      * 根据 appId 删除对话历史
      */
     boolean deleteByAppId(Long appId);

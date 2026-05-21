@@ -55,6 +55,16 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
     }
 
     @Override
+    public boolean addStructuredMessage(Long appId, String content, String messageType, Long userId) {
+        ThrowUtils.throwIf(
+                !ChatHistoryMessageTypeEnum.AI_SUMMARY.getValue().equals(messageType) &&
+                !ChatHistoryMessageTypeEnum.AI_REVIEW_REPORT.getValue().equals(messageType),
+                ErrorCode.PARAMS_ERROR, "Invalid structured message type: " + messageType
+        );
+        return addChatMessage(appId, content, messageType, userId);
+    }
+
+    @Override
     public boolean deleteByAppId(Long appId) {
         ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "App ID cannot be empty");
         QueryWrapper queryWrapper = QueryWrapper.create()
@@ -82,6 +92,8 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
                 .eq("appId", appId);
 
         // 游标逻辑：只使用 createTime 作为游标
+        //lastCreateTime 就是游标，前端传上一页最后一条消息的创建时间。
+        // 第一次加载不传，拿最新的10条。点"加载更多"时传最旧那条的时间，拿更早的10条
         if (lastCreateTime != null) {
             queryWrapper.lt("createTime", lastCreateTime);
         }
@@ -99,7 +111,7 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
                     .eq("appId", appId)
                     .eq("messageType", ChatHistoryMessageTypeEnum.USER.getValue()) // 只加载用户消息
                     .orderBy("createTime", false)
-                    .limit(1, maxCount);
+                    .limit(1, maxCount);// 起始点是1而不是0；
             List<ChatHistory> historyList = this.list(queryWrapper);
             if (historyList == null || historyList.isEmpty()) {
                 return 0;
