@@ -48,6 +48,13 @@ public class ReviewModelConfig {
                 .apiKey(openAiApiKey)
                 .modelName(openAiModelName)
                 .maxTokens(openAiMaxTokens)
+                // 必须启用 json_schema 模式以激活 OpenAI Structured Outputs。
+                // 验证来源：LangChain4j 1.1.0 OpenAiChatModel.supportedCapabilities() bytecode —
+                // 仅当 responseFormat == "json_schema" 时才注册 RESPONSE_FORMAT_JSON_SCHEMA capability。
+                // 没有这个配置，DefaultAiServices 回退到 prompt 注入模式，
+                // 对 ReviewReport(含 List<Issue> 嵌套结构)的 POJO 解析失败率较高。
+                // 勿删。
+                .responseFormat("json_schema")
                 .logRequests(false)
                 .logResponses(false)
                 .listeners(List.of(aiModelMonitorListener))
@@ -71,6 +78,10 @@ public class ReviewModelConfig {
     @Bean("reviewChatModel")
     @ConditionalOnProperty(name = "review.model.provider", havingValue = "qwen")
     public ChatModel qwenReviewChatModel() {
+        // 注意：Dashscope 兼容层只支持 json_object，不支持 json_schema（OpenAI Structured Outputs）。
+        // 文档来源：https://www.alibabacloud.com/help/en/model-studio/qwen-structured-output
+        // 因此此分支不设置 responseFormat，DefaultAiServices 将使用 prompt 注入模式。
+        // 可靠性低于 OpenAI 分支，若 ReviewReport 解析频繁失败，建议切换回 openai provider。
         return OpenAiChatModel.builder()
                 .baseUrl(qwenBaseUrl)
                 .apiKey(qwenApiKey)
