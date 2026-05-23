@@ -26,6 +26,15 @@ public class ReviewReport {
     @Description("Brief summary of the review result")
     private String summary;
 
+    /**
+     * Internal workflow-control flag. NOT a review result from the LLM.
+     * Set to true ONLY by ReviewAgent.fallbackReport() when LLM output parsing fails.
+     * OrchestratorAgent uses this to skip Refine when Review itself is unavailable.
+     * Default false — normal reviews always produce false here.
+     */
+    @Builder.Default
+    private boolean degraded = false;
+
     public enum Severity {
         BLOCKER, MAJOR, MINOR
     }

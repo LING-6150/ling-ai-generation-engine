@@ -95,6 +95,7 @@ class ReviewAgentTest {
         assertTrue(result.getPassed());
         assertEquals(92, result.getScore());
         assertEquals("Code looks good", result.getSummary());
+        assertFalse(result.isDegraded(), "Normal review must have degraded=false");
     }
 
     @Test
@@ -107,6 +108,7 @@ class ReviewAgentTest {
         assertNotNull(result);
         assertFalse(result.getPassed());
         assertEquals(0, result.getScore());
+        assertTrue(result.isDegraded(), "Fallback report must have degraded=true");
         assertEquals("Automated review unavailable, manual check recommended", result.getSummary());
         assertEquals(1, result.getIssues().size());
         assertEquals(Severity.MAJOR, result.getIssues().get(0).getSeverity());

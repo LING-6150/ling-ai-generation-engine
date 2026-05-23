@@ -40,3 +40,10 @@ management:
   endpoint:
     health:
       show-details: always
+
+# Multi-agent orchestrator feature flag
+# false = legacy LangGraph4j path (production default, stable)
+# true  = new multi-agent path (enable after P6 validation)
+agent:
+  orchestrator:
+    enabled: false

@@ -3,6 +3,8 @@ package com.ling.lingaicodegeneration.service.impl;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.ling.lingaicodegeneration.ai.langgraph4j.workflow.CodeGenWorkflow;
+import com.ling.lingaicodegeneration.ai.multiagent.agent.AgentContext;
+import com.ling.lingaicodegeneration.ai.multiagent.agent.OrchestratorAgent;
 import com.ling.lingaicodegeneration.constant.AppConstant;
 import com.ling.lingaicodegeneration.core.AiCodeGeneratorFacade;
 import com.ling.lingaicodegeneration.core.builder.VueProjectBuilder;
@@ -33,6 +35,7 @@ import org.redisson.api.RateIntervalUnit;
 import org.redisson.api.RateType;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -63,6 +66,15 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
     @Resource
     private CodeGenWorkflow codeGenWorkflow;
+
+    @Resource
+    private OrchestratorAgent orchestratorAgent;
+
+    // agent.orchestrator.enabled=true → new multi-agent path (P6+)
+    // agent.orchestrator.enabled=false (default) → legacy LangGraph4j path
+    // Set true in application-local.yml for development, keep false in application.yml for prod stability.
+    @Value("${agent.orchestrator.enabled:false}")
+    private boolean orchestratorEnabled;
 
     @Resource
     private RedissonClient redissonClient;
@@ -227,17 +239,41 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
     @Override
     public Flux<String> chatToGenCode(Long appId, String message, User loginUser, boolean agent) {
-        // 限流检查：每个用户每60秒最多5次
-        String rateLimitKey = "rate_limit:user:" + loginUser.getId();
-        RRateLimiter rateLimiter = redissonClient.getRateLimiter(rateLimitKey);
-        rateLimiter.trySetRate(RateType.OVERALL, 5, 60, RateIntervalUnit.SECONDS);
-        rateLimiter.expire(Duration.ofHours(1));
-        boolean acquired = rateLimiter.tryAcquire(1);
-        if (!acquired) {
-            throw new BusinessException(ErrorCode.TOO_MANY_REQUEST,
-                    "AI requests are limited to 5 per minute, please try again later");
+
+        // 限流检查：每个用户每60秒最多5次，Redis挂了降级为放行
+        try {
+            String rateLimitKey = "rate_limit:user:" + loginUser.getId();
+            RRateLimiter rateLimiter = redissonClient.getRateLimiter(rateLimitKey);
+            rateLimiter.trySetRate(RateType.OVERALL, 5, 60, RateIntervalUnit.SECONDS);
+            rateLimiter.expire(Duration.ofHours(1));
+            boolean acquired = rateLimiter.tryAcquire(1);
+            if (!acquired) {
+                throw new BusinessException(ErrorCode.TOO_MANY_REQUEST,
+                        "AI requests are limited to 5 per minute, please try again later");
+            }
+        } catch (BusinessException e) {
+            throw e; // 限流触发时正常抛出，不能被吞掉
+        } catch (Exception e) {
+            log.warn("Rate limiter unavailable, allowing request through: {}", e.getMessage());
         }
 
+        // Daily token limit检查：按prompt长度估算，每用户每天100,000 tokens，Redis挂了降级为放行
+        try {
+            String today = java.time.LocalDate.now()
+                    .format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
+            String dailyTokenKey = "daily_token:" + loginUser.getId() + ":" + today;
+            org.redisson.api.RAtomicLong dailyCounter = redissonClient.getAtomicLong(dailyTokenKey);
+            long usedTokens = dailyCounter.get();
+            long estimatedTokens = message.length() / 4 + 500;
+            if (usedTokens + estimatedTokens > 100_000) {
+                throw new BusinessException(ErrorCode.TOO_MANY_REQUEST,
+                        "Daily token limit exceeded (100,000 tokens), please try again tomorrow");
+            }
+        } catch (BusinessException e) {
+            throw e; // 超限时正常抛出，不能被吞掉
+        } catch (Exception e) {
+            log.warn("Daily token counter unavailable, allowing request through: {}", e.getMessage());
+        }
 
         // 1. Validate params
         if (appId == null || appId <= 0) {
@@ -277,19 +313,20 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         // 7. Call AI to generate code (streaming)
         Flux<String> codeStream;
         if (agent) {
-            // Agent mode: use LangGraph4j workflow
-            log.info("Agent mode enabled, using workflow for appId: {}", appId);
-            codeStream = codeGenWorkflow.executeWorkflowWithFlux(message, appId);
-            // Workflow handles file saving internally, just return the stream
-            return codeStream
-                    .doFinally(signalType -> MonitorContextHolder.clearContext());  // ✅ 加上
+            if (orchestratorEnabled) {
+                log.info("OrchestratorAgent enabled, using multi-agent path for appId: {}", appId);
+                AgentContext agentCtx = new AgentContext(appId, loginUser.getId(), 3, "OrchestratorAgent");
+                codeStream = orchestratorAgent.execute(message, agentCtx);
+            } else {
+                log.info("OrchestratorAgent disabled, using LangGraph4j workflow for appId: {}", appId);
+                codeStream = codeGenWorkflow.executeWorkflowWithFlux(message, appId);
+            }
+            return codeStream.doFinally(signalType -> MonitorContextHolder.clearContext());
         } else {
-            // Normal mode: use existing AI generation
             codeStream = aiCodeGeneratorFacade.generateAndSaveCodeStream(
                     message, codeGenTypeEnum, appId);
-            // 8. 使用流处理器执行器处理流
             return streamHandlerExecutor.doExecute(codeStream, chatHistoryService,
-                    appId, loginUser, codeGenTypeEnum)
+                            appId, loginUser, codeGenTypeEnum)
                     .doFinally(signalType -> MonitorContextHolder.clearContext());
         }
     }

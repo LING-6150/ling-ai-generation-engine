@@ -26,6 +26,9 @@ public class ReviewAgent implements Agent<ReviewInput, ReviewReport> {
                     input.generatedCodeDir(), input.requirementSpec());
 
             ReviewReport report = reviewLlmService.review(context);
+            // Defensive: reset degraded regardless of what LLM returned — this field
+            // is a workflow-control flag, not a value the LLM should ever set.
+            report.setDegraded(false);
             report = sortIssues(report);
 
             log.info("ReviewAgent completed, appId: {}, passed: {}, score: {}, issues: {}",
@@ -54,6 +57,7 @@ public class ReviewAgent implements Agent<ReviewInput, ReviewReport> {
         return ReviewReport.builder()
                 .passed(false)
                 .score(0)
+                .degraded(true)
                 .issues(List.of(ReviewReport.Issue.builder()
                         .severity(ReviewReport.Severity.MAJOR)
                         .description("Review LLM output parsing failed: " + e.getMessage())

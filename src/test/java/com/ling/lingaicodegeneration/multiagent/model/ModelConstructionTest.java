@@ -127,6 +127,7 @@ class ModelConstructionTest {
         assertEquals(42, deserialized.getScore());
         assertEquals(1, deserialized.getIssues().size());
         assertEquals(ReviewReport.Severity.BLOCKER, deserialized.getIssues().get(0).getSeverity());
+        assertFalse(deserialized.isDegraded(), "Normal ReviewReport must have degraded=false after roundtrip");
     }
 
     @Test
@@ -144,6 +145,23 @@ class ModelConstructionTest {
         assertNotNull(deserialized);
         assertTrue(deserialized.getPassed());
         assertEquals(88, deserialized.getScore());
+        assertFalse(deserialized.isDegraded(), "Normal ReviewReport must have degraded=false after LangChain4j roundtrip");
+    }
+
+    @Test
+    void reviewReport_degradedFlag_isNotSetByBuilder_default() {
+        // Verify that omitting .degraded() in builder results in false (not null or true)
+        ReviewReport report = ReviewReport.builder()
+                .passed(false).score(0).issues(List.of()).summary("degraded test").build();
+        assertFalse(report.isDegraded());
+
+        // Verify explicit degraded=true survives roundtrip
+        ReviewReport fallback = ReviewReport.builder()
+                .passed(false).score(0).issues(List.of()).summary("fallback").degraded(true).build();
+        assertTrue(fallback.isDegraded());
+        String json = Json.toJson(fallback);
+        ReviewReport deserialized = Json.fromJson(json, ReviewReport.class);
+        assertTrue(deserialized.isDegraded(), "degraded=true must survive LangChain4j roundtrip");
     }
 
     // ── RefinementPlan (record) ──────────────────────────────────────────────
