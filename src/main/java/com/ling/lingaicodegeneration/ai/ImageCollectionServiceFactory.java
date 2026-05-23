@@ -23,4 +23,10 @@ public class ImageCollectionServiceFactory {
                 .tools(imageSearchTool)
                 .build();
     }
+    @Bean
+    public ImagePlanningService imagePlanningService() {
+        return AiServices.builder(ImagePlanningService.class)
+                .chatModel(chatModel)
+                .build();
+    }
 }

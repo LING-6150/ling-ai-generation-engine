@@ -5,7 +5,7 @@ import com.ling.lingaicodegeneration.ai.AiCodeGeneratorServiceFactory;
 import com.ling.lingaicodegeneration.ai.model.HtmlCodeResult;
 import com.ling.lingaicodegeneration.ai.model.MultiFileCodeResult;
 import com.ling.lingaicodegeneration.ai.model.message.*;
-import com.ling.lingaicodegeneration.constant.AppConstant;
+        import com.ling.lingaicodegeneration.constant.AppConstant;
 import com.ling.lingaicodegeneration.core.builder.VueProjectBuilder;
 import com.ling.lingaicodegeneration.exception.BusinessException;
 import com.ling.lingaicodegeneration.exception.ErrorCode;

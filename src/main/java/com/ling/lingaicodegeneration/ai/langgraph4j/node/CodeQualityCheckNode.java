@@ -17,7 +17,6 @@ import static org.bsc.langgraph4j.action.AsyncNodeAction.node_async;
 @Slf4j
 public class CodeQualityCheckNode {
 
-    // Supported code file extensions
     private static final List<String> CODE_EXTENSIONS =
             List.of(".html", ".htm", ".css", ".js", ".json", ".vue", ".ts", ".jsx", ".tsx");
 
@@ -28,7 +27,6 @@ public class CodeQualityCheckNode {
             String generatedCodeDir = context.getGeneratedCodeDir();
             QualityResult qualityResult;
             try {
-                // Read all code files content
                 String codeContent = readAndConcatenateCodeFiles(generatedCodeDir);
                 if (codeContent.isBlank()) {
                     log.warn("No code files found for quality check");
@@ -38,7 +36,6 @@ public class CodeQualityCheckNode {
                             .suggestions(List.of("Please ensure code generation completed successfully"))
                             .build();
                 } else {
-                    // Call AI quality check service
                     CodeQualityCheckService qualityCheckService =
                             SpringContextUtil.getBean(CodeQualityCheckService.class);
                     qualityResult = qualityCheckService.checkCodeQuality(codeContent);
@@ -47,20 +44,23 @@ public class CodeQualityCheckNode {
                 }
             } catch (Exception e) {
                 log.error("Code quality check error: {}", e.getMessage(), e);
-                // On error, assume valid to proceed
                 qualityResult = QualityResult.builder()
                         .isValid(true)
                         .build();
             }
+
+            // 质量检查失败则retryCount+1
+            if (!qualityResult.getIsValid()) {
+                context.setRetryCount(context.getRetryCount() + 1);
+                log.warn("Quality check failed, retryCount now: {}", context.getRetryCount());
+            }
+
             context.setCurrentStep("Code Quality Check");
             context.setQualityResult(qualityResult);
             return WorkflowContext.saveContext(context);
         });
     }
 
-    /**
-     * Read and concatenate all code files in directory
-     */
     private static String readAndConcatenateCodeFiles(String codeDir) {
         if (codeDir == null || codeDir.isBlank()) {
             return "";

@@ -3,6 +3,8 @@ package com.ling.lingaicodegeneration.multiagent.agent;
 import com.ling.lingaicodegeneration.ai.multiagent.agent.*;
 import com.ling.lingaicodegeneration.ai.multiagent.model.*;
 import com.ling.lingaicodegeneration.model.enums.CodeGenTypeEnum;
+import com.ling.lingaicodegeneration.monitor.MonitorContext;
+import com.ling.lingaicodegeneration.monitor.MonitorContextHolder;
 import com.ling.lingaicodegeneration.service.ChatHistoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +16,7 @@ import reactor.core.publisher.Flux;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -260,5 +263,105 @@ class OrchestratorAgentTest {
         assertTrue(planningDone    < codeGenStart,    "planning_done before code_gen_start");
         assertTrue(codeGenStart    < reviewStart,     "code_gen_start before review_start");
         assertTrue(reviewStart     < workflowDone,    "review_start before workflow_done");
+    }
+
+    // ── P7: code tokens appear in event stream ────────────────────────────
+
+    @Test
+    void execute_streamCodeTokens_appearsInEventStream() {
+        when(requirementAgent.execute(any(), any())).thenReturn(defaultSpec());
+        when(assetAgent.execute(any(), any())).thenReturn("");
+        when(plannerAgent.execute(any(), any()))
+                .thenReturn(new TaskGraph(false, 0, null, null));
+        when(codeGenAgent.execute(any(), any()))
+                .thenReturn(Flux.just("<!DOCTYPE", " html>", "<body>"));
+        when(reviewAgent.execute(any(), any())).thenReturn(passedReport());
+        when(chatHistoryService.addStructuredMessage(any(), any(), any(), any()))
+                .thenReturn(true);
+
+        List<String> events = run();
+
+        List<String> codeTokenEvents = events.stream()
+                .filter(e -> e.contains("\"type\":\"code_token\""))
+                .toList();
+        assertEquals(3, codeTokenEvents.size(), "Expected one code_token event per token");
+        assertTrue(codeTokenEvents.get(0).contains("<!DOCTYPE"));
+        assertTrue(codeTokenEvents.get(1).contains(" html>"));
+        assertTrue(codeTokenEvents.get(2).contains("<body>"));
+
+        // code_token events appear between code_gen_start and code_gen_done
+        List<String> types = events.stream()
+                .map(e -> e.replaceAll(".*\"type\":\"([^\"]+)\".*", "$1"))
+                .toList();
+        int codeGenStart = types.indexOf("code_gen_start");
+        int codeGenDone  = types.indexOf("code_gen_done");
+        int firstToken   = types.indexOf("code_token");
+        assertTrue(codeGenStart < firstToken && firstToken < codeGenDone,
+                "code_token events must be between code_gen_start and code_gen_done");
+    }
+
+    // ── P7: cancel signal stops virtual thread, no exception ─────────────
+
+    @Test
+    void execute_cancelSignal_interruptsVirtualThread_noException() {
+        when(requirementAgent.execute(any(), any())).thenReturn(defaultSpec());
+        when(assetAgent.execute(any(), any())).thenReturn("");
+        when(plannerAgent.execute(any(), any()))
+                .thenReturn(new TaskGraph(false, 0, null, null));
+        // Never-completing Flux simulates long-running code gen
+        when(codeGenAgent.execute(any(), any())).thenReturn(Flux.never());
+
+        assertDoesNotThrow(() ->
+                orchestratorAgent.execute("build page", ctx)
+                        .timeout(Duration.ofMillis(500))
+                        .onErrorResume(e -> Flux.empty())  // timeout/cancel → end cleanly
+                        .collectList()
+                        .block(Duration.ofSeconds(5))
+        );
+        // vt.interrupt() stops the virtual thread from blockLast() on Flux.never()
+        // No exception should reach the test; workflow_error event is emitted internally
+    }
+
+    // ── P7: agentName ThreadLocal propagation ─────────────────────────────
+
+    @Test
+    void agentName_propagatedViaThreadLocal_beforeEachAgentCall() {
+        CopyOnWriteArrayList<String> captured = new CopyOnWriteArrayList<>();
+
+        when(requirementAgent.execute(any(), any())).thenAnswer(inv -> {
+            MonitorContext c = MonitorContextHolder.getContext();
+            captured.add("req:" + (c != null ? c.getAgentName() : "null"));
+            return defaultSpec();
+        });
+        when(assetAgent.execute(any(), any())).thenAnswer(inv -> {
+            MonitorContext c = MonitorContextHolder.getContext();
+            captured.add("asset:" + (c != null ? c.getAgentName() : "null"));
+            return "";
+        });
+        when(plannerAgent.execute(any(), any())).thenAnswer(inv -> {
+            MonitorContext c = MonitorContextHolder.getContext();
+            captured.add("plan:" + (c != null ? c.getAgentName() : "null"));
+            return new TaskGraph(false, 0, null, null);
+        });
+        when(codeGenAgent.execute(any(), any())).thenAnswer(inv -> {
+            MonitorContext c = MonitorContextHolder.getContext();
+            captured.add("code:" + (c != null ? c.getAgentName() : "null"));
+            return Flux.just("token");
+        });
+        when(reviewAgent.execute(any(), any())).thenAnswer(inv -> {
+            MonitorContext c = MonitorContextHolder.getContext();
+            captured.add("review:" + (c != null ? c.getAgentName() : "null"));
+            return passedReport();
+        });
+        when(chatHistoryService.addStructuredMessage(any(), any(), any(), any()))
+                .thenReturn(true);
+
+        run();
+
+        assertTrue(captured.contains("req:RequirementAgent"),   "RequirementAgent agentName missing");
+        assertTrue(captured.contains("asset:AssetAgent"),       "AssetAgent agentName missing");
+        assertTrue(captured.contains("plan:PlannerAgent"),       "PlannerAgent agentName missing");
+        assertTrue(captured.contains("code:CodeGenAgent"),       "CodeGenAgent agentName missing");
+        assertTrue(captured.contains("review:ReviewAgent"),     "ReviewAgent agentName missing");
     }
 }

@@ -35,7 +35,7 @@ public class StreamingChatModelConfig {
     private AiModelMonitorListener aiModelMonitorListener;
 
     @Bean
-    @Scope("prototype")
+    @Scope("prototype")   // ← 这里声明 prototype
     public OpenAiStreamingChatModel openAiStreamingChatModel() {
         return OpenAiStreamingChatModel.builder()
                 .apiKey(apiKey)

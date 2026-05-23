@@ -22,6 +22,9 @@ public class MonitorContext implements Serializable {
 
     private String userId;
     private String appId;
+    /** Agent name for per-agent Prometheus labelling. Set by OrchestratorAgent before each LLM call. */
+    @Builder.Default
+    private String agentName = "unknown";
 
     @Serial
     private static final long serialVersionUID = 1L;

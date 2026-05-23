@@ -22,10 +22,13 @@ import java.util.concurrent.ConcurrentMap;
  * so each unique combination gets exactly one metric object, reused across requests.
  *
  * Metrics exposed:
- * - ai_model_requests_total{user_id, app_id, model_name, status} — request count
- * - ai_model_errors_total{user_id, app_id, model_name, error_message} — error count
- * - ai_model_tokens_total{user_id, app_id, model_name, token_type} — token usage
- * - ai_model_response_duration_seconds{user_id, app_id, model_name} — response time
+ * - ai_model_requests_total{user_id, app_id, model_name, status, agent_name} — request count
+ * - ai_model_errors_total{user_id, app_id, model_name, error_message, agent_name} — error count
+ * - ai_model_tokens_total{user_id, app_id, model_name, token_type, agent_name} — token usage
+ * - ai_model_response_duration_seconds{user_id, app_id, model_name, agent_name} — response time
+ *
+ * agent_name cardinality: 6 fixed values (RequirementAgent / AssetAgent / PlannerAgent /
+ * CodeGenAgent / ReviewAgent / RefineAgent) + "unknown" for non-orchestrated calls.
  */
 @Component
 @Slf4j
@@ -45,8 +48,9 @@ public class AiModelMetricsCollector {
      * Calling this twice with status="started" and status="success" gives
      * visibility into in-flight requests (started - success = currently processing).
      */
-    public void recordRequest(String userId, String appId, String modelName, String status) {
-        String key = String.format("%s_%s_%s_%s", userId, appId, modelName, status);
+    public void recordRequest(String userId, String appId, String modelName,
+                              String status, String agentName) {
+        String key = String.format("%s_%s_%s_%s_%s", userId, appId, modelName, status, agentName);
         Counter counter = requestCountersCache.computeIfAbsent(key, k ->
                 Counter.builder("ai_model_requests_total")
                         .description("Total number of AI model requests")
@@ -54,6 +58,7 @@ public class AiModelMetricsCollector {
                         .tag("app_id", appId)
                         .tag("model_name", modelName)
                         .tag("status", status)
+                        .tag("agent_name", agentName)
                         .register(meterRegistry)
         );
         counter.increment();
@@ -63,12 +68,13 @@ public class AiModelMetricsCollector {
      * Record an error. Separate from request status so we can tag
      * the specific error message for easier debugging in Grafana.
      */
-    public void recordError(String userId, String appId, String modelName, String errorMessage) {
+    public void recordError(String userId, String appId, String modelName,
+                            String errorMessage, String agentName) {
         // Truncate error message to avoid cardinality explosion in Prometheus
         String truncatedError = errorMessage != null && errorMessage.length() > 100
                 ? errorMessage.substring(0, 100)
                 : errorMessage;
-        String key = String.format("%s_%s_%s_%s", userId, appId, modelName, truncatedError);
+        String key = String.format("%s_%s_%s_%s_%s", userId, appId, modelName, truncatedError, agentName);
         Counter counter = errorCountersCache.computeIfAbsent(key, k ->
                 Counter.builder("ai_model_errors_total")
                         .description("Total number of AI model errors")
@@ -76,6 +82,7 @@ public class AiModelMetricsCollector {
                         .tag("app_id", appId)
                         .tag("model_name", modelName)
                         .tag("error_message", truncatedError != null ? truncatedError : "unknown")
+                        .tag("agent_name", agentName)
                         .register(meterRegistry)
         );
         counter.increment();
@@ -87,8 +94,8 @@ public class AiModelMetricsCollector {
      * is driven by longer prompts (input) or longer responses (output).
      */
     public void recordTokenUsage(String userId, String appId, String modelName,
-                                 String tokenType, long tokenCount) {
-        String key = String.format("%s_%s_%s_%s", userId, appId, modelName, tokenType);
+                                 String tokenType, long tokenCount, String agentName) {
+        String key = String.format("%s_%s_%s_%s_%s", userId, appId, modelName, tokenType, agentName);
         Counter counter = tokenCountersCache.computeIfAbsent(key, k ->
                 Counter.builder("ai_model_tokens_total")
                         .description("Total number of tokens consumed by AI model")
@@ -96,6 +103,7 @@ public class AiModelMetricsCollector {
                         .tag("app_id", appId)
                         .tag("model_name", modelName)
                         .tag("token_type", tokenType)
+                        .tag("agent_name", agentName)
                         .register(meterRegistry)
         );
         counter.increment(tokenCount);
@@ -106,14 +114,16 @@ public class AiModelMetricsCollector {
      * Timer automatically tracks count, sum, max, and percentiles,
      * allowing Grafana to show p50/p95/p99 latency distributions.
      */
-    public void recordResponseTime(String userId, String appId, String modelName, Duration duration) {
-        String key = String.format("%s_%s_%s", userId, appId, modelName);
+    public void recordResponseTime(String userId, String appId, String modelName,
+                                   Duration duration, String agentName) {
+        String key = String.format("%s_%s_%s_%s", userId, appId, modelName, agentName);
         Timer timer = responseTimersCache.computeIfAbsent(key, k ->
                 Timer.builder("ai_model_response_duration_seconds")
                         .description("AI model response time in seconds")
                         .tag("user_id", userId)
                         .tag("app_id", appId)
                         .tag("model_name", modelName)
+                        .tag("agent_name", agentName)
                         .register(meterRegistry)
         );
         timer.record(duration);

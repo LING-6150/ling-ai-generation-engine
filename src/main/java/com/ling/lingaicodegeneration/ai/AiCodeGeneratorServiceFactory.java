@@ -32,6 +32,9 @@ public class AiCodeGeneratorServiceFactory {
     private RedisChatMemoryStore redisChatMemoryStore;
 
     @Resource
+    //@Lazy 是干嘛的？
+    //解决循环依赖。ChatHistoryService 里用到了 AppService，AppService 又用到了这个 Factory，Spring 启动时两边互相等对方，会报循环依赖错误。
+    // 加 @Lazy 延迟加载，第一次真正调用时才注入，绕开这个问题。
     @Lazy
     private ChatHistoryService chatHistoryService;
 
@@ -43,6 +46,9 @@ public class AiCodeGeneratorServiceFactory {
      *   triggered blocking in SpringRestClient.execute() → requests queued up
      * - Now: Each call gets a FRESH instance via SpringContextUtil.getBean("prototype bean")
      *   → every request has its own StreamingChatModel → no contention
+     *  旧方案：Caffeine 缓存 → 复用同一实例
+     * 根本原因：SpringRestClient.execute() 同步阻塞
+     * 新方案：每次 getBean() 拿新实例 → 各自独立
      *
      * Chat memory is still persisted in Redis (data not lost), only the in-memory
      * MessageWindowChatMemory wrapper is recreated each time.
@@ -60,6 +66,7 @@ public class AiCodeGeneratorServiceFactory {
     }
 
     /**
+     *  Memory 对象每次新建，但数据从 Redis 加载，历史不丢失
      * Build a fresh MessageWindowChatMemory backed by Redis.
      * The object is new each time, but data is loaded from Redis — no history lost.
      */
@@ -87,6 +94,8 @@ public class AiCodeGeneratorServiceFactory {
             case VUE_PROJECT -> {
                 // Fetch a fresh prototype instance of the reasoning streaming model
                 OpenAiStreamingChatModel reasoningStreamingChatModel =
+                        //这里用 SpringContextUtil.getBean() 而不是字段注入，这就是并发问题的解法。
+                        // 每次调用这个方法都触发一次 prototype Bean 的新建
                         SpringContextUtil.getBean("reasoningStreamingChatModel",
                                 OpenAiStreamingChatModel.class);
                 yield AiServices.builder(AiCodeGeneratorService.class)
@@ -99,6 +108,8 @@ public class AiCodeGeneratorServiceFactory {
                                 new FileModifyTool(),
                                 new FileDeleteTool()
                         )
+                        //AI 有时候会幻觉出一个不存在的工具名，正常情况下会抛异常导致整个生成失败。这里配置了降级策略，
+                        // 返回一条错误消息给 AI，让它自己纠正，不中断生成流程。
                         // Handle hallucinated tool names gracefully
                         .hallucinatedToolNameStrategy(toolExecutionRequest ->
                                 ToolExecutionResultMessage.from(toolExecutionRequest,

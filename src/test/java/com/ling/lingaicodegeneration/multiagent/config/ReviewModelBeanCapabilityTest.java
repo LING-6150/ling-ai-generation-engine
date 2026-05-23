@@ -5,6 +5,7 @@ import dev.langchain4j.model.chat.ChatModel;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -16,8 +17,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *           falls back to prompt-injection mode for ReviewReport parsing)
  * POST-FIX: this test passes (capability present → JSON Schema Structured
  *           Outputs activated, reliable nested POJO deserialization)
+ *
+ * Force openai provider so the test is not affected by local-profile overrides
+ * (application-local.yml may set review.model.provider=qwen for local dev).
  */
 @SpringBootTest
+@TestPropertySource(properties = "review.model.provider=openai")
 class ReviewModelBeanCapabilityTest {
 
     @Resource(name = "reviewChatModel")

@@ -10,41 +10,33 @@ import org.bsc.langgraph4j.GraphStateException;
 import org.bsc.langgraph4j.NodeOutput;
 import org.bsc.langgraph4j.StateGraph;
 import org.bsc.langgraph4j.state.AgentState;
-import org.bsc.langgraph4j.state.AppenderChannel;
-import org.bsc.langgraph4j.state.Channel;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
-import static org.bsc.langgraph4j.action.AsyncEdgeAction.edge_async;
 
 import java.util.Map;
 
 import static org.bsc.langgraph4j.StateGraph.END;
 import static org.bsc.langgraph4j.StateGraph.START;
+import static org.bsc.langgraph4j.action.AsyncEdgeAction.edge_async;
 
 @Slf4j
 @Component
 public class CodeGenWorkflow {
 
-    /**
-     * Create compiled workflow
-     */
     private CompiledGraph<AgentState> createWorkflow() {
         try {
             return new StateGraph<>(AgentState::new)
-                    // Add nodes
                     .addNode("image_collector", ImageCollectorNode.create())
                     .addNode("prompt_enhancer", PromptEnhancerNode.create())
                     .addNode("router", RouterNode.create())
                     .addNode("code_generator", CodeGeneratorNode.create())
                     .addNode("code_quality_check", CodeQualityCheckNode.create())
                     .addNode("project_builder", ProjectBuilderNode.create())
-                    // Add edges
                     .addEdge(START, "image_collector")
                     .addEdge("image_collector", "prompt_enhancer")
                     .addEdge("prompt_enhancer", "router")
                     .addEdge("router", "code_generator")
                     .addEdge("code_generator", "code_quality_check")
-                    // Conditional edge after quality check
                     .addConditionalEdges("code_quality_check",
                             edge_async(this::routeAfterQualityCheck),
                             Map.of(
@@ -59,9 +51,6 @@ public class CodeGenWorkflow {
         }
     }
 
-    /**
-     * Execute workflow (blocking)
-     */
     public WorkflowContext executeWorkflow(String originalPrompt, Long appId) {
         CompiledGraph<AgentState> workflow = createWorkflow();
         WorkflowContext initialContext = WorkflowContext.builder()
@@ -87,9 +76,6 @@ public class CodeGenWorkflow {
         return finalContext;
     }
 
-    /**
-     * Execute workflow (Flux streaming output)
-     */
     public Flux<String> executeWorkflowWithFlux(String originalPrompt, Long appId) {
         return Flux.create(sink -> {
             Thread.startVirtualThread(() -> {
@@ -136,16 +122,20 @@ public class CodeGenWorkflow {
         });
     }
 
-    /**
-     * Route after quality check
-     */
     private String routeAfterQualityCheck(AgentState state) {
         WorkflowContext context = WorkflowContext.getContext(state);
         QualityResult qualityResult = context.getQualityResult();
+
         if (qualityResult == null || !qualityResult.getIsValid()) {
-            log.error("Code quality check failed, regenerating code");
+            int retryCount = context.getRetryCount();
+            if (retryCount > 3) {
+                log.error("Code quality check failed after {} retries, giving up", retryCount);
+                return "skip_build";
+            }
+            log.warn("Code quality check failed (attempt {}), retrying...", retryCount);
             return "fail";
         }
+
         log.info("Code quality check passed, proceeding to build");
         CodeGenTypeEnum generationType = context.getGenerationType();
         if (generationType == CodeGenTypeEnum.VUE_PROJECT) {
@@ -155,9 +145,6 @@ public class CodeGenWorkflow {
         }
     }
 
-    /**
-     * Format SSE event helper
-     */
     private String formatSseEvent(String eventType, Object data) {
         try {
             String jsonData = new com.fasterxml.jackson.databind.ObjectMapper()
