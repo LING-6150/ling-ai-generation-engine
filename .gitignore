@@ -33,3 +33,6 @@ build/
 .vscode/
 
 application-local.yml
+.env
+.env.local
+*-secret.yml

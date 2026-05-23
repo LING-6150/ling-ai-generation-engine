@@ -15,10 +15,11 @@ import java.util.List;
  * Review model config — deliberately uses a different provider from CodeGenAgent
  * to get an adversarial, heterogeneous perspective during code review.
  *
- * Switch provider via: review.model.provider=openai (default) | qwen
+ * Switch provider via: review.model.provider=zhipu (default) | openai | fallback-deepseek
  *
- * OpenAI:  set OPENAI_API_KEY env var
- * Qwen:    set QWEN_API_KEY env var, change review.model.provider=qwen
+ * zhipu:            set ZHIPU_API_KEY env var  (GLM-4-Flash, prompt-injection mode)
+ * openai:           set OPENAI_API_KEY env var  (GPT-4o-mini, json_schema structured output)
+ * fallback-deepseek: set DEEPSEEK_API_KEY env var (deepseek-chat, prompt-injection mode)
  */
 @Configuration
 public class ReviewModelConfig {
@@ -26,7 +27,39 @@ public class ReviewModelConfig {
     @Resource
     private AiModelMonitorListener aiModelMonitorListener;
 
-    // ── OpenAI GPT-4o-mini (default) ────────────────────────────────────────
+    // ── Zhipu GLM-4-Flash (default) ─────────────────────────────────────────
+    // Note: GLM-4-Flash uses OpenAI-compatible API but does NOT support json_schema
+    // (OpenAI Structured Outputs). DefaultAiServices falls back to prompt-injection
+    // mode for ReviewReport parsing — acceptable reliability for local dev.
+    // To get full Structured Outputs, switch to review.model.provider=openai.
+
+    @Value("${langchain4j.review-model.zhipu.base-url:https://open.bigmodel.cn/api/paas/v4}")
+    private String zhipuBaseUrl;
+
+    @Value("${langchain4j.review-model.zhipu.api-key:${ZHIPU_API_KEY:placeholder}}")
+    private String zhipuApiKey;
+
+    @Value("${langchain4j.review-model.zhipu.model-name:glm-4-flash}")
+    private String zhipuModelName;
+
+    @Value("${langchain4j.review-model.zhipu.max-tokens:4096}")
+    private Integer zhipuMaxTokens;
+
+    @Bean("reviewChatModel")
+    @ConditionalOnProperty(name = "review.model.provider", havingValue = "zhipu", matchIfMissing = true)
+    public ChatModel zhipuReviewChatModel() {
+        return OpenAiChatModel.builder()
+                .baseUrl(zhipuBaseUrl)
+                .apiKey(zhipuApiKey)
+                .modelName(zhipuModelName)
+                .maxTokens(zhipuMaxTokens)
+                .logRequests(false)
+                .logResponses(false)
+                .listeners(List.of(aiModelMonitorListener))
+                .build();
+    }
+
+    // ── OpenAI GPT-4o-mini ──────────────────────────────────────────────────
 
     @Value("${langchain4j.review-model.openai.base-url:https://api.openai.com/v1}")
     private String openAiBaseUrl;
@@ -41,7 +74,7 @@ public class ReviewModelConfig {
     private Integer openAiMaxTokens;
 
     @Bean("reviewChatModel")
-    @ConditionalOnProperty(name = "review.model.provider", havingValue = "openai", matchIfMissing = true)
+    @ConditionalOnProperty(name = "review.model.provider", havingValue = "openai")
     public ChatModel openAiReviewChatModel() {
         return OpenAiChatModel.builder()
                 .baseUrl(openAiBaseUrl)
@@ -61,32 +94,30 @@ public class ReviewModelConfig {
                 .build();
     }
 
-    // ── Qwen (通义千问) fallback ─────────────────────────────────────────────
+    // ── DeepSeek fallback (same provider as CodeGenAgent — emergency use only) ──
+    // Use only when zhipu/openai are unavailable. Homogeneous review (DeepSeek
+    // reviewing DeepSeek output) reduces adversarial effectiveness.
 
-    @Value("${langchain4j.review-model.qwen.base-url:https://dashscope.aliyuncs.com/compatible-mode/v1}")
-    private String qwenBaseUrl;
+    @Value("${langchain4j.review-model.fallback-deepseek.base-url:https://api.deepseek.com}")
+    private String fallbackDeepSeekBaseUrl;
 
-    @Value("${langchain4j.review-model.qwen.api-key:${QWEN_API_KEY:placeholder}}")
-    private String qwenApiKey;
+    @Value("${langchain4j.review-model.fallback-deepseek.api-key:${DEEPSEEK_API_KEY:placeholder}}")
+    private String fallbackDeepSeekApiKey;
 
-    @Value("${langchain4j.review-model.qwen.model-name:qwen-turbo}")
-    private String qwenModelName;
+    @Value("${langchain4j.review-model.fallback-deepseek.model-name:deepseek-chat}")
+    private String fallbackDeepSeekModelName;
 
-    @Value("${langchain4j.review-model.qwen.max-tokens:4096}")
-    private Integer qwenMaxTokens;
+    @Value("${langchain4j.review-model.fallback-deepseek.max-tokens:4096}")
+    private Integer fallbackDeepSeekMaxTokens;
 
     @Bean("reviewChatModel")
-    @ConditionalOnProperty(name = "review.model.provider", havingValue = "qwen")
-    public ChatModel qwenReviewChatModel() {
-        // 注意：Dashscope 兼容层只支持 json_object，不支持 json_schema（OpenAI Structured Outputs）。
-        // 文档来源：https://www.alibabacloud.com/help/en/model-studio/qwen-structured-output
-        // 因此此分支不设置 responseFormat，DefaultAiServices 将使用 prompt 注入模式。
-        // 可靠性低于 OpenAI 分支，若 ReviewReport 解析频繁失败，建议切换回 openai provider。
+    @ConditionalOnProperty(name = "review.model.provider", havingValue = "fallback-deepseek")
+    public ChatModel fallbackDeepSeekReviewChatModel() {
         return OpenAiChatModel.builder()
-                .baseUrl(qwenBaseUrl)
-                .apiKey(qwenApiKey)
-                .modelName(qwenModelName)
-                .maxTokens(qwenMaxTokens)
+                .baseUrl(fallbackDeepSeekBaseUrl)
+                .apiKey(fallbackDeepSeekApiKey)
+                .modelName(fallbackDeepSeekModelName)
+                .maxTokens(fallbackDeepSeekMaxTokens)
                 .logRequests(false)
                 .logResponses(false)
                 .listeners(List.of(aiModelMonitorListener))
