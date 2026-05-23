@@ -194,12 +194,18 @@ class OrchestratorAgentTest {
         when(codeGenAgent.execute(any(), any()))
                 .thenReturn(Flux.error(new RuntimeException("code gen failed")));
 
-        // Flux ends in error; we expect a RuntimeException propagated
-        assertThrows(RuntimeException.class, () ->
+        // Bug fix (sink.error → sink.complete): the outer Flux now completes NORMALLY
+        // after emitting a workflow_error event.  No exception should reach the caller.
+        // Previously sink.error(e) caused HttpMessageNotWritableException in Spring MVC.
+        List<String> events = assertDoesNotThrow(() ->
                 orchestratorAgent.execute("build page", ctx)
                         .collectList()
                         .block(Duration.ofSeconds(15))
         );
+
+        assertNotNull(events);
+        assertTrue(events.stream().anyMatch(e -> e.contains("workflow_error")),
+                "workflow_error event must be emitted on CodeGenAgent failure");
 
         verify(refineAgent, never()).execute(any(), any());
         verify(reviewAgent, never()).execute(any(), any());

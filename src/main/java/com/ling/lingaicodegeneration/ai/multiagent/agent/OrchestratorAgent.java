@@ -190,7 +190,17 @@ public class OrchestratorAgent implements Agent<String, Flux<String>> {
                     log.error("OrchestratorAgent fatal error, appId: {}: {}",
                             ctx.appId(), e.getMessage(), e);
                     sink.next(event("workflow_error", truncate(e.getMessage(), 200)));
-                    sink.error(e);
+                    // Complete normally instead of sink.error(e).
+                    // Rationale: Spring MVC (spring-boot-starter-web, NOT WebFlux) has no
+                    // HttpMessageConverter for LinkedHashMap → text/event-stream.  Calling
+                    // sink.error() propagates the exception to Spring's default error handler
+                    // (DefaultErrorAttributes), which tries to write a LinkedHashMap error body
+                    // as text/event-stream and throws:
+                    //   HttpMessageNotWritableException: No converter for [class
+                    //   java.util.LinkedHashMap] with preset Content-Type 'text/event-stream'
+                    // The workflow_error SSE event above already carries the error detail to
+                    // the frontend, so completing normally is safe and semantically correct.
+                    sink.complete();
                 }
             });
 
