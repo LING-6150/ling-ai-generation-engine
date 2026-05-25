@@ -36,3 +36,6 @@ application-local.yml
 .env
 .env.local
 *-secret.yml
+
+# AI generated code output (should never be committed)
+tmp/
