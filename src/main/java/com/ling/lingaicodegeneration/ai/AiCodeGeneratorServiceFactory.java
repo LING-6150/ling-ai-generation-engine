@@ -1,7 +1,6 @@
 package com.ling.lingaicodegeneration.ai;
 
 import com.ling.lingaicodegeneration.ai.guardrail.PromptSafetyInputGuardrail;
-import com.ling.lingaicodegeneration.ai.guardrail.RetryOutputGuardrail;
 import com.ling.lingaicodegeneration.ai.tools.*;
 import com.ling.lingaicodegeneration.exception.BusinessException;
 import com.ling.lingaicodegeneration.exception.ErrorCode;
@@ -131,7 +130,14 @@ public class AiCodeGeneratorServiceFactory {
                         .streamingChatModel(streamingChatModel)
                         .chatMemory(chatMemory)
                         .inputGuardrails(new PromptSafetyInputGuardrail())   // 加这里
-                        .outputGuardrails(new RetryOutputGuardrail())         // 加这里
+                        // RetryOutputGuardrail removed from streaming path:
+                        // SENSITIVE_WORDS contains "token" which appears in virtually all HTML
+                        // code, causing reprompt() to always trigger. In streaming context,
+                        // AiServiceStreamingResponseHandler.onCompleteResponse() runs guardrails
+                        // AFTER buffering all tokens; if guardrail throws, tokens are never
+                        // replayed to the Flux → blockLast() hangs or the exception propagates
+                        // with a null message → workflow_error with detail:"". Output guardrails
+                        // are only safe in non-streaming (batch) contexts.
                         .build();
             }
             default -> throw new BusinessException(ErrorCode.SYSTEM_ERROR,

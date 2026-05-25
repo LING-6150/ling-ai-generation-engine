@@ -187,8 +187,8 @@ public class OrchestratorAgent implements Agent<String, Flux<String>> {
                     sink.complete();
 
                 } catch (Exception e) {
-                    log.error("OrchestratorAgent fatal error, appId: {}: {}",
-                            ctx.appId(), e.getMessage(), e);
+                    log.error("OrchestratorAgent fatal error, appId: {}, exceptionClass={}, message={}",
+                            ctx.appId(), e.getClass().getName(), e.getMessage(), e);
                     sink.next(event("workflow_error", truncate(e.getMessage(), 200)));
                     // Complete normally instead of sink.error(e).
                     // Rationale: Spring MVC (spring-boot-starter-web, NOT WebFlux) has no
