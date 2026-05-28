@@ -2,6 +2,7 @@ package com.ling.lingaicodegeneration.ai.multiagent.agent;
 
 import cn.hutool.json.JSONUtil;
 import com.ling.lingaicodegeneration.ai.multiagent.model.*;
+import com.ling.lingaicodegeneration.ai.multiagent.util.ContextPruningService;
 import com.ling.lingaicodegeneration.core.CodeFileSaver;
 import com.ling.lingaicodegeneration.model.enums.ChatHistoryMessageTypeEnum;
 import com.ling.lingaicodegeneration.monitor.MonitorContext;
@@ -30,6 +31,7 @@ public class OrchestratorAgent implements Agent<String, Flux<String>> {
     @Resource private CodeGenAgent      codeGenAgent;
     @Resource private ReviewAgent       reviewAgent;
     @Resource private RefineAgent       refineAgent;
+    @Resource private ContextPruningService contextPruningService;
     @Resource private ChatHistoryService chatHistoryService;
     @Resource(name = "imageSearchExecutor")
     private ExecutorService imageSearchExecutor;
@@ -81,6 +83,9 @@ public class OrchestratorAgent implements Agent<String, Flux<String>> {
                     CompletableFuture.allOf(reqFuture, assetFuture).join();
                     RequirementSpec spec   = reqFuture.join();
                     String          images = assetFuture.join();
+                    if (ctx.contextPruningEnabled()) {
+                        spec = contextPruningService.pruneRequirementSpec(spec);
+                    }
 
                     sink.next(event("requirement_done", "type=" + spec.getCodeGenType()));
                     sink.next(event("asset_done",
@@ -101,6 +106,9 @@ public class OrchestratorAgent implements Agent<String, Flux<String>> {
                     sink.next(event("code_gen_start", null));
                     String outputDir = CodeFileSaver.resolveOutputDir(spec.getCodeGenType(), ctx.appId());
                     CodeGenInput codeInput = new CodeGenInput(spec, images, plan);
+                    if (ctx.contextPruningEnabled()) {
+                        codeInput = contextPruningService.pruneForCodeGen(codeInput);
+                    }
                     MonitorContextHolder.setContext(monCtx(ctx, "CodeGenAgent"));
                     try {
                         Flux<String> codeFlux = codeGenAgent.execute(codeInput,
@@ -119,6 +127,9 @@ public class OrchestratorAgent implements Agent<String, Flux<String>> {
                                 "attempt=" + (attempt + 1) + "/" + (maxRetries + 1)));
 
                         ReviewInput reviewInput = new ReviewInput(outputDir, spec);
+                        if (ctx.contextPruningEnabled()) {
+                            reviewInput = contextPruningService.pruneForReview(reviewInput);
+                        }
                         MonitorContextHolder.setContext(monCtx(ctx, "ReviewAgent"));
                         try {
                             finalReview = reviewAgent.execute(reviewInput,
@@ -149,6 +160,9 @@ public class OrchestratorAgent implements Agent<String, Flux<String>> {
                         RefinementPlan refinePlan = new RefinementPlan(
                                 targetFiles, plan.reviewFocusAreas(), attempt + 1);
                         RefineInput refineInput = new RefineInput(outputDir, finalReview, refinePlan);
+                        if (ctx.contextPruningEnabled()) {
+                            refineInput = contextPruningService.pruneForRefine(refineInput);
+                        }
 
                         MonitorContextHolder.setContext(monCtx(ctx, "RefineAgent"));
                         try {

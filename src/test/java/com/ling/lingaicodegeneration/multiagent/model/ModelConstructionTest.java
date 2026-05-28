@@ -24,6 +24,7 @@ class ModelConstructionTest {
         assertEquals("original", original.agentName()); // immutable
         assertEquals(original.appId(), renamed.appId());
         assertEquals(original.retryBudget(), renamed.retryBudget());
+        assertFalse(renamed.contextPruningEnabled());
     }
 
     @Test
@@ -33,6 +34,16 @@ class ModelConstructionTest {
 
         assertEquals(1, updated.retryBudget());
         assertEquals(3, original.retryBudget()); // immutable
+    }
+
+    @Test
+    void agentContext_withContextPruningEnabled_returnsNewInstance() {
+        AgentContext original = new AgentContext(1L, 2L, 3, "test");
+        AgentContext updated = original.withContextPruningEnabled(true);
+
+        assertTrue(updated.contextPruningEnabled());
+        assertFalse(original.contextPruningEnabled());
+        assertEquals(original.agentName(), updated.agentName());
     }
 
     // ── RequirementSpec (Lombok) ─────────────────────────────────────────────

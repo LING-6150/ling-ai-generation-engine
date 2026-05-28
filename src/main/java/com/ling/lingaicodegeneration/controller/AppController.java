@@ -250,11 +250,12 @@ public class AppController {
             @RequestParam Long appId,
             @RequestParam String message,
             @RequestParam(defaultValue = "false") boolean agent,
+            @RequestParam(defaultValue = "false") boolean contextPruning,
             HttpServletRequest request) {
         ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "App ID cannot be null");
         ThrowUtils.throwIf(message == null || message.isBlank(), ErrorCode.PARAMS_ERROR, "Message cannot be empty");
         User loginUser = userService.getLoginUser(request);
-        Flux<String> contentFlux = appService.chatToGenCode(appId, message, loginUser, agent);
+        Flux<String> contentFlux = appService.chatToGenCode(appId, message, loginUser, agent, contextPruning);
         return contentFlux
                 .map(chunk -> {
                     java.util.Map<String, String> wrapper = java.util.Map.of("d", chunk);

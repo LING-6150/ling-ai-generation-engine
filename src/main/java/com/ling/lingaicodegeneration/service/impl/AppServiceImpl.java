@@ -238,7 +238,8 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
     private StreamHandlerExecutor streamHandlerExecutor;
 
     @Override
-    public Flux<String> chatToGenCode(Long appId, String message, User loginUser, boolean agent) {
+    public Flux<String> chatToGenCode(Long appId, String message, User loginUser,
+                                      boolean agent, boolean contextPruning) {
 
         // 限流检查：每个用户每60秒最多5次，Redis挂了降级为放行
         try {
@@ -314,8 +315,10 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         Flux<String> codeStream;
         if (agent) {
             if (orchestratorEnabled) {
-                log.info("OrchestratorAgent enabled, using multi-agent path for appId: {}", appId);
-                AgentContext agentCtx = new AgentContext(appId, loginUser.getId(), 3, "OrchestratorAgent");
+                log.info("OrchestratorAgent enabled, using multi-agent path for appId: {}, contextPruning: {}",
+                        appId, contextPruning);
+                AgentContext agentCtx = new AgentContext(
+                        appId, loginUser.getId(), 3, "OrchestratorAgent", contextPruning);
                 codeStream = orchestratorAgent.execute(message, agentCtx);
             } else {
                 log.info("OrchestratorAgent disabled, using LangGraph4j workflow for appId: {}", appId);
