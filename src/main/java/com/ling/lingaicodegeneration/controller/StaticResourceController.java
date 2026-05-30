@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 
 @RestController
 @RequestMapping("/static")
@@ -48,9 +50,14 @@ public class StaticResourceController {
                 resourcePath = "/index.html";
             }
 
-            // Build file path
-            String filePath = PREVIEW_ROOT_DIR + "/" + dirName + resourcePath;
-            File file = new File(filePath);
+            Path previewRoot = Path.of(PREVIEW_ROOT_DIR).toRealPath();
+            Path appRoot = previewRoot.resolve(dirName).normalize();
+            Path requestedPath = appRoot.resolve(resourcePath.substring(1)).normalize();
+            if (!requestedPath.startsWith(appRoot) || !appRoot.startsWith(previewRoot)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            File file = requestedPath.toFile();
 
             // Check if file exists
             if (!file.exists()) {
@@ -60,8 +67,13 @@ public class StaticResourceController {
             // Return file resource
             Resource resource = new FileSystemResource(file);
             return ResponseEntity.ok()
-                    .header("Content-Type", getContentTypeWithCharset(filePath))
+                    .header("Content-Type", getContentTypeWithCharset(requestedPath.toString()))
+                    .header("X-Content-Type-Options", "nosniff")
+                    .header("Referrer-Policy", "no-referrer")
+                    .header("Content-Security-Policy", "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; frame-ancestors 'self'")
                     .body(resource);
+        } catch (IOException e) {
+            return ResponseEntity.notFound().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

@@ -65,22 +65,25 @@ public class AiModelMetricsCollector {
     }
 
     /**
-     * Record an error. Separate from request status so we can tag
-     * the specific error message for easier debugging in Grafana.
+     * Record an error. errorType is intentionally low-cardinality so provider
+     * infrastructure failures can be tracked without exploding Prometheus labels.
      */
     public void recordError(String userId, String appId, String modelName,
-                            String errorMessage, String agentName) {
+                            String errorMessage, String errorType, String agentName) {
         // Truncate error message to avoid cardinality explosion in Prometheus
         String truncatedError = errorMessage != null && errorMessage.length() > 100
                 ? errorMessage.substring(0, 100)
                 : errorMessage;
-        String key = String.format("%s_%s_%s_%s_%s", userId, appId, modelName, truncatedError, agentName);
+        String normalizedErrorType = errorType != null ? errorType : "unknown";
+        String key = String.format("%s_%s_%s_%s_%s_%s", userId, appId, modelName,
+                normalizedErrorType, truncatedError, agentName);
         Counter counter = errorCountersCache.computeIfAbsent(key, k ->
                 Counter.builder("ai_model_errors_total")
                         .description("Total number of AI model errors")
                         .tag("user_id", userId)
                         .tag("app_id", appId)
                         .tag("model_name", modelName)
+                        .tag("error_type", normalizedErrorType)
                         .tag("error_message", truncatedError != null ? truncatedError : "unknown")
                         .tag("agent_name", agentName)
                         .register(meterRegistry)

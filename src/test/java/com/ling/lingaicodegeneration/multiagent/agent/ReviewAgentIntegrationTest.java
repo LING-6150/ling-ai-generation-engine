@@ -8,6 +8,7 @@ import com.ling.lingaicodegeneration.ai.multiagent.model.ReviewInput;
 import com.ling.lingaicodegeneration.ai.multiagent.model.ReviewReport;
 import com.ling.lingaicodegeneration.model.enums.CodeGenTypeEnum;
 import jakarta.annotation.Resource;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.io.TempDir;
@@ -22,6 +23,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Tag("llm")
 @EnabledIfEnvironmentVariable(named = "OPENAI_API_KEY", matches = ".+")
 class ReviewAgentIntegrationTest {
 

@@ -3,6 +3,7 @@ package com.ling.lingaicodegeneration.multiagent.config;
 import dev.langchain4j.model.chat.Capability;
 import dev.langchain4j.model.chat.ChatModel;
 import jakarta.annotation.Resource;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
@@ -22,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * (application-local.yml may set review.model.provider=qwen for local dev).
  */
 @SpringBootTest
+@Tag("integration")
 @TestPropertySource(properties = "review.model.provider=openai")
 class ReviewModelBeanCapabilityTest {
 
