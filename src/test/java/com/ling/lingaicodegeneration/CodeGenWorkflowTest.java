@@ -2,11 +2,13 @@ package com.ling.lingaicodegeneration;
 
 import com.ling.lingaicodegeneration.ai.langgraph4j.state.WorkflowContext;
 import com.ling.lingaicodegeneration.ai.langgraph4j.workflow.CodeGenWorkflow;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import jakarta.annotation.Resource;
 
 @SpringBootTest
+@Tag("llm")
 public class CodeGenWorkflowTest {
 
     @Resource

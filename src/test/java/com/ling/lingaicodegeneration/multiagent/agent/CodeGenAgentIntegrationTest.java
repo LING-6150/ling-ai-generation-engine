@@ -9,7 +9,9 @@ import com.ling.lingaicodegeneration.ai.multiagent.model.TaskGraph;
 import com.ling.lingaicodegeneration.core.CodeFileSaver;
 import com.ling.lingaicodegeneration.model.enums.CodeGenTypeEnum;
 import jakarta.annotation.Resource;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.boot.test.context.SpringBootTest;
 import reactor.core.publisher.Flux;
 
@@ -20,6 +22,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Tag("llm")
+@EnabledIfEnvironmentVariable(named = "DEEPSEEK_API_KEY", matches = ".+")
 class CodeGenAgentIntegrationTest {
 
     @Resource

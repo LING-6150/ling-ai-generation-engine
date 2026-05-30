@@ -112,19 +112,20 @@ public class AiModelMonitorListener implements ChatModelListener {
                 ? errorContext.chatRequest().modelName() : "unknown";
         String errorMessage = errorContext.error() != null
                 ? errorContext.error().getMessage() : "unknown error";
+        String errorType = AiProviderErrorClassifier.classify(errorContext.error());
 
         aiModelMetricsCollector.recordRequest(
                 context.getUserId(), context.getAppId(), modelName, "error",
                 context.getAgentName());
         aiModelMetricsCollector.recordError(
                 context.getUserId(), context.getAppId(), modelName, errorMessage,
-                context.getAgentName());
+                errorType, context.getAgentName());
         recordResponseTime(attributes, context.getUserId(), context.getAppId(), modelName,
                 context.getAgentName());
 
-        log.warn("AI 请求失败 - userId: {}, appId: {}, model: {}, agent: {}, error: {}",
+        log.warn("AI 请求失败 - userId: {}, appId: {}, model: {}, agent: {}, errorType: {}, error: {}",
                 context.getUserId(), context.getAppId(), modelName,
-                context.getAgentName(), errorMessage);
+                context.getAgentName(), errorType, errorMessage);
     }
 
     private void recordResponseTime(Map<Object, Object> attributes,

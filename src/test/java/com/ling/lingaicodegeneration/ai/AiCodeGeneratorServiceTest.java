@@ -3,10 +3,12 @@ package com.ling.lingaicodegeneration.ai;
 import com.ling.lingaicodegeneration.ai.model.HtmlCodeResult;
 import com.ling.lingaicodegeneration.ai.model.MultiFileCodeResult;
 import jakarta.annotation.Resource;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
+@Tag("llm")
 class AiCodeGeneratorServiceTest {
 
     @Resource
