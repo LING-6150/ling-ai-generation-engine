@@ -97,3 +97,67 @@ This pass adds low-cardinality provider error classification to Java-side metric
 ### Eval Alignment
 
 The `tls_handshake`, `timeout`, `rate_limit`, `connection`, and `provider_unavailable` classes should be treated as transient infrastructure errors in eval reports, not model-quality failures.
+
+## Issue #6: Actual Token Budget Accounting
+
+### Decision
+
+Daily token quota now has a small shared accounting helper. The request path keeps a cheap pre-flight estimate before calling the provider, while authoritative quota accumulation remains based on LangChain4j token metadata in `AiModelMonitorListener`.
+
+### Policy
+
+- Pre-flight estimate: `message.length() / 4 + 500`.
+- Daily limit: `100,000` tokens per user.
+- Redis key: `daily_token:{userId}:{yyyyMMdd}`.
+- Counter TTL: 25 hours.
+
+### Caveat
+
+The pre-flight estimate intentionally protects provider calls from obviously over-budget requests; actual usage may include multiple agent/model calls and is accumulated from callback metadata after responses arrive.
+
+## Issue #7: Vue Build Result Reporting
+
+### Decision
+
+`VueProjectBuilder` now exposes `buildProjectWithResult`, returning `VueBuildResult` with `passed`, `durationMillis`, `outputSnippet`, and `errorSnippet`. The existing boolean `buildProject` remains as a compatibility wrapper.
+
+### Result Shape
+
+```java
+record VueBuildResult(boolean passed, long durationMillis, String outputSnippet, String errorSnippet)
+```
+
+### Caveat
+
+Build snippets are bounded to 4,000 characters. This creates a stable Java-side signal for future eval `VueEvaluator` integration, but does not yet persist build metadata to the database.
+
+## Issue #8: ZIP Download Safety
+
+### Decision
+
+ZIP packaging now applies explicit bounds before writing entries:
+
+- Max file count: 1,000 files.
+- Max raw bytes: 50 MiB.
+- Symlinks are skipped by using `Files.isRegularFile(..., NOFOLLOW_LINKS)`.
+- ZIP entry names are normalized and checked before writing.
+
+### Caveat
+
+ZIP bytes are still buffered in memory before response write to avoid partial/corrupt responses. The raw byte limit keeps that behavior bounded for generated projects.
+
+## Issue #9: Production Config Profiles
+
+### Decision
+
+Added share-safe local and production config examples plus expanded `.env.example` and README configuration notes.
+
+### Files
+
+- `src/main/resources/application-local.example.yml`
+- `src/main/resources/application-prod.example.yml`
+- `.env.example`
+
+### Caveat
+
+No real secrets are committed. Production deployments should provide env vars for MySQL, Redis, CORS origins, model keys, review provider, Pexels, and the agent orchestrator flag.

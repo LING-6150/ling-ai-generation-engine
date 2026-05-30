@@ -1,0 +1,68 @@
+# Production profile template. Copy to a deployment-only config file or provide
+# these values as environment variables. Do not commit real production secrets.
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
+      database: ${SPRING_DATA_REDIS_DATABASE:0}
+  session:
+    store-type: redis
+
+app:
+  cors:
+    # Set to the deployed frontend origin(s) only. Do not use '*'.
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS}
+
+langchain4j:
+  open-ai:
+    streaming-chat-model:
+      base-url: ${LANGCHAIN4J_OPEN_AI_STREAMING_CHAT_MODEL_BASE_URL:https://api.deepseek.com}
+      api-key: ${DEEPSEEK_API_KEY}
+      model-name: ${LANGCHAIN4J_OPEN_AI_STREAMING_CHAT_MODEL_MODEL_NAME:deepseek-chat}
+      max-tokens: ${LANGCHAIN4J_OPEN_AI_STREAMING_CHAT_MODEL_MAX_TOKENS:8192}
+      log-requests: false
+      log-responses: false
+    reasoning-streaming-chat-model:
+      base-url: ${LANGCHAIN4J_OPEN_AI_REASONING_STREAMING_CHAT_MODEL_BASE_URL:https://api.deepseek.com}
+      api-key: ${DEEPSEEK_API_KEY}
+      model-name: ${LANGCHAIN4J_OPEN_AI_REASONING_STREAMING_CHAT_MODEL_MODEL_NAME:deepseek-reasoner}
+      max-tokens: ${LANGCHAIN4J_OPEN_AI_REASONING_STREAMING_CHAT_MODEL_MAX_TOKENS:8192}
+      temperature: ${LANGCHAIN4J_OPEN_AI_REASONING_STREAMING_CHAT_MODEL_TEMPERATURE:0.0}
+      log-requests: false
+      log-responses: false
+    routing-chat-model:
+      base-url: ${LANGCHAIN4J_OPEN_AI_ROUTING_CHAT_MODEL_BASE_URL:https://api.deepseek.com}
+      api-key: ${DEEPSEEK_API_KEY}
+      model-name: ${LANGCHAIN4J_OPEN_AI_ROUTING_CHAT_MODEL_MODEL_NAME:deepseek-chat}
+      max-tokens: ${LANGCHAIN4J_OPEN_AI_ROUTING_CHAT_MODEL_MAX_TOKENS:256}
+      temperature: ${LANGCHAIN4J_OPEN_AI_ROUTING_CHAT_MODEL_TEMPERATURE:0.0}
+      log-requests: false
+      log-responses: false
+  structured-routing-chat-model:
+    base-url: ${LANGCHAIN4J_STRUCTURED_ROUTING_CHAT_MODEL_BASE_URL:https://api.deepseek.com}
+    api-key: ${DEEPSEEK_API_KEY}
+    model-name: ${LANGCHAIN4J_STRUCTURED_ROUTING_CHAT_MODEL_MODEL_NAME:deepseek-chat}
+    max-tokens: ${LANGCHAIN4J_STRUCTURED_ROUTING_CHAT_MODEL_MAX_TOKENS:512}
+    log-requests: false
+    log-responses: false
+
+review:
+  model:
+    # zhipu uses ZHIPU_API_KEY, openai uses OPENAI_API_KEY,
+    # fallback-deepseek uses DEEPSEEK_API_KEY.
+    provider: ${REVIEW_MODEL_PROVIDER:zhipu}
+
+pexels:
+  api-key: ${PEXELS_API_KEY}
+
+agent:
+  orchestrator:
+    # Production default is false until the multi-agent path is explicitly validated.
+    enabled: ${AGENT_ORCHESTRATOR_ENABLED:false}
