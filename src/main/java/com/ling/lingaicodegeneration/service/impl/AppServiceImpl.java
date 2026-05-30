@@ -20,6 +20,7 @@ import com.ling.lingaicodegeneration.model.enums.CodeGenTypeEnum;
 import com.ling.lingaicodegeneration.model.vo.AppVO;
 import com.ling.lingaicodegeneration.model.vo.UserVO;
 import com.ling.lingaicodegeneration.mapper.AppMapper;
+import com.ling.lingaicodegeneration.monitor.DailyTokenBudgetAccounting;
 import com.ling.lingaicodegeneration.monitor.MonitorContext;
 import com.ling.lingaicodegeneration.monitor.MonitorContextHolder;
 import com.ling.lingaicodegeneration.service.AppService;
@@ -43,6 +44,7 @@ import reactor.core.publisher.Flux;
 import java.io.File;
 import java.io.Serializable;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -258,15 +260,16 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
             log.warn("Rate limiter unavailable, allowing request through: {}", e.getMessage());
         }
 
-        // Daily token limit检查：按prompt长度估算，每用户每天100,000 tokens，Redis挂了降级为放行
+        // Daily token pre-flight estimate：cheap guard before generation.
+        // Actual quota accumulation is based on LangChain4j response token metadata
+        // in AiModelMonitorListener after the provider returns.
         try {
-            String today = java.time.LocalDate.now()
-                    .format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
-            String dailyTokenKey = "daily_token:" + loginUser.getId() + ":" + today;
+            String dailyTokenKey = DailyTokenBudgetAccounting.dailyTokenKey(
+                    String.valueOf(loginUser.getId()), LocalDate.now());
             org.redisson.api.RAtomicLong dailyCounter = redissonClient.getAtomicLong(dailyTokenKey);
             long usedTokens = dailyCounter.get();
-            long estimatedTokens = message.length() / 4 + 500;
-            if (usedTokens + estimatedTokens > 100_000) {
+            long estimatedTokens = DailyTokenBudgetAccounting.estimatePreflightTokens(message);
+            if (DailyTokenBudgetAccounting.wouldExceedDailyLimit(usedTokens, estimatedTokens)) {
                 throw new BusinessException(ErrorCode.TOO_MANY_REQUEST,
                         "Daily token limit exceeded (100,000 tokens), please try again tomorrow");
             }

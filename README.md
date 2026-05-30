@@ -364,54 +364,28 @@ USE ling_ai_code_generation;
 -- Run the SQL scripts in /sql directory
 ```
 
-**3. Create `application-local.yml`** (gitignored)
+**3. Create local config**
 
-```yaml
-langchain4j:
-  open-ai:
-    chat-model:
-      base-url: https://api.deepseek.com
-      api-key: YOUR_DEEPSEEK_API_KEY
-      model-name: deepseek-chat
-      max-tokens: 8192
-      response-format: json_object
-      timeout: 120s
-    streaming-chat-model:
-      base-url: https://api.deepseek.com
-      api-key: YOUR_DEEPSEEK_API_KEY
-      model-name: deepseek-chat
-      max-tokens: 8192
-    reasoning-streaming-chat-model:
-      base-url: https://api.deepseek.com
-      api-key: YOUR_DEEPSEEK_API_KEY
-      model-name: deepseek-chat
-      max-tokens: 8192
-    routing-chat-model:
-      base-url: https://api.deepseek.com
-      api-key: YOUR_DEEPSEEK_API_KEY
-      model-name: deepseek-chat
-      max-tokens: 256
-    image-collection-chat-model:
-      base-url: https://api.deepseek.com
-      api-key: YOUR_DEEPSEEK_API_KEY
-      model-name: deepseek-chat
-      max-tokens: 2048
-
-pexels:
-  api-key: YOUR_PEXELS_API_KEY
-
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/ling_ai_code_generation
-    username: root
-    password: YOUR_MYSQL_PASSWORD
-  data:
-    redis:
-      host: localhost
-      port: 6379
-  session:
-    store-type: redis
+```bash
+cp src/main/resources/application-local.example.yml src/main/resources/application-local.yml
+cp .env.example .env.local
 ```
+
+Fill in `application-local.yml` or export the variables from `.env.local`. Both files are gitignored for secrets.
+
+Required values:
+
+| Area | Local default / env var | Production note |
+|---|---|---|
+| Database | `spring.datasource.*` or `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD` | Point to the production MySQL instance; do not commit passwords. |
+| Redis | `spring.data.redis.*` or `SPRING_DATA_REDIS_HOST`, `SPRING_DATA_REDIS_PORT`, `SPRING_DATA_REDIS_PASSWORD` | Keep Redis private to the deployment network. |
+| CORS | `app.cors.allowed-origins` or `APP_CORS_ALLOWED_ORIGINS` | Use only deployed frontend origin(s); never use `*` with credentials. |
+| Main models | `DEEPSEEK_API_KEY` plus optional LangChain4j model override env vars | Main generation, routing, and structured routing use DeepSeek-compatible config by default. |
+| Review provider | `REVIEW_MODEL_PROVIDER=zhipu`, `openai`, or `fallback-deepseek` | `zhipu` requires `ZHIPU_API_KEY`; `openai` requires `OPENAI_API_KEY`; fallback uses `DEEPSEEK_API_KEY`. |
+| Images | `PEXELS_API_KEY` | Required for Pexels-backed image search. |
+| Agent path | `AGENT_ORCHESTRATOR_ENABLED=false` | Keep `false` in production until the multi-agent path is explicitly validated. |
+
+See `src/main/resources/application-local.example.yml` and `src/main/resources/application-prod.example.yml` for complete share-safe templates.
 
 **4. Start the backend**
 
@@ -467,6 +441,14 @@ mvn clean package -DskipTests
 scp -i ling-ec2-key.pem target/*.jar ubuntu@3.227.11.113:~/project/backend/
 
 # 3. Start backend with prod profile
+export SPRING_DATASOURCE_URL=jdbc:mysql://127.0.0.1:3306/ling_ai_code_generation
+export SPRING_DATASOURCE_USERNAME=YOUR_DB_USER
+export SPRING_DATASOURCE_PASSWORD=YOUR_DB_PASSWORD
+export SPRING_DATA_REDIS_HOST=127.0.0.1
+export APP_CORS_ALLOWED_ORIGINS=http://3.227.11.113
+export DEEPSEEK_API_KEY=YOUR_DEEPSEEK_API_KEY
+export ZHIPU_API_KEY=YOUR_ZHIPU_API_KEY
+export PEXELS_API_KEY=YOUR_PEXELS_API_KEY
 nohup java -jar Ling-AI-CODE-generation-0.0.1-SNAPSHOT.jar \
   --spring.profiles.active=prod > app.log 2>&1 &
 

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Map;
 
 /**
@@ -168,13 +169,12 @@ public class AiModelMonitorListener implements ChatModelListener {
             if (tokenUsage == null || tokenUsage.totalTokenCount() == null) return;
             if ("system".equals(userId)) return;
 
-            String today = java.time.LocalDate.now()
-                    .format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
-            String key = "daily_token:" + userId + ":" + today;
+            LocalDate today = LocalDate.now();
+            String key = DailyTokenBudgetAccounting.dailyTokenKey(userId, today);
 
             org.redisson.api.RAtomicLong counter = redissonClient.getAtomicLong(key);
             counter.addAndGet(tokenUsage.totalTokenCount());
-            counter.expire(java.time.Duration.ofHours(25));
+            counter.expire(DailyTokenBudgetAccounting.DAILY_COUNTER_TTL);
 
             log.debug("今日 Token 累计 - userId: {}, 日期: {}, 本次: {}",
                     userId, today, tokenUsage.totalTokenCount());

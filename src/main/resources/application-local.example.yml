@@ -1,0 +1,68 @@
+# Copy to src/main/resources/application-local.yml for local development.
+# application-local.yml is gitignored; keep real secrets out of git.
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/ling_ai_code_generation
+    username: root
+    password: ${MYSQL_PASSWORD:}
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ${REDIS_PASSWORD:}
+      database: 0
+  session:
+    store-type: redis
+
+app:
+  cors:
+    allowed-origins:
+      - http://localhost:5173
+      - http://127.0.0.1:5173
+
+langchain4j:
+  open-ai:
+    streaming-chat-model:
+      base-url: https://api.deepseek.com
+      api-key: ${DEEPSEEK_API_KEY}
+      model-name: deepseek-chat
+      max-tokens: 8192
+      log-requests: false
+      log-responses: false
+    reasoning-streaming-chat-model:
+      base-url: https://api.deepseek.com
+      api-key: ${DEEPSEEK_API_KEY}
+      model-name: deepseek-chat
+      max-tokens: 8192
+      temperature: 0.0
+      log-requests: false
+      log-responses: false
+    routing-chat-model:
+      base-url: https://api.deepseek.com
+      api-key: ${DEEPSEEK_API_KEY}
+      model-name: deepseek-chat
+      max-tokens: 256
+      temperature: 0.0
+      log-requests: false
+      log-responses: false
+  structured-routing-chat-model:
+    base-url: https://api.deepseek.com
+    api-key: ${DEEPSEEK_API_KEY}
+    model-name: deepseek-chat
+    max-tokens: 512
+    log-requests: false
+    log-responses: false
+
+review:
+  model:
+    # zhipu is the default review provider. Other values: openai, fallback-deepseek.
+    provider: zhipu
+
+pexels:
+  api-key: ${PEXELS_API_KEY}
+
+agent:
+  orchestrator:
+    # Keep false locally unless validating the newer multi-agent orchestration path.
+    enabled: false
