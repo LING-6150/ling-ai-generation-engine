@@ -39,6 +39,25 @@ public final class AiProviderErrorClassifier {
         };
     }
 
+    public static String classifyWorkflow(Throwable error) {
+        if (error == null) {
+            return "workflow_error";
+        }
+        String providerType = classify(error);
+        if (!"provider_error".equals(providerType) && !"unknown".equals(providerType)) {
+            return providerType;
+        }
+
+        String text = collectMessages(error).toLowerCase(Locale.ROOT);
+        if (containsAny(text, "produced empty code stream", "returned empty code stream")) {
+            return "workflow_empty_stream";
+        }
+        if (containsAny(text, "parsed html code is empty", "parsed multi-file code is empty")) {
+            return "workflow_empty_parse";
+        }
+        return "workflow_error";
+    }
+
     private static boolean containsAny(String text, String... markers) {
         for (String marker : markers) {
             if (text.contains(marker)) {

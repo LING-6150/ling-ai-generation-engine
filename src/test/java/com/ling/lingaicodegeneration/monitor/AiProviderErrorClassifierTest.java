@@ -30,4 +30,20 @@ class AiProviderErrorClassifierTest {
         assertEquals("provider_error", AiProviderErrorClassifier.classify(error));
         assertFalse(AiProviderErrorClassifier.isTransient(error));
     }
+
+    @Test
+    void classifyWorkflowDetectsEmptyStreamGuardrail() {
+        RuntimeException error = new RuntimeException(
+                "CodeGenAgent produced empty code stream (tokens=0), appId=1");
+
+        assertEquals("workflow_empty_stream", AiProviderErrorClassifier.classifyWorkflow(error));
+    }
+
+    @Test
+    void classifyWorkflowPreservesTransientProviderTypes() {
+        RuntimeException error = new RuntimeException(
+                "I/O error on POST request: Remote host terminated the handshake");
+
+        assertEquals("tls_handshake", AiProviderErrorClassifier.classifyWorkflow(error));
+    }
 }

@@ -3,6 +3,7 @@ package com.ling.lingaicodegeneration.multiagent.agent;
 import com.ling.lingaicodegeneration.ai.multiagent.agent.*;
 import com.ling.lingaicodegeneration.ai.multiagent.model.*;
 import com.ling.lingaicodegeneration.model.enums.CodeGenTypeEnum;
+import com.ling.lingaicodegeneration.monitor.AiModelMetricsCollector;
 import com.ling.lingaicodegeneration.monitor.MonitorContext;
 import com.ling.lingaicodegeneration.monitor.MonitorContextHolder;
 import com.ling.lingaicodegeneration.service.ChatHistoryService;
@@ -33,6 +34,7 @@ class OrchestratorAgentTest {
     @Mock private CodeGenAgent      codeGenAgent;
     @Mock private ReviewAgent       reviewAgent;
     @Mock private RefineAgent       refineAgent;
+    @Mock private AiModelMetricsCollector aiModelMetricsCollector;
     @Mock private ChatHistoryService chatHistoryService;
 
     @InjectMocks
@@ -231,6 +233,8 @@ class OrchestratorAgentTest {
         assertTrue(events.stream().anyMatch(e -> e.contains("CodeGenAgent produced empty code stream")),
                 "workflow_error should explain the empty stream");
 
+        verify(aiModelMetricsCollector).recordWorkflowError(
+                eq("1"), eq("1"), eq("OrchestratorAgent"), eq("workflow_empty_stream"), eq(false));
         verify(refineAgent, never()).execute(any(), any());
         verify(reviewAgent, never()).execute(any(), any());
     }

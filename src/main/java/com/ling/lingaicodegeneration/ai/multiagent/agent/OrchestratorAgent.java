@@ -7,6 +7,8 @@ import com.ling.lingaicodegeneration.core.CodeFileSaver;
 import com.ling.lingaicodegeneration.model.enums.ChatHistoryMessageTypeEnum;
 import com.ling.lingaicodegeneration.monitor.MonitorContext;
 import com.ling.lingaicodegeneration.monitor.MonitorContextHolder;
+import com.ling.lingaicodegeneration.monitor.AiModelMetricsCollector;
+import com.ling.lingaicodegeneration.monitor.AiProviderErrorClassifier;
 import com.ling.lingaicodegeneration.service.ChatHistoryService;
 import dev.langchain4j.internal.Json;
 import jakarta.annotation.Resource;
@@ -33,6 +35,7 @@ public class OrchestratorAgent implements Agent<String, Flux<String>> {
     @Resource private ReviewAgent       reviewAgent;
     @Resource private RefineAgent       refineAgent;
     @Resource private ContextPruningService contextPruningService;
+    @Resource private AiModelMetricsCollector aiModelMetricsCollector;
     @Resource private ChatHistoryService chatHistoryService;
     @Resource(name = "imageSearchExecutor")
     private ExecutorService imageSearchExecutor;
@@ -218,6 +221,7 @@ public class OrchestratorAgent implements Agent<String, Flux<String>> {
                 } catch (Exception e) {
                     log.error("OrchestratorAgent fatal error, appId: {}, exceptionClass={}, message={}",
                             ctx.appId(), e.getClass().getName(), e.getMessage(), e);
+                    recordWorkflowError(ctx, e);
                     sink.next(event("workflow_error", truncate(describeError(e), 200)));
                     // Complete normally instead of sink.error(e).
                     // Rationale: Spring MVC (spring-boot-starter-web, NOT WebFlux) has no
@@ -278,6 +282,21 @@ public class OrchestratorAgent implements Agent<String, Flux<String>> {
     private static String truncate(String s, int max) {
         if (s == null) return "";
         return s.length() <= max ? s : s.substring(0, max) + "...";
+    }
+
+    private void recordWorkflowError(AgentContext ctx, Throwable error) {
+        try {
+            aiModelMetricsCollector.recordWorkflowError(
+                    String.valueOf(ctx.userId()),
+                    String.valueOf(ctx.appId()),
+                    ctx.agentName(),
+                    AiProviderErrorClassifier.classifyWorkflow(error),
+                    ctx.contextPruningEnabled()
+            );
+        } catch (Exception metricsError) {
+            log.warn("Failed to record workflow error metric, appId: {}, error: {}",
+                    ctx.appId(), metricsError.getMessage());
+        }
     }
 
     private static String describeError(Throwable error) {

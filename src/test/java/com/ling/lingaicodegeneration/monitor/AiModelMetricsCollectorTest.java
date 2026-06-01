@@ -1,0 +1,34 @@
+package com.ling.lingaicodegeneration.monitor;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class AiModelMetricsCollectorTest {
+
+    @Test
+    void recordWorkflowErrorAddsLowCardinalityCounter() {
+        SimpleMeterRegistry registry = new SimpleMeterRegistry();
+        AiModelMetricsCollector collector = new AiModelMetricsCollector();
+        ReflectionTestUtils.setField(collector, "meterRegistry", registry);
+
+        collector.recordWorkflowError(
+                "user-1",
+                "app-1",
+                "OrchestratorAgent",
+                "workflow_empty_stream",
+                true
+        );
+
+        assertEquals(1.0, registry.get("ai_workflow_errors_total")
+                .tag("user_id", "user-1")
+                .tag("app_id", "app-1")
+                .tag("agent_name", "OrchestratorAgent")
+                .tag("error_type", "workflow_empty_stream")
+                .tag("context_pruning", "true")
+                .counter()
+                .count());
+    }
+}

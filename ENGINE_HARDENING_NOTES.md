@@ -161,3 +161,40 @@ Added share-safe local and production config examples plus expanded `.env.exampl
 ### Caveat
 
 No real secrets are committed. Production deployments should provide env vars for MySQL, Redis, CORS origins, model keys, review provider, Pexels, and the agent orchestrator flag.
+
+## Day 9B: Provider Failure Resilience Observability
+
+### Decision
+
+Do not add automatic fallback routing yet. The immediate reliability gap after the eval pass@3 attempts was observability: workflow-layer failures, such as an empty streaming code response, were visible in SSE but not represented as low-cardinality workflow metrics or eval retry signals.
+
+### Changes
+
+- `AiProviderErrorClassifier.classifyWorkflow(...)` maps workflow exceptions to stable labels:
+  - provider/transient classes are preserved (`tls_handshake`, `timeout`, `rate_limit`, `connection`, `provider_unavailable`)
+  - `workflow_empty_stream`
+  - `workflow_empty_parse`
+  - `workflow_error`
+- `AiModelMetricsCollector.recordWorkflowError(...)` emits:
+
+```text
+ai_workflow_errors_total{user_id, app_id, agent_name, error_type, context_pruning}
+```
+
+- `OrchestratorAgent` records workflow error metrics when the fatal workflow catch path emits `workflow_error`.
+
+### Eval Alignment
+
+The eval harness now treats `CodeGenAgent produced empty code stream` and `AI returned empty code stream` as transient infra errors worth retrying. Parse-empty errors remain non-infra because they may indicate model output quality or prompt-format failure.
+
+### Validation
+
+```bash
+./mvnw -q -Dtest=AiProviderErrorClassifierTest,AiModelMetricsCollectorTest,OrchestratorAgentTest test
+./mvnw -q -DskipTests compile
+git diff --check
+```
+
+### Caveat
+
+This is not a fallback chain. It makes provider/workflow failures measurable and retryable before adding model fallback behavior that could change pruning experiment variables.

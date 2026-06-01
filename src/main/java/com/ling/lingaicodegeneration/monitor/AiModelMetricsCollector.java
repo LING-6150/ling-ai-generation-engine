@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentMap;
  * - ai_model_errors_total{user_id, app_id, model_name, error_message, agent_name} — error count
  * - ai_model_tokens_total{user_id, app_id, model_name, token_type, agent_name} — token usage
  * - ai_model_response_duration_seconds{user_id, app_id, model_name, agent_name} — response time
+ * - ai_workflow_errors_total{user_id, app_id, agent_name, error_type, context_pruning} — workflow-layer errors
  *
  * agent_name cardinality: 6 fixed values (RequirementAgent / AssetAgent / PlannerAgent /
  * CodeGenAgent / ReviewAgent / RefineAgent) + "unknown" for non-orchestrated calls.
@@ -41,6 +42,7 @@ public class AiModelMetricsCollector {
     private final ConcurrentMap<String, Counter> requestCountersCache = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Counter> errorCountersCache = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Counter> tokenCountersCache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Counter> workflowErrorCountersCache = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Timer> responseTimersCache = new ConcurrentHashMap<>();
 
     /**
@@ -110,6 +112,24 @@ public class AiModelMetricsCollector {
                         .register(meterRegistry)
         );
         counter.increment(tokenCount);
+    }
+
+    public void recordWorkflowError(String userId, String appId, String agentName,
+                                    String errorType, boolean contextPruning) {
+        String normalizedErrorType = errorType != null ? errorType : "workflow_error";
+        String key = String.format("%s_%s_%s_%s_%s", userId, appId, agentName,
+                normalizedErrorType, contextPruning);
+        Counter counter = workflowErrorCountersCache.computeIfAbsent(key, k ->
+                Counter.builder("ai_workflow_errors_total")
+                        .description("Total number of AI workflow-layer errors")
+                        .tag("user_id", userId)
+                        .tag("app_id", appId)
+                        .tag("agent_name", agentName)
+                        .tag("error_type", normalizedErrorType)
+                        .tag("context_pruning", String.valueOf(contextPruning))
+                        .register(meterRegistry)
+        );
+        counter.increment();
     }
 
     /**
