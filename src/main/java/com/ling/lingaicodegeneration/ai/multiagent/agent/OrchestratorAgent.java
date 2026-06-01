@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Component
@@ -113,8 +114,22 @@ public class OrchestratorAgent implements Agent<String, Flux<String>> {
                     try {
                         Flux<String> codeFlux = codeGenAgent.execute(codeInput,
                                 ctx.withAgentName("CodeGenAgent"));
+                        StringBuilder codeBuilder = new StringBuilder();
+                        AtomicInteger tokenCount = new AtomicInteger();
                         codeFlux.doOnNext(token -> sink.next(event("code_token", token)))
+                                .doOnNext(token -> {
+                                    tokenCount.incrementAndGet();
+                                    if (token != null) {
+                                        codeBuilder.append(token);
+                                    }
+                                })
                                 .blockLast(Duration.ofMinutes(5));
+                        if (codeBuilder.toString().isBlank()) {
+                            throw new IllegalStateException(
+                                    "CodeGenAgent produced empty code stream"
+                                            + " (tokens=" + tokenCount.get() + ")"
+                                            + ", appId=" + ctx.appId());
+                        }
                     } finally {
                         MonitorContextHolder.clearContext();
                     }
@@ -203,7 +218,7 @@ public class OrchestratorAgent implements Agent<String, Flux<String>> {
                 } catch (Exception e) {
                     log.error("OrchestratorAgent fatal error, appId: {}, exceptionClass={}, message={}",
                             ctx.appId(), e.getClass().getName(), e.getMessage(), e);
-                    sink.next(event("workflow_error", truncate(e.getMessage(), 200)));
+                    sink.next(event("workflow_error", truncate(describeError(e), 200)));
                     // Complete normally instead of sink.error(e).
                     // Rationale: Spring MVC (spring-boot-starter-web, NOT WebFlux) has no
                     // HttpMessageConverter for LinkedHashMap → text/event-stream.  Calling
@@ -263,5 +278,16 @@ public class OrchestratorAgent implements Agent<String, Flux<String>> {
     private static String truncate(String s, int max) {
         if (s == null) return "";
         return s.length() <= max ? s : s.substring(0, max) + "...";
+    }
+
+    private static String describeError(Throwable error) {
+        if (error == null) {
+            return "Unknown workflow error";
+        }
+        String message = error.getMessage();
+        if (message == null || message.isBlank()) {
+            return error.getClass().getName();
+        }
+        return error.getClass().getName() + ": " + message;
     }
 }

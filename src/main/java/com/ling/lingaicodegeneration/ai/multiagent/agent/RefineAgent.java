@@ -60,7 +60,7 @@ public class RefineAgent implements Agent<RefineInput, Flux<String>> {
                         log.info("RefineAgent completed, appId: {}", ctx.appId());
                         sink.complete();
                     })
-                    .onError(error -> sink.error(new RuntimeException(error.getMessage())))
+                    .onError(error -> sink.error(new RuntimeException(describeError(error), error)))
                     .start());
 
         } catch (Exception e) {
@@ -97,5 +97,16 @@ public class RefineAgent implements Agent<RefineInput, Flux<String>> {
                         ? "all files in the project"
                         : String.join(", ", targetFiles)
         );
+    }
+
+    private String describeError(Throwable error) {
+        if (error == null) {
+            return "Unknown refine streaming error";
+        }
+        String message = error.getMessage();
+        if (message == null || message.isBlank()) {
+            return error.getClass().getName();
+        }
+        return error.getClass().getName() + ": " + message;
     }
 }

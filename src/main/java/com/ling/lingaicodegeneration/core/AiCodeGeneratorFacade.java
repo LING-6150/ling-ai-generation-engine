@@ -5,7 +5,7 @@ import com.ling.lingaicodegeneration.ai.AiCodeGeneratorServiceFactory;
 import com.ling.lingaicodegeneration.ai.model.HtmlCodeResult;
 import com.ling.lingaicodegeneration.ai.model.MultiFileCodeResult;
 import com.ling.lingaicodegeneration.ai.model.message.*;
-        import com.ling.lingaicodegeneration.constant.AppConstant;
+import com.ling.lingaicodegeneration.constant.AppConstant;
 import com.ling.lingaicodegeneration.core.builder.VueProjectBuilder;
 import com.ling.lingaicodegeneration.exception.BusinessException;
 import com.ling.lingaicodegeneration.exception.ErrorCode;
@@ -16,6 +16,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.io.File;
 
@@ -91,20 +92,44 @@ public class AiCodeGeneratorFacade {
         StringBuilder codeBuilder = new StringBuilder();
         return codeStream
                 .doOnNext(codeBuilder::append)
-                .doOnComplete(() -> {
-                    try {
-                        String completeCode = codeBuilder.toString();
-                        if (codeGenType == CodeGenTypeEnum.HTML) {
-                            HtmlCodeResult htmlCodeResult = CodeParser.parseHtmlCode(completeCode);
-                            CodeFileSaver.saveHtmlCodeResult(htmlCodeResult, appId);
-                        } else {
-                            MultiFileCodeResult multiFileCodeResult = CodeParser.parseMultiFileCode(completeCode);
-                            CodeFileSaver.saveMultiFileCodeResult(multiFileCodeResult, appId);
-                        }
-                    } catch (Exception e) {
-                        log.error("Failed to save code: {}", e.getMessage());
-                    }
-                });
+                .concatWith(Mono.fromRunnable(() ->
+                        saveCompletedCodeOrThrow(codeBuilder.toString(), codeGenType, appId)));
+    }
+
+    private void saveCompletedCodeOrThrow(String completeCode, CodeGenTypeEnum codeGenType, Long appId) {
+        if (completeCode == null || completeCode.isBlank()) {
+            throw new IllegalStateException("AI returned empty code stream, appId=" + appId
+                    + ", codeGenType=" + codeGenType);
+        }
+        try {
+            if (codeGenType == CodeGenTypeEnum.HTML) {
+                HtmlCodeResult htmlCodeResult = CodeParser.parseHtmlCode(completeCode);
+                if (htmlCodeResult.getHtmlCode() == null || htmlCodeResult.getHtmlCode().isBlank()) {
+                    throw new IllegalStateException("Parsed HTML code is empty");
+                }
+                CodeFileSaver.saveHtmlCodeResult(htmlCodeResult, appId);
+            } else {
+                MultiFileCodeResult multiFileCodeResult = CodeParser.parseMultiFileCode(completeCode);
+                if (isEmptyMultiFileCode(multiFileCodeResult)) {
+                    throw new IllegalStateException("Parsed multi-file code is empty");
+                }
+                CodeFileSaver.saveMultiFileCodeResult(multiFileCodeResult, appId);
+            }
+        } catch (Exception e) {
+            log.error("Failed to save generated code, appId: {}, codeGenType: {}, error: {}",
+                    appId, codeGenType, e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    private boolean isEmptyMultiFileCode(MultiFileCodeResult result) {
+        return isBlank(result.getHtmlCode())
+                && isBlank(result.getCssCode())
+                && isBlank(result.getJsCode());
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 
     /**
@@ -135,9 +160,20 @@ public class AiCodeGeneratorFacade {
                         sink.complete();
                     })
                     .onError(error -> {
-                        sink.error(new RuntimeException(error.getMessage()));
+                        sink.error(new RuntimeException(describeError(error), error));
                     })
                     .start();
         });
+    }
+
+    private String describeError(Throwable error) {
+        if (error == null) {
+            return "Unknown streaming error";
+        }
+        String message = error.getMessage();
+        if (message == null || message.isBlank()) {
+            return error.getClass().getName();
+        }
+        return error.getClass().getName() + ": " + message;
     }
 }

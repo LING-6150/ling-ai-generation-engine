@@ -211,6 +211,30 @@ class OrchestratorAgentTest {
         verify(reviewAgent, never()).execute(any(), any());
     }
 
+    @Test
+    void execute_codeGenEmptyStream_emitsWorkflowError() {
+        when(requirementAgent.execute(any(), any())).thenReturn(defaultSpec());
+        when(assetAgent.execute(any(), any())).thenReturn("");
+        when(plannerAgent.execute(any(), any()))
+                .thenReturn(new TaskGraph(false, 1, null, null));
+        when(codeGenAgent.execute(any(), any())).thenReturn(Flux.empty());
+
+        List<String> events = assertDoesNotThrow(() ->
+                orchestratorAgent.execute("build page", ctx)
+                        .collectList()
+                        .block(Duration.ofSeconds(15))
+        );
+
+        assertNotNull(events);
+        assertTrue(events.stream().anyMatch(e -> e.contains("workflow_error")),
+                "workflow_error event must be emitted on empty CodeGenAgent stream");
+        assertTrue(events.stream().anyMatch(e -> e.contains("CodeGenAgent produced empty code stream")),
+                "workflow_error should explain the empty stream");
+
+        verify(refineAgent, never()).execute(any(), any());
+        verify(reviewAgent, never()).execute(any(), any());
+    }
+
     // ── RefineAgent failure → consume budget, continue ────────────────────
 
     @Test
