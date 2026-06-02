@@ -198,3 +198,40 @@ git diff --check
 ### Caveat
 
 This is not a fallback chain. It makes provider/workflow failures measurable and retryable before adding model fallback behavior that could change pruning experiment variables.
+
+## Day 9B.1: Controller-Level Empty SSE Guard
+
+### Trigger
+
+After Day 9B, a targeted recovery run still produced suspicious empty eval results:
+
+- generated code length was 0
+- error was null
+- duration was near 0ms
+
+This means at least one path could still complete the outer SSE stream without any business event reaching the eval client.
+
+### Decision
+
+Keep the fix narrow. Do not add a fallback chain yet. Add a controller-level guard so an empty `contentFlux` from `AppService.chatToGenCode(...)` is converted into an explicit `workflow_error` SSE payload before the final `done` event.
+
+### Changes
+
+- `AppController.chatToGenCode(...)`
+  - Applies `switchIfEmpty(...)` to the service content stream.
+  - Emits a `workflow_error` payload with detail `Generation stream completed without events`.
+  - Keeps the existing final `done` event.
+  - Reuses a shared `ObjectMapper` for SSE wrapping.
+- `AppControllerTest`
+  - Verifies an empty content stream emits `workflow_error` followed by `done`.
+  - Verifies normal content events are preserved.
+
+### Validation
+
+```bash
+./mvnw -q -Dtest=AppControllerTest test
+```
+
+### Expected Eval Behavior
+
+The eval harness should now receive an explicit workflow error when the Java controller sees an empty stream, allowing `--infra-retries` to classify and retry the failure instead of recording another silent suspicious empty generation.

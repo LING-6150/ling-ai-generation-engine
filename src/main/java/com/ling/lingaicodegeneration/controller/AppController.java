@@ -20,6 +20,7 @@ import com.ling.lingaicodegeneration.service.AppService;
 import com.ling.lingaicodegeneration.ai.AiCodeGenTypeRoutingService;
 import com.ling.lingaicodegeneration.service.ProjectDownloadService;
 import com.ling.lingaicodegeneration.service.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,14 +33,18 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/app")
 @Slf4j
 public class AppController {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Resource
     private AppService appService;
@@ -257,25 +262,42 @@ public class AppController {
         User loginUser = userService.getLoginUser(request);
         Flux<String> contentFlux = appService.chatToGenCode(appId, message, loginUser, agent, contextPruning);
         return contentFlux
-                .map(chunk -> {
-                    java.util.Map<String, String> wrapper = java.util.Map.of("d", chunk);
-                    String jsonData = "";
-                    try {
-                        jsonData = new com.fasterxml.jackson.databind.ObjectMapper()
-                                .writeValueAsString(wrapper);
-                    } catch (Exception e) {
-                        log.error("JSON serialization error: {}", e.getMessage());
-                    }
-                    return ServerSentEvent.<String>builder()
-                            .data(jsonData)
-                            .build();
-                })
-                .concatWith(reactor.core.publisher.Mono.just(
+                .switchIfEmpty(Mono.fromSupplier(() -> {
+                    log.warn("Generation SSE stream completed without content, appId: {}, agent: {}, contextPruning: {}",
+                            appId, agent, contextPruning);
+                    return workflowErrorChunk("Generation stream completed without events");
+                }))
+                .map(this::toServerSentEvent)
+                .concatWith(Mono.just(
                         ServerSentEvent.<String>builder()
                                 .event("done")
                                 .data("")
                                 .build()
                 ));
+    }
+
+    private ServerSentEvent<String> toServerSentEvent(String chunk) {
+        String jsonData = "";
+        try {
+            jsonData = OBJECT_MAPPER.writeValueAsString(Map.of("d", chunk));
+        } catch (Exception e) {
+            log.error("JSON serialization error: {}", e.getMessage());
+        }
+        return ServerSentEvent.<String>builder()
+                .data(jsonData)
+                .build();
+    }
+
+    private String workflowErrorChunk(String detail) {
+        try {
+            return OBJECT_MAPPER.writeValueAsString(Map.of(
+                    "type", "workflow_error",
+                    "detail", detail
+            ));
+        } catch (Exception e) {
+            log.error("workflow_error serialization error: {}", e.getMessage());
+            return "{\"type\":\"workflow_error\",\"detail\":\"Generation stream completed without events\"}";
+        }
     }
 
     // ========== Admin APIs ==========
