@@ -25,14 +25,16 @@ class DailyTokenBudgetAccountingTest {
 
     @Test
     void wouldExceedDailyLimitRejectsOnlyWhenEstimateCrossesBudget() {
-        assertFalse(DailyTokenBudgetAccounting.wouldExceedDailyLimit(99_500L, 500L));
-        assertTrue(DailyTokenBudgetAccounting.wouldExceedDailyLimit(99_501L, 500L));
-        assertTrue(DailyTokenBudgetAccounting.wouldExceedDailyLimit(100_001L, 0L));
+        long limit = DailyTokenBudgetAccounting.DAILY_TOKEN_LIMIT;
+
+        assertFalse(DailyTokenBudgetAccounting.wouldExceedDailyLimit(limit - 500L, 500L));
+        assertTrue(DailyTokenBudgetAccounting.wouldExceedDailyLimit(limit - 499L, 500L));
+        assertTrue(DailyTokenBudgetAccounting.wouldExceedDailyLimit(limit + 1L, 0L));
     }
 
     @Test
     void exposesAccountingConstantsUsedByRedisCounter() {
-        assertEquals(100_000L, DailyTokenBudgetAccounting.DAILY_TOKEN_LIMIT);
+        assertEquals(10_000_000L, DailyTokenBudgetAccounting.DAILY_TOKEN_LIMIT);
         assertEquals(Duration.ofHours(25), DailyTokenBudgetAccounting.DAILY_COUNTER_TTL);
     }
 }

@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter;
  */
 public final class DailyTokenBudgetAccounting {
 
-    public static final long DAILY_TOKEN_LIMIT = 100_000L;
+    public static final long DAILY_TOKEN_LIMIT = 10_000_000L;
     public static final Duration DAILY_COUNTER_TTL = Duration.ofHours(25);
 
     private static final int ESTIMATED_CHARS_PER_TOKEN = 4;

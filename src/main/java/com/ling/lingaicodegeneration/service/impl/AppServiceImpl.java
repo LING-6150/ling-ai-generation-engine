@@ -43,10 +43,12 @@ import reactor.core.publisher.Flux;
 
 import java.io.File;
 import java.io.Serializable;
+import java.text.NumberFormat;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -271,7 +273,10 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
             long estimatedTokens = DailyTokenBudgetAccounting.estimatePreflightTokens(message);
             if (DailyTokenBudgetAccounting.wouldExceedDailyLimit(usedTokens, estimatedTokens)) {
                 throw new BusinessException(ErrorCode.TOO_MANY_REQUEST,
-                        "Daily token limit exceeded (100,000 tokens), please try again tomorrow");
+                        "Daily token limit exceeded ("
+                                + NumberFormat.getIntegerInstance(Locale.US)
+                                .format(DailyTokenBudgetAccounting.DAILY_TOKEN_LIMIT)
+                                + " tokens), please try again tomorrow");
             }
         } catch (BusinessException e) {
             throw e; // 超限时正常抛出，不能被吞掉
