@@ -4,6 +4,7 @@ import com.ling.lingaicodegeneration.ai.multiagent.model.*;
 import com.ling.lingaicodegeneration.ai.multiagent.util.ContextPruningService;
 import com.ling.lingaicodegeneration.model.enums.CodeGenTypeEnum;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 
@@ -33,6 +34,28 @@ class ContextPruningServiceTest {
         assertEquals(6, pruned.imageListStr().split("\\R").length);
         assertEquals("Use semantic HTML", pruned.taskGraph().codeGenHints());
         assertNull(pruned.taskGraph().reviewFocusAreas());
+    }
+
+    @Test
+    void pruneForCodeGen_diagnosticsFlagDoesNotChangeOutput() {
+        RequirementSpec spec = RequirementSpec.builder()
+                .codeGenType(CodeGenTypeEnum.HTML)
+                .projectDescription("A restaurant website")
+                .features(List.of("menu", "reservation", "gallery", "reviews", "map", "newsletter"))
+                .techConstraints(List.of("vanilla js"))
+                .complexity(Complexity.MEDIUM)
+                .build();
+        String images = String.join("\n",
+                "https://img/1", "https://img/2", "https://img/3", "https://img/4",
+                "https://img/5", "https://img/6", "https://img/7");
+        TaskGraph plan = new TaskGraph(true, 2, "Use semantic HTML", "Review responsiveness");
+        CodeGenInput input = new CodeGenInput(spec, images, plan);
+
+        CodeGenInput diagnosticsOff = service.pruneForCodeGen(input);
+        ReflectionTestUtils.setField(service, "contextPruningDiagnosticsEnabled", true);
+        CodeGenInput diagnosticsOn = service.pruneForCodeGen(input);
+
+        assertEquals(diagnosticsOff, diagnosticsOn);
     }
 
     @Test

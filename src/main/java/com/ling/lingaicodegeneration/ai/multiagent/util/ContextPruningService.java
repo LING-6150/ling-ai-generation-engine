@@ -3,6 +3,7 @@ package com.ling.lingaicodegeneration.ai.multiagent.util;
 import com.ling.lingaicodegeneration.ai.multiagent.model.*;
 import dev.langchain4j.internal.Json;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -20,6 +21,9 @@ public class ContextPruningService {
     private static final int MAX_REFINEMENT_ISSUES = 5;
     private static final int MAX_TARGET_FILES = 6;
 
+    @Value("${context.pruning.diagnostics.enabled:false}")
+    private boolean contextPruningDiagnosticsEnabled;
+
     public CodeGenInput pruneForCodeGen(CodeGenInput input) {
         CodeGenInput pruned = new CodeGenInput(
                 pruneRequirementSpec(input.requirementSpec()),
@@ -27,6 +31,7 @@ public class ContextPruningService {
                 pruneTaskGraphForCodeGen(input.taskGraph())
         );
         logReduction("CodeGenInput", input, pruned);
+        logCodeGenDiagnostics(input, pruned);
         return pruned;
     }
 
@@ -150,6 +155,35 @@ public class ContextPruningService {
                 label, beforeChars, afterChars, String.format("%.1f", reduction));
     }
 
+    private void logCodeGenDiagnostics(CodeGenInput before, CodeGenInput after) {
+        if (!contextPruningDiagnosticsEnabled || before == null || after == null) {
+            return;
+        }
+        log.info(
+                "Context pruning CodeGenInput fields: "
+                        + "requirementSpec {} -> {}, imageListStr {} -> {}, taskGraph {} -> {}, "
+                        + "features {} -> {}, constraints {} -> {}, imageLines {} -> {}, "
+                        + "codeGenHints {} -> {}, reviewFocusAreas removed={}",
+                estimateChars(before.requirementSpec()),
+                estimateChars(after.requirementSpec()),
+                charLength(before.imageListStr()),
+                charLength(after.imageListStr()),
+                estimateChars(before.taskGraph()),
+                estimateChars(after.taskGraph()),
+                size(before.requirementSpec() != null ? before.requirementSpec().getFeatures() : null),
+                size(after.requirementSpec() != null ? after.requirementSpec().getFeatures() : null),
+                size(before.requirementSpec() != null ? before.requirementSpec().getTechConstraints() : null),
+                size(after.requirementSpec() != null ? after.requirementSpec().getTechConstraints() : null),
+                lineCount(before.imageListStr()),
+                lineCount(after.imageListStr()),
+                before.taskGraph() != null ? charLength(before.taskGraph().codeGenHints()) : 0,
+                after.taskGraph() != null ? charLength(after.taskGraph().codeGenHints()) : 0,
+                before.taskGraph() != null
+                        && before.taskGraph().reviewFocusAreas() != null
+                        && (after.taskGraph() == null || after.taskGraph().reviewFocusAreas() == null)
+        );
+    }
+
     private int estimateChars(Object value) {
         if (value == null) return 0;
         try {
@@ -157,5 +191,26 @@ public class ContextPruningService {
         } catch (Exception e) {
             return String.valueOf(value).length();
         }
+    }
+
+    private int charLength(String value) {
+        return value != null ? value.length() : 0;
+    }
+
+    private int lineCount(String value) {
+        if (value == null || value.isBlank()) {
+            return 0;
+        }
+        int count = 0;
+        for (String line : value.split("\\R")) {
+            if (!line.isBlank()) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private int size(List<?> values) {
+        return values != null ? values.size() : 0;
     }
 }

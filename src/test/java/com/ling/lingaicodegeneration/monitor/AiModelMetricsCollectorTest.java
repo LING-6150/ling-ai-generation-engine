@@ -31,4 +31,22 @@ class AiModelMetricsCollectorTest {
                 .counter()
                 .count());
     }
+
+    @Test
+    void recordPromptCharsAddsPerAgentCounter() {
+        SimpleMeterRegistry registry = new SimpleMeterRegistry();
+        AiModelMetricsCollector collector = new AiModelMetricsCollector();
+        ReflectionTestUtils.setField(collector, "meterRegistry", registry);
+
+        collector.recordPromptChars("user-1", "app-1", "deepseek-chat", 42, "CodeGenAgent");
+        collector.recordPromptChars("user-1", "app-1", "deepseek-chat", 8, "CodeGenAgent");
+
+        assertEquals(50.0, registry.get("ai_agent_prompt_chars_total")
+                .tag("user_id", "user-1")
+                .tag("app_id", "app-1")
+                .tag("model_name", "deepseek-chat")
+                .tag("agent_name", "CodeGenAgent")
+                .counter()
+                .count());
+    }
 }

@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentMap;
  * - ai_model_requests_total{user_id, app_id, model_name, status, agent_name} — request count
  * - ai_model_errors_total{user_id, app_id, model_name, error_message, agent_name} — error count
  * - ai_model_tokens_total{user_id, app_id, model_name, token_type, agent_name} — token usage
+ * - ai_agent_prompt_chars_total{user_id, app_id, model_name, agent_name} — prompt characters
  * - ai_model_response_duration_seconds{user_id, app_id, model_name, agent_name} — response time
  * - ai_workflow_errors_total{user_id, app_id, agent_name, error_type, context_pruning} — workflow-layer errors
  *
@@ -42,6 +43,7 @@ public class AiModelMetricsCollector {
     private final ConcurrentMap<String, Counter> requestCountersCache = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Counter> errorCountersCache = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Counter> tokenCountersCache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Counter> promptCharCountersCache = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Counter> workflowErrorCountersCache = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Timer> responseTimersCache = new ConcurrentHashMap<>();
 
@@ -112,6 +114,29 @@ public class AiModelMetricsCollector {
                         .register(meterRegistry)
         );
         counter.increment(tokenCount);
+    }
+
+    /**
+     * Record outgoing prompt characters for diagnostic attribution.
+     * The value is local character count only; it must not call an external
+     * tokenizer/model because that would perturb the metric being studied.
+     */
+    public void recordPromptChars(String userId, String appId, String modelName,
+                                  long promptChars, String agentName) {
+        if (promptChars <= 0) {
+            return;
+        }
+        String key = String.format("%s_%s_%s_%s", userId, appId, modelName, agentName);
+        Counter counter = promptCharCountersCache.computeIfAbsent(key, k ->
+                Counter.builder("ai_agent_prompt_chars_total")
+                        .description("Total outgoing prompt characters by AI agent")
+                        .tag("user_id", userId)
+                        .tag("app_id", appId)
+                        .tag("model_name", modelName)
+                        .tag("agent_name", agentName)
+                        .register(meterRegistry)
+        );
+        counter.increment(promptChars);
     }
 
     public void recordWorkflowError(String userId, String appId, String agentName,

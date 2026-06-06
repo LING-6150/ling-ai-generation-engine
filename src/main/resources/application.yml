@@ -53,3 +53,8 @@ management:
 agent:
   orchestrator:
     enabled: false
+
+context:
+  pruning:
+    diagnostics:
+      enabled: false

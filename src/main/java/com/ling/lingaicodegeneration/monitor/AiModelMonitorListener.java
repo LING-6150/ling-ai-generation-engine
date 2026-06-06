@@ -1,5 +1,11 @@
 package com.ling.lingaicodegeneration.monitor;
 
+import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.data.message.CustomMessage;
+import dev.langchain4j.data.message.SystemMessage;
+import dev.langchain4j.data.message.ToolExecutionResultMessage;
+import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.listener.ChatModelErrorContext;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.chat.listener.ChatModelRequestContext;
@@ -7,11 +13,13 @@ import dev.langchain4j.model.chat.listener.ChatModelResponseContext;
 import dev.langchain4j.model.output.TokenUsage;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,6 +51,9 @@ public class AiModelMonitorListener implements ChatModelListener {
     @Resource
     private org.redisson.api.RedissonClient redissonClient;
 
+    @Value("${context.pruning.diagnostics.enabled:false}")
+    private boolean contextPruningDiagnosticsEnabled;
+
     @Override
     public void onRequest(ChatModelRequestContext requestContext) {
         requestContext.attributes().put(REQUEST_START_TIME_KEY, Instant.now());
@@ -62,6 +73,7 @@ public class AiModelMonitorListener implements ChatModelListener {
         aiModelMetricsCollector.recordRequest(
                 context.getUserId(), context.getAppId(), modelName, "started",
                 context.getAgentName());
+        recordPromptCharsIfEnabled(requestContext, context, modelName);
 
         log.debug("AI 请求开始 - userId: {}, appId: {}, model: {}, agent: {}",
                 context.getUserId(), context.getAppId(), modelName, context.getAgentName());
@@ -162,6 +174,62 @@ public class AiModelMonitorListener implements ChatModelListener {
         } catch (Exception e) {
             log.warn("记录 Token 消耗失败: {}", e.getMessage());
         }
+    }
+
+    private void recordPromptCharsIfEnabled(ChatModelRequestContext requestContext,
+                                            MonitorContext context,
+                                            String modelName) {
+        if (!contextPruningDiagnosticsEnabled) {
+            return;
+        }
+        try {
+            List<ChatMessage> messages = requestContext.chatRequest().messages();
+            long promptChars = countPromptChars(messages);
+            aiModelMetricsCollector.recordPromptChars(
+                    context.getUserId(), context.getAppId(), modelName, promptChars,
+                    context.getAgentName());
+        } catch (Exception e) {
+            log.warn("记录 prompt 字符数失败: {}", e.getMessage());
+        }
+    }
+
+    static long countPromptChars(List<ChatMessage> messages) {
+        if (messages == null || messages.isEmpty()) {
+            return 0;
+        }
+        return messages.stream()
+                .mapToLong(AiModelMonitorListener::messageChars)
+                .sum();
+    }
+
+    private static int messageChars(ChatMessage message) {
+        if (message == null) {
+            return 0;
+        }
+        String text = messageText(message);
+        return text != null ? text.length() : 0;
+    }
+
+    private static String messageText(ChatMessage message) {
+        if (message instanceof SystemMessage systemMessage) {
+            return systemMessage.text();
+        }
+        if (message instanceof UserMessage userMessage) {
+            if (userMessage.hasSingleText()) {
+                return userMessage.singleText();
+            }
+            return String.valueOf(userMessage.contents());
+        }
+        if (message instanceof AiMessage aiMessage) {
+            return aiMessage.text();
+        }
+        if (message instanceof ToolExecutionResultMessage toolMessage) {
+            return toolMessage.text();
+        }
+        if (message instanceof CustomMessage customMessage) {
+            return String.valueOf(customMessage.attributes());
+        }
+        return String.valueOf(message);
     }
 
     private void accumulateDailyTokens(String userId, TokenUsage tokenUsage) {

@@ -66,3 +66,9 @@ agent:
   orchestrator:
     # Keep false locally unless validating the newer multi-agent orchestration path.
     enabled: false
+
+context:
+  pruning:
+    diagnostics:
+      # Enable only during eval diagnostics; keeps prompt-char counters and pruning field logs off by default.
+      enabled: false
