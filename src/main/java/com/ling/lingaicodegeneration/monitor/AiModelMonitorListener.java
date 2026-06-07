@@ -184,9 +184,14 @@ public class AiModelMonitorListener implements ChatModelListener {
         }
         try {
             List<ChatMessage> messages = requestContext.chatRequest().messages();
-            long promptChars = countPromptChars(messages);
+            PromptComposition composition = classifyPromptComposition(messages);
             aiModelMetricsCollector.recordPromptChars(
-                    context.getUserId(), context.getAppId(), modelName, promptChars,
+                    context.getUserId(), context.getAppId(), modelName, composition.totalChars(),
+                    context.getAgentName());
+            aiModelMetricsCollector.recordPromptComposition(
+                    context.getUserId(), context.getAppId(), modelName,
+                    composition.systemChars(), composition.memoryChars(),
+                    composition.userChars(), composition.memoryMessages(),
                     context.getAgentName());
         } catch (Exception e) {
             log.warn("记录 prompt 字符数失败: {}", e.getMessage());
@@ -194,12 +199,43 @@ public class AiModelMonitorListener implements ChatModelListener {
     }
 
     static long countPromptChars(List<ChatMessage> messages) {
+        return classifyPromptComposition(messages).totalChars();
+    }
+
+    static PromptComposition classifyPromptComposition(List<ChatMessage> messages) {
         if (messages == null || messages.isEmpty()) {
-            return 0;
+            return new PromptComposition(0, 0, 0, 0);
         }
-        return messages.stream()
-                .mapToLong(AiModelMonitorListener::messageChars)
-                .sum();
+
+        int lastUserMessageIndex = lastUserMessageIndex(messages);
+        long systemChars = 0;
+        long memoryChars = 0;
+        long userChars = 0;
+        long memoryMessages = 0;
+
+        for (int i = 0; i < messages.size(); i++) {
+            ChatMessage message = messages.get(i);
+            long chars = messageChars(message);
+            if (message instanceof SystemMessage) {
+                systemChars += chars;
+            } else if (i == lastUserMessageIndex && message instanceof UserMessage) {
+                userChars += chars;
+            } else {
+                memoryChars += chars;
+                memoryMessages++;
+            }
+        }
+
+        return new PromptComposition(systemChars, memoryChars, userChars, memoryMessages);
+    }
+
+    private static int lastUserMessageIndex(List<ChatMessage> messages) {
+        for (int i = messages.size() - 1; i >= 0; i--) {
+            if (messages.get(i) instanceof UserMessage) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private static int messageChars(ChatMessage message) {
@@ -230,6 +266,17 @@ public class AiModelMonitorListener implements ChatModelListener {
             return String.valueOf(customMessage.attributes());
         }
         return String.valueOf(message);
+    }
+
+    record PromptComposition(
+            long systemChars,
+            long memoryChars,
+            long userChars,
+            long memoryMessages
+    ) {
+        long totalChars() {
+            return systemChars + memoryChars + userChars;
+        }
     }
 
     private void accumulateDailyTokens(String userId, TokenUsage tokenUsage) {

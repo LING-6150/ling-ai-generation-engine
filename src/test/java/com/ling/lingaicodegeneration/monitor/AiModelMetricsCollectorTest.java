@@ -49,4 +49,47 @@ class AiModelMetricsCollectorTest {
                 .counter()
                 .count());
     }
+
+    @Test
+    void recordPromptCompositionAddsBucketCounters() {
+        SimpleMeterRegistry registry = new SimpleMeterRegistry();
+        AiModelMetricsCollector collector = new AiModelMetricsCollector();
+        ReflectionTestUtils.setField(collector, "meterRegistry", registry);
+
+        collector.recordPromptComposition(
+                "user-1", "app-1", "deepseek-chat",
+                10, 20, 30, 2, "CodeGenAgent");
+        collector.recordPromptComposition(
+                "user-1", "app-1", "deepseek-chat",
+                1, 2, 3, 1, "CodeGenAgent");
+
+        assertEquals(11.0, registry.get("ai_agent_prompt_system_chars_total")
+                .tag("user_id", "user-1")
+                .tag("app_id", "app-1")
+                .tag("model_name", "deepseek-chat")
+                .tag("agent_name", "CodeGenAgent")
+                .counter()
+                .count());
+        assertEquals(22.0, registry.get("ai_agent_prompt_memory_chars_total")
+                .tag("user_id", "user-1")
+                .tag("app_id", "app-1")
+                .tag("model_name", "deepseek-chat")
+                .tag("agent_name", "CodeGenAgent")
+                .counter()
+                .count());
+        assertEquals(33.0, registry.get("ai_agent_prompt_user_chars_total")
+                .tag("user_id", "user-1")
+                .tag("app_id", "app-1")
+                .tag("model_name", "deepseek-chat")
+                .tag("agent_name", "CodeGenAgent")
+                .counter()
+                .count());
+        assertEquals(3.0, registry.get("ai_agent_prompt_memory_messages_total")
+                .tag("user_id", "user-1")
+                .tag("app_id", "app-1")
+                .tag("model_name", "deepseek-chat")
+                .tag("agent_name", "CodeGenAgent")
+                .counter()
+                .count());
+    }
 }

@@ -26,6 +26,10 @@ import java.util.concurrent.ConcurrentMap;
  * - ai_model_errors_total{user_id, app_id, model_name, error_message, agent_name} — error count
  * - ai_model_tokens_total{user_id, app_id, model_name, token_type, agent_name} — token usage
  * - ai_agent_prompt_chars_total{user_id, app_id, model_name, agent_name} — prompt characters
+ * - ai_agent_prompt_system_chars_total{user_id, app_id, model_name, agent_name} — system prompt chars
+ * - ai_agent_prompt_memory_chars_total{user_id, app_id, model_name, agent_name} — memory/history chars
+ * - ai_agent_prompt_user_chars_total{user_id, app_id, model_name, agent_name} — current user prompt chars
+ * - ai_agent_prompt_memory_messages_total{user_id, app_id, model_name, agent_name} — memory/history message count
  * - ai_model_response_duration_seconds{user_id, app_id, model_name, agent_name} — response time
  * - ai_workflow_errors_total{user_id, app_id, agent_name, error_type, context_pruning} — workflow-layer errors
  *
@@ -44,6 +48,7 @@ public class AiModelMetricsCollector {
     private final ConcurrentMap<String, Counter> errorCountersCache = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Counter> tokenCountersCache = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Counter> promptCharCountersCache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Counter> promptCompositionCountersCache = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Counter> workflowErrorCountersCache = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Timer> responseTimersCache = new ConcurrentHashMap<>();
 
@@ -137,6 +142,51 @@ public class AiModelMetricsCollector {
                         .register(meterRegistry)
         );
         counter.increment(promptChars);
+    }
+
+    /**
+     * Record outgoing prompt composition for diagnostic attribution.
+     * The buckets are computed from the already-built chat request, so this is
+     * read-only instrumentation and must not modify generation behavior.
+     */
+    public void recordPromptComposition(String userId, String appId, String modelName,
+                                        long systemChars, long memoryChars, long userChars,
+                                        long memoryMessages, String agentName) {
+        recordPromptCompositionCounter(
+                "ai_agent_prompt_system_chars_total",
+                "Total outgoing system prompt characters by AI agent",
+                userId, appId, modelName, agentName, systemChars);
+        recordPromptCompositionCounter(
+                "ai_agent_prompt_memory_chars_total",
+                "Total outgoing memory/history prompt characters by AI agent",
+                userId, appId, modelName, agentName, memoryChars);
+        recordPromptCompositionCounter(
+                "ai_agent_prompt_user_chars_total",
+                "Total outgoing current user prompt characters by AI agent",
+                userId, appId, modelName, agentName, userChars);
+        recordPromptCompositionCounter(
+                "ai_agent_prompt_memory_messages_total",
+                "Total outgoing memory/history message count by AI agent",
+                userId, appId, modelName, agentName, memoryMessages);
+    }
+
+    private void recordPromptCompositionCounter(String metricName, String description,
+                                                String userId, String appId, String modelName,
+                                                String agentName, long value) {
+        if (value <= 0) {
+            return;
+        }
+        String key = String.format("%s_%s_%s_%s_%s", metricName, userId, appId, modelName, agentName);
+        Counter counter = promptCompositionCountersCache.computeIfAbsent(key, k ->
+                Counter.builder(metricName)
+                        .description(description)
+                        .tag("user_id", userId)
+                        .tag("app_id", appId)
+                        .tag("model_name", modelName)
+                        .tag("agent_name", agentName)
+                        .register(meterRegistry)
+        );
+        counter.increment(value);
     }
 
     public void recordWorkflowError(String userId, String appId, String agentName,
