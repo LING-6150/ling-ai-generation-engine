@@ -113,11 +113,11 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
                     .orderBy("createTime", false)
                     .limit(1, maxCount);// 起始点是1而不是0；
             List<ChatHistory> historyList = this.list(queryWrapper);
+            chatMemory.clear();
             if (historyList == null || historyList.isEmpty()) {
                 return 0;
             }
             Collections.reverse(historyList);
-            chatMemory.clear();
             int loadedCount = 0;
             for (ChatHistory history : historyList) {
                 chatMemory.add(dev.langchain4j.data.message.UserMessage.from(history.getMessage()));
