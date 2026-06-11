@@ -354,8 +354,8 @@ location /api {
 **1. Clone and configure**
 
 ```bash
-git clone https://github.com/LING-6150/Ling-AI-CODE-generation.git
-cd Ling-AI-CODE-generation
+git clone https://github.com/LING-6150/ling-ai-generation-engine.git
+cd ling-ai-generation-engine
 ```
 
 **2. Create database**
