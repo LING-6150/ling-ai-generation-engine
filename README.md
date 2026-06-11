@@ -1,6 +1,6 @@
 # 🤖 Ling-AI-CODE-generation
 
-> **AI-Powered Web Application Generation Platform** — Generate production-ready websites and Vue 3 projects from natural language descriptions, with real-time streaming, intelligent workflow orchestration, and enterprise-grade observability.
+> **AI-Powered Web Application Generation Platform** — Generate websites and Vue 3 projects from natural language descriptions, with real-time streaming, workflow orchestration, and Prometheus/Grafana observability.
 
 [![Java](https://img.shields.io/badge/Java-21-orange)](https://openjdk.org/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5-green)](https://spring.io/projects/spring-boot)
@@ -30,11 +30,13 @@
 
 ## Overview
 
-Ling-AI-CODE-generation is a full-stack AI platform that lets users describe a website in plain English and instantly receive a working, deployable web application. The platform supports three generation modes — single HTML, multi-file static sites, and full Vue 3 + Vite projects — with real-time streaming output, AI-powered workflow orchestration, and production-grade system optimization.
+Ling-AI-CODE-generation is a full-stack AI platform that lets users describe a website in plain English and receive a generated web application. The platform supports three generation modes — single HTML, multi-file static sites, and full Vue 3 + Vite projects — with real-time streaming output, workflow orchestration, and production-oriented observability.
 
 **Live at**: http://3.227.11.113
 
-**Built for**: North American SDE internship interviews, demonstrating distributed systems, AI integration, and engineering best practices.
+**Eval companion**: [llm-codegen-eval](https://github.com/LING-6150/llm-codegen-eval), a separate Python harness for sharded A/B runs, token attribution, and reliability diagnostics.
+
+**Deployment note**: the public demo can be configured to run the simpler single-agent path for stability. The multi-agent path and context-pruning experiments are validated offline through the eval harness.
 
 ---
 
@@ -105,7 +107,7 @@ Ling-AI-CODE-generation is a full-stack AI platform that lets users describe a w
 - Incremental modification workflow: AI reads existing code before making targeted changes
 - Security: path traversal protection, important file deletion prevention
 
-### 📊 Enterprise Observability
+### 📊 Observability
 - Custom Prometheus metrics: request count, token usage, response time, error rate
 - Grafana dashboard with 11 panels
 - `ChatModelListener` hooks into LangChain4j model lifecycle
@@ -234,7 +236,7 @@ StreamingChatModel model = SpringContextUtil.getBean(
     "openAiStreamingChatModel", StreamingChatModel.class);
 ```
 
-**Impact**: Eliminated request serialization; load test confirmed **28% latency reduction** (6.4 min parallel vs 8.9 min sequential baseline).
+**Legacy measurement**: An early pre-harness load test showed a **28% latency reduction** (6.4 min parallel vs 8.9 min sequential baseline). Treat this as a concurrency validation signal, not as a current benchmark headline.
 
 ---
 
@@ -253,7 +255,7 @@ ImageCollector → PromptEnhancer → Router → CodeGenerator
                                        (retry loop)
 ```
 
-**Validated**: 95% build success rate across 20 diverse prompts, ~2.8 min avg latency, ~6,800 tokens/request.
+**Legacy validation**: An early 20-prompt smoke test observed 95% build success, ~2.8 min average latency, and ~6,800 tokens/request. These numbers predate the isolated eval harness and should be treated as historical smoke-test context, not current benchmark claims.
 
 ---
 
@@ -383,7 +385,7 @@ Required values:
 | Main models | `DEEPSEEK_API_KEY` plus optional LangChain4j model override env vars | Main generation, routing, and structured routing use DeepSeek-compatible config by default. |
 | Review provider | `REVIEW_MODEL_PROVIDER=zhipu`, `openai`, or `fallback-deepseek` | `zhipu` requires `ZHIPU_API_KEY`; `openai` requires `OPENAI_API_KEY`; fallback uses `DEEPSEEK_API_KEY`. |
 | Images | `PEXELS_API_KEY` | Required for Pexels-backed image search. |
-| Agent path | `AGENT_ORCHESTRATOR_ENABLED=false` | Keep `false` in production until the multi-agent path is explicitly validated. |
+| Agent path | `AGENT_ORCHESTRATOR_ENABLED=false` | Public demo can run the simpler path for stability; multi-agent behavior is validated offline with the eval harness. |
 
 See `src/main/resources/application-local.example.yml` and `src/main/resources/application-prod.example.yml` for complete share-safe templates.
 
