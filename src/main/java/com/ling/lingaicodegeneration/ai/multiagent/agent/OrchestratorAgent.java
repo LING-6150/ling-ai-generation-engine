@@ -287,8 +287,6 @@ public class OrchestratorAgent implements Agent<String, Flux<String>> {
     private void recordWorkflowError(AgentContext ctx, Throwable error) {
         try {
             aiModelMetricsCollector.recordWorkflowError(
-                    String.valueOf(ctx.userId()),
-                    String.valueOf(ctx.appId()),
                     ctx.agentName(),
                     AiProviderErrorClassifier.classifyWorkflow(error),
                     ctx.contextPruningEnabled()

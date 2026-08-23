@@ -70,9 +70,7 @@ public class AiModelMonitorListener implements ChatModelListener {
         String modelName = requestContext.chatRequest().modelName() != null
                 ? requestContext.chatRequest().modelName() : "unknown";
 
-        aiModelMetricsCollector.recordRequest(
-                context.getUserId(), context.getAppId(), modelName, "started",
-                context.getAgentName());
+        aiModelMetricsCollector.recordRequest(modelName, "started", context.getAgentName());
         recordPromptCharsIfEnabled(requestContext, context, modelName);
 
         log.debug("AI 请求开始 - userId: {}, appId: {}, model: {}, agent: {}",
@@ -92,14 +90,10 @@ public class AiModelMonitorListener implements ChatModelListener {
         String modelName = responseContext.chatResponse().modelName() != null
                 ? responseContext.chatResponse().modelName() : "unknown";
 
-        aiModelMetricsCollector.recordRequest(
-                context.getUserId(), context.getAppId(), modelName, "success",
-                context.getAgentName());
+        aiModelMetricsCollector.recordRequest(modelName, "success", context.getAgentName());
 
-        recordResponseTime(attributes, context.getUserId(), context.getAppId(), modelName,
-                context.getAgentName());
-        recordTokenUsage(responseContext, context.getUserId(), context.getAppId(), modelName,
-                context.getAgentName());
+        recordResponseTime(attributes, modelName, context.getAgentName());
+        recordTokenUsage(responseContext, modelName, context.getAgentName());
 
         log.debug("AI 请求完成 - userId: {}, appId: {}, model: {}, agent: {}",
                 context.getUserId(), context.getAppId(), modelName, context.getAgentName());
@@ -127,14 +121,9 @@ public class AiModelMonitorListener implements ChatModelListener {
                 ? errorContext.error().getMessage() : "unknown error";
         String errorType = AiProviderErrorClassifier.classify(errorContext.error());
 
-        aiModelMetricsCollector.recordRequest(
-                context.getUserId(), context.getAppId(), modelName, "error",
-                context.getAgentName());
-        aiModelMetricsCollector.recordError(
-                context.getUserId(), context.getAppId(), modelName, errorMessage,
-                errorType, context.getAgentName());
-        recordResponseTime(attributes, context.getUserId(), context.getAppId(), modelName,
-                context.getAgentName());
+        aiModelMetricsCollector.recordRequest(modelName, "error", context.getAgentName());
+        aiModelMetricsCollector.recordError(modelName, errorType, context.getAgentName());
+        recordResponseTime(attributes, modelName, context.getAgentName());
 
         log.warn("AI 请求失败 - userId: {}, appId: {}, model: {}, agent: {}, errorType: {}, error: {}",
                 context.getUserId(), context.getAppId(), modelName,
@@ -142,34 +131,32 @@ public class AiModelMonitorListener implements ChatModelListener {
     }
 
     private void recordResponseTime(Map<Object, Object> attributes,
-                                    String userId, String appId, String modelName,
-                                    String agentName) {
+                                    String modelName, String agentName) {
         Instant startTime = (Instant) attributes.get(REQUEST_START_TIME_KEY);
         if (startTime == null) {
             log.warn("未找到请求开始时间，无法记录响应时间");
             return;
         }
-        aiModelMetricsCollector.recordResponseTime(userId, appId, modelName,
-                Duration.between(startTime, Instant.now()), agentName);
+        aiModelMetricsCollector.recordResponseTime(
+                modelName, Duration.between(startTime, Instant.now()), agentName);
     }
 
     private void recordTokenUsage(ChatModelResponseContext responseContext,
-                                  String userId, String appId, String modelName,
-                                  String agentName) {
+                                  String modelName, String agentName) {
         try {
             TokenUsage tokenUsage = responseContext.chatResponse().metadata().tokenUsage();
             if (tokenUsage == null) return;
             if (tokenUsage.inputTokenCount() != null) {
                 aiModelMetricsCollector.recordTokenUsage(
-                        userId, appId, modelName, "input", tokenUsage.inputTokenCount(), agentName);
+                        modelName, "input", tokenUsage.inputTokenCount(), agentName);
             }
             if (tokenUsage.outputTokenCount() != null) {
                 aiModelMetricsCollector.recordTokenUsage(
-                        userId, appId, modelName, "output", tokenUsage.outputTokenCount(), agentName);
+                        modelName, "output", tokenUsage.outputTokenCount(), agentName);
             }
             if (tokenUsage.totalTokenCount() != null) {
                 aiModelMetricsCollector.recordTokenUsage(
-                        userId, appId, modelName, "total", tokenUsage.totalTokenCount(), agentName);
+                        modelName, "total", tokenUsage.totalTokenCount(), agentName);
             }
         } catch (Exception e) {
             log.warn("记录 Token 消耗失败: {}", e.getMessage());
@@ -186,10 +173,9 @@ public class AiModelMonitorListener implements ChatModelListener {
             List<ChatMessage> messages = requestContext.chatRequest().messages();
             PromptComposition composition = classifyPromptComposition(messages);
             aiModelMetricsCollector.recordPromptChars(
-                    context.getUserId(), context.getAppId(), modelName, composition.totalChars(),
-                    context.getAgentName());
+                    modelName, composition.totalChars(), context.getAgentName());
             aiModelMetricsCollector.recordPromptComposition(
-                    context.getUserId(), context.getAppId(), modelName,
+                    modelName,
                     composition.systemChars(), composition.memoryChars(),
                     composition.userChars(), composition.memoryMessages(),
                     context.getAgentName());

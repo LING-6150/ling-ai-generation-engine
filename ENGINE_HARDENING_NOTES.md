@@ -178,7 +178,7 @@ Do not add automatic fallback routing yet. The immediate reliability gap after t
 - `AiModelMetricsCollector.recordWorkflowError(...)` emits:
 
 ```text
-ai_workflow_errors_total{user_id, app_id, agent_name, error_type, context_pruning}
+ai_workflow_errors_total{agent_name, error_type, context_pruning}
 ```
 
 - `OrchestratorAgent` records workflow error metrics when the fatal workflow catch path emits `workflow_error`.

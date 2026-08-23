@@ -296,10 +296,13 @@ MonitorContext context = (MonitorContext) responseContext.attributes().get(MONIT
 ```
 
 **Metrics exposed**:
-- `ai_model_requests_total` (Counter, tagged: user_id, app_id, model_name, status)
-- `ai_model_tokens_total` (Counter, tagged: token_type = input/output/total)
-- `ai_model_response_duration_seconds` (Timer, auto-calculates percentiles)
-- `ai_model_errors_total` (Counter, tagged: error_message)
+- `ai_model_requests_total` (Counter, tagged: model_name, status, agent_name)
+- `ai_model_tokens_total` (Counter, tagged: model_name, token_type, agent_name)
+- `ai_model_response_duration_seconds` (Timer, tagged: model_name, agent_name)
+- `ai_model_errors_total` (Counter, tagged: model_name, error_type, agent_name)
+
+Request-scoped `userId`, `appId`, and raw error messages stay in logs rather than
+Prometheus labels. This keeps metric cardinality and the in-process Meter cache bounded.
 
 ---
 
@@ -519,7 +522,8 @@ ai_model_response_duration_seconds_sum 524.7
 
 ### Grafana Dashboard (11 panels)
 
-Import `grafana-dashboard.json` for the pre-built dashboard including request rate, token usage, response time distribution, error rate, and per-user analytics.
+Grafana can aggregate request rate, token usage, response time, and error rate by
+bounded dimensions such as model and Agent. Request-level investigation uses logs.
 
 ---
 

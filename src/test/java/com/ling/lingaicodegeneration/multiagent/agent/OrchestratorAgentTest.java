@@ -234,7 +234,7 @@ class OrchestratorAgentTest {
                 "workflow_error should explain the empty stream");
 
         verify(aiModelMetricsCollector).recordWorkflowError(
-                eq("1"), eq("1"), eq("OrchestratorAgent"), eq("workflow_empty_stream"), eq(false));
+                eq("OrchestratorAgent"), eq("workflow_empty_stream"), eq(false));
         verify(refineAgent, never()).execute(any(), any());
         verify(reviewAgent, never()).execute(any(), any());
     }
