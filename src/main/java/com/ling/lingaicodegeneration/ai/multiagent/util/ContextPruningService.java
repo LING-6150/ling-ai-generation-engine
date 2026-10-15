@@ -48,7 +48,8 @@ public class ContextPruningService {
         RefineInput pruned = new RefineInput(
                 input.generatedCodeDir(),
                 pruneReviewReport(input.reviewReport()),
-                pruneRefinementPlan(input.refinementPlan())
+                pruneRefinementPlan(input.refinementPlan()),
+                input.verificationReport()  // already capped by the verifier; keep as-is
         );
         logReduction("RefineInput", input, pruned);
         return pruned;
