@@ -36,9 +36,14 @@ public interface AppService extends IService<App> {
      * Chat to generate code (streaming)
      */
     Flux<String> chatToGenCode(Long appId, String message, User loginUser,
-                               boolean agent, boolean contextPruning);
+                               boolean agent, boolean contextPruning, boolean executionFeedback);
+
+    default Flux<String> chatToGenCode(Long appId, String message, User loginUser,
+                                       boolean agent, boolean contextPruning) {
+        return chatToGenCode(appId, message, loginUser, agent, contextPruning, false);
+    }
 
     default Flux<String> chatToGenCode(Long appId, String message, User loginUser) {
-        return chatToGenCode(appId, message, loginUser, false, false);
+        return chatToGenCode(appId, message, loginUser, false, false, false);
     }
 }

@@ -47,11 +47,11 @@ class AppControllerTest {
         User user = new User();
         user.setId(1L);
         when(userService.getLoginUser(request)).thenReturn(user);
-        when(appService.chatToGenCode(eq(123L), eq("build app"), eq(user), eq(true), eq(true)))
+        when(appService.chatToGenCode(eq(123L), eq("build app"), eq(user), eq(true), eq(true), eq(false)))
                 .thenReturn(Flux.empty());
 
         List<ServerSentEvent<String>> events = appController
-                .chatToGenCode(123L, "build app", true, true, request)
+                .chatToGenCode(123L, "build app", true, true, false, request)
                 .collectList()
                 .block();
 
@@ -66,11 +66,11 @@ class AppControllerTest {
         User user = new User();
         user.setId(1L);
         when(userService.getLoginUser(request)).thenReturn(user);
-        when(appService.chatToGenCode(eq(123L), eq("build app"), eq(user), eq(true), eq(false)))
+        when(appService.chatToGenCode(eq(123L), eq("build app"), eq(user), eq(true), eq(false), eq(false)))
                 .thenReturn(Flux.just("{\"type\":\"code_token\",\"content\":\"hello\"}"));
 
         List<ServerSentEvent<String>> events = appController
-                .chatToGenCode(123L, "build app", true, false, request)
+                .chatToGenCode(123L, "build app", true, false, false, request)
                 .collectList()
                 .block();
 

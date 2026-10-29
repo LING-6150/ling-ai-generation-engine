@@ -256,11 +256,12 @@ public class AppController {
             @RequestParam String message,
             @RequestParam(defaultValue = "false") boolean agent,
             @RequestParam(defaultValue = "false") boolean contextPruning,
+            @RequestParam(defaultValue = "false") boolean executionFeedback,
             HttpServletRequest request) {
         ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "App ID cannot be null");
         ThrowUtils.throwIf(message == null || message.isBlank(), ErrorCode.PARAMS_ERROR, "Message cannot be empty");
         User loginUser = userService.getLoginUser(request);
-        Flux<String> contentFlux = appService.chatToGenCode(appId, message, loginUser, agent, contextPruning);
+        Flux<String> contentFlux = appService.chatToGenCode(appId, message, loginUser, agent, contextPruning, executionFeedback);
         return contentFlux
                 .switchIfEmpty(Mono.fromSupplier(() -> {
                     log.warn("Generation SSE stream completed without content, appId: {}, agent: {}, contextPruning: {}",

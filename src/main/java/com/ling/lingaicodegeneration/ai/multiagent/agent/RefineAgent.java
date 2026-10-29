@@ -2,6 +2,7 @@ package com.ling.lingaicodegeneration.ai.multiagent.agent;
 
 import com.ling.lingaicodegeneration.ai.multiagent.llm.RefineAiService;
 import com.ling.lingaicodegeneration.ai.multiagent.model.RefineInput;
+import com.ling.lingaicodegeneration.ai.multiagent.verify.VerificationReport;
 import com.ling.lingaicodegeneration.ai.tools.FileDirReadTool;
 import com.ling.lingaicodegeneration.ai.tools.FileModifyTool;
 import com.ling.lingaicodegeneration.ai.tools.FileReadTool;
@@ -75,7 +76,7 @@ public class RefineAgent implements Agent<RefineInput, Flux<String>> {
         List<String> targetFiles = input.refinementPlan().targetFiles();
         String instructions = input.refinementPlan().instructions();
 
-        return String.format("""
+        String request = String.format("""
                 Code directory: %s
                 Attempt: %d of 3
 
@@ -97,6 +98,27 @@ public class RefineAgent implements Agent<RefineInput, Flux<String>> {
                         ? "all files in the project"
                         : String.join(", ", targetFiles)
         );
+        // Appended only when present, so the legacy request stays byte-identical.
+        return request + buildExecutionFeedback(input.verificationReport());
+    }
+
+    // Visible for unit testing
+    public String buildExecutionFeedback(VerificationReport report) {
+        if (report == null || !report.hasActionableFailures()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder("""
+
+                Execution Feedback (observed by actually loading or building the project):
+                """);
+        for (VerificationReport.Failure failure : report.failures()) {
+            sb.append("- [").append(failure.type()).append("] ").append(failure.message()).append('\n');
+        }
+        sb.append("""
+                These are real runtime/build errors, not opinions. Fix them first, before review issues. \
+                You may modify any file needed to fix them, even if the Review Report does not mention it.
+                """);
+        return sb.toString();
     }
 
     private String describeError(Throwable error) {

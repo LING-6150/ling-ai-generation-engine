@@ -3,6 +3,8 @@ package com.ling.lingaicodegeneration.ai.multiagent.agent;
 import cn.hutool.json.JSONUtil;
 import com.ling.lingaicodegeneration.ai.multiagent.model.*;
 import com.ling.lingaicodegeneration.ai.multiagent.util.ContextPruningService;
+import com.ling.lingaicodegeneration.ai.multiagent.verify.ExecutionVerifier;
+import com.ling.lingaicodegeneration.ai.multiagent.verify.VerificationReport;
 import com.ling.lingaicodegeneration.core.CodeFileSaver;
 import com.ling.lingaicodegeneration.model.enums.ChatHistoryMessageTypeEnum;
 import com.ling.lingaicodegeneration.monitor.MonitorContext;
@@ -35,6 +37,7 @@ public class OrchestratorAgent implements Agent<String, Flux<String>> {
     @Resource private ReviewAgent       reviewAgent;
     @Resource private RefineAgent       refineAgent;
     @Resource private ContextPruningService contextPruningService;
+    @Resource private ExecutionVerifier     executionVerifier;
     @Resource private AiModelMetricsCollector aiModelMetricsCollector;
     @Resource private ChatHistoryService chatHistoryService;
     @Resource(name = "imageSearchExecutor")
@@ -170,14 +173,25 @@ public class OrchestratorAgent implements Agent<String, Flux<String>> {
                                 "score=" + finalReview.getScore()
                                         + ",passed=" + finalReview.getPassed()));
 
-                        if (finalReview.getPassed() || attempt >= maxRetries) break;
+                        // Ground truth next to the LLM's opinion: actually load/build the files.
+                        // Off by default, so the legacy loop is unchanged.
+                        VerificationReport verification = null;
+                        if (ctx.executionFeedbackEnabled()) {
+                            sink.next(event("verify_start", "attempt=" + (attempt + 1)));
+                            verification = executionVerifier.verify(spec.getCodeGenType(), outputDir);
+                            sink.next(event("verify_done", describeVerification(verification)));
+                        }
+                        boolean executionOk = verification == null || !verification.hasActionableFailures();
+
+                        if ((finalReview.getPassed() && executionOk) || attempt >= maxRetries) break;
 
                         // Refine — stream tokens to SSE client just like CodeGenAgent
                         sink.next(event("refine_start", "attempt=" + (attempt + 1)));
                         List<String> targetFiles = extractTargetFiles(finalReview);
                         RefinementPlan refinePlan = new RefinementPlan(
                                 targetFiles, plan.reviewFocusAreas(), attempt + 1);
-                        RefineInput refineInput = new RefineInput(outputDir, finalReview, refinePlan);
+                        RefineInput refineInput = new RefineInput(outputDir, finalReview, refinePlan,
+                                executionOk ? null : verification);
                         if (ctx.contextPruningEnabled()) {
                             refineInput = contextPruningService.pruneForRefine(refineInput);
                         }
@@ -277,6 +291,20 @@ public class OrchestratorAgent implements Agent<String, Flux<String>> {
         // Use null check only (not isBlank) so whitespace code tokens are preserved
         if (detail != null) map.put("detail", detail);
         return JSONUtil.toJsonStr(map);
+    }
+
+    /** Short SSE detail, e.g. "passed=false,failures=2,first=page_error: x is not defined". Visible for unit testing. */
+    public static String describeVerification(VerificationReport report) {
+        if (!report.available()) {
+            return truncate("unavailable=" + report.unavailableReason(), 200);
+        }
+        if (report.passed()) {
+            return "passed=true,ms=" + report.durationMillis();
+        }
+        VerificationReport.Failure first = report.failures().isEmpty() ? null : report.failures().get(0);
+        String firstText = first == null ? "" : ",first=" + first.type() + ": " + first.message();
+        return truncate("passed=false,failures=" + report.failures().size()
+                + ",ms=" + report.durationMillis() + firstText, 200);
     }
 
     private static String truncate(String s, int max) {

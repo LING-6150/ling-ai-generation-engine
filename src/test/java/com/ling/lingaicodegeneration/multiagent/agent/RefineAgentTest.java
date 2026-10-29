@@ -5,6 +5,7 @@ import com.ling.lingaicodegeneration.ai.multiagent.agent.RefineAgent;
 import com.ling.lingaicodegeneration.ai.multiagent.model.RefineInput;
 import com.ling.lingaicodegeneration.ai.multiagent.model.RefinementPlan;
 import com.ling.lingaicodegeneration.ai.multiagent.model.ReviewReport;
+import com.ling.lingaicodegeneration.ai.multiagent.verify.VerificationReport;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -89,5 +90,38 @@ class RefineAgentTest {
         String request = refineAgent.buildRefinementRequest(input);
 
         assertTrue(request.contains("Follow the review report"));
+    }
+
+    // ── execution feedback ───────────────────────────────────────────────
+
+    @Test
+    void buildRefinementRequest_withoutFeedback_isIdenticalToLegacyRequest() {
+        RefinementPlan plan = new RefinementPlan(List.of("index.html"), "Focus", 1);
+        String legacy = refineAgent.buildRefinementRequest(new RefineInput("/tmp/dir", buildReport(), plan));
+        String withNull = refineAgent.buildRefinementRequest(new RefineInput("/tmp/dir", buildReport(), plan, null));
+
+        assertEquals(legacy, withNull);
+        assertFalse(legacy.contains("Execution Feedback"));
+    }
+
+    @Test
+    void buildRefinementRequest_withFailures_listsThemAndAllowsUnlistedFiles() {
+        VerificationReport report = VerificationReport.failed(List.of(
+                new VerificationReport.Failure("page_error", "startTimer is not defined"),
+                new VerificationReport.Failure("resource_failed", "file:///app/script.js net::ERR_FILE_NOT_FOUND")), 40);
+        RefinementPlan plan = new RefinementPlan(List.of(), null, 1);
+
+        String request = refineAgent.buildRefinementRequest(new RefineInput("/tmp/dir", buildReport(), plan, report));
+
+        assertTrue(request.contains("Execution Feedback"));
+        assertTrue(request.contains("- [page_error] startTimer is not defined"));
+        assertTrue(request.contains("- [resource_failed] file:///app/script.js"));
+        assertTrue(request.contains("even if the Review Report does not mention it"));
+    }
+
+    @Test
+    void buildExecutionFeedback_ignoresPassedOrUnavailableReports() {
+        assertEquals("", refineAgent.buildExecutionFeedback(VerificationReport.passed(10)));
+        assertEquals("", refineAgent.buildExecutionFeedback(VerificationReport.unavailable("no browser", 1)));
     }
 }
