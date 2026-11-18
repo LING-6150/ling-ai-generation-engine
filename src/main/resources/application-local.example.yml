@@ -23,6 +23,12 @@ app:
 
 langchain4j:
   open-ai:
+    chat-model:
+      base-url: https://api.deepseek.com
+      api-key: ${DEEPSEEK_API_KEY}
+      model-name: deepseek-chat
+      log-requests: false
+      log-responses: false
     streaming-chat-model:
       base-url: https://api.deepseek.com
       api-key: ${DEEPSEEK_API_KEY}

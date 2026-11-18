@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - dev
 
 jobs:
   offline-tests:
@@ -23,3 +24,18 @@ jobs:
 
       - name: Run offline Maven tests
         run: ./mvnw -q test
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Ling-AI-CODE-generation-frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: Ling-AI-CODE-generation-frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build

@@ -59,8 +59,3 @@ create table if not exists chat_history
     INDEX idx_createTime (createTime),
     INDEX idx_appId_createTime (appId, createTime)
 ) comment 'Chat history' collate = utf8mb4_unicode_ci;
-
-ALTER TABLE chat_history
-    ADD INDEX idx_appId (appId),
-    ADD INDEX idx_createTime (createTime),
-    ADD INDEX idx_appId_createTime (appId, createTime);

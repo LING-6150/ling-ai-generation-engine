@@ -98,12 +98,6 @@ declare namespace API {
     message?: string
   }
 
-  type BaseResponseUser = {
-    code?: number
-    data?: User
-    message?: string
-  }
-
   type BaseResponseUserVO = {
     code?: number
     data?: UserVO
@@ -140,7 +134,7 @@ declare namespace API {
   }
 
   type DeleteRequest = {
-    id?: number
+    id?: string | number
   }
 
   type getAppVOByIdAdminParams = {
@@ -207,20 +201,6 @@ declare namespace API {
 
   type serveStaticResourceParams = {
     dirName: string
-  }
-
-  type User = {
-    id?: number
-    userAccount?: string
-    userPassword?: string
-    userName?: string
-    userAvatar?: string
-    userProfile?: string
-    userRole?: string
-    editTime?: string
-    createTime?: string
-    updateTime?: string
-    isDelete?: number
   }
 
   type UserAddRequest = {
