@@ -1,7 +1,10 @@
 package com.ling.lingaicodegeneration.controller;
 
 import com.ling.lingaicodegeneration.ai.AiCodeGenTypeRoutingService;
+import com.ling.lingaicodegeneration.constant.AppConstant;
+import com.ling.lingaicodegeneration.model.entity.App;
 import com.ling.lingaicodegeneration.model.entity.User;
+import com.ling.lingaicodegeneration.model.vo.AppVO;
 import com.ling.lingaicodegeneration.service.AppService;
 import com.ling.lingaicodegeneration.service.ProjectDownloadService;
 import com.ling.lingaicodegeneration.service.UserService;
@@ -17,6 +20,7 @@ import reactor.core.publisher.Flux;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -41,6 +45,20 @@ class AppControllerTest {
 
     @InjectMocks
     private AppController appController;
+
+    @Test
+    void anonymousFeaturedDetailOmitsInitialPrompt() {
+        App app = new App();
+        app.setPriority(AppConstant.GOOD_APP_PRIORITY);
+        AppVO summary = new AppVO();
+        summary.setInitPrompt("private instructions");
+        summary.setAppName("Public title");
+        when(appService.getById(123L)).thenReturn(app);
+        when(appService.getAppVO(app)).thenReturn(summary);
+        AppVO response = appController.getAppVOById(123L, request).getData();
+        assertNull(response.getInitPrompt());
+        assertEquals("Public title", response.getAppName());
+    }
 
     @Test
     void chatToGenCodeEmitsWorkflowErrorWhenContentFluxIsEmpty() {

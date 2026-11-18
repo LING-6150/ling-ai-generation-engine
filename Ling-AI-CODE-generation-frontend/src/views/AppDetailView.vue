@@ -21,14 +21,15 @@
             </a-button>
             <a-button
               type="primary"
+              v-if="isOwner"
               @click="$router.push(`/chat/${appInfo.id}`)"
             >
               💬 Open Chat
             </a-button>
             <a-button
-              v-if="appInfo.deployKey"
+              v-if="appInfo.deployUrl"
               type="link"
-              :href="`http://localhost/${appInfo.deployKey}`"
+              :href="appInfo.deployUrl"
               target="_blank"
             >
               🌐 View Live
@@ -73,9 +74,9 @@
               <span class="meta-label">Deployed</span>
               <span>{{ formatDate(appInfo.deployedTime) }}</span>
             </div>
-            <div class="meta-item" v-if="appInfo.deployKey">
+            <div class="meta-item" v-if="appInfo.deployUrl">
               <span class="meta-label">Deploy URL</span>
-              <a :href="`http://localhost/${appInfo.deployKey}`" target="_blank">localhost/{{ appInfo.deployKey }}</a>
+              <a :href="appInfo.deployUrl" target="_blank">{{ appInfo.deployUrl }}</a>
             </div>
           </div>
         </div>
@@ -86,7 +87,8 @@
           <iframe
             :src="previewUrl"
             class="preview-iframe"
-            sandbox="allow-scripts allow-same-origin"
+            sandbox="allow-scripts"
+            referrerpolicy="no-referrer"
           />
         </div>
       </div>
@@ -115,12 +117,13 @@ const isOwner = computed(() => {
 })
 //重新修改 改成vue逻辑的
 const previewUrl = computed(() => {
-  if (!appInfo.value?.codeGenType || !appId) return ''
+  if (!isOwner.value || !appInfo.value?.codeGenType || !appId) return ''
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8123/api'
   const codeGenType = appInfo.value.codeGenType
   if (codeGenType === 'vue_project') {
-    return `http://localhost:8123/api/static/${codeGenType}_${appId}/dist/index.html`
+    return `${baseUrl}/static/${codeGenType}_${appId}/dist/index.html`
   }
-  return `http://localhost:8123/api/static/${codeGenType}_${appId}/`
+  return `${baseUrl}/static/${codeGenType}_${appId}/`
 })
 
 const fetchAppInfo = async () => {

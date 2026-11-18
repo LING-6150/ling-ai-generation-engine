@@ -27,6 +27,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.MediaType;
@@ -58,6 +59,9 @@ public class AppController {
     @Resource
     private AiCodeGenTypeRoutingService aiCodeGenTypeRoutingService;
 
+    @Value("${app.generation.static-only:false}")
+    private boolean staticOnly;
+
     // ========== User APIs ==========
 
     /**
@@ -82,12 +86,18 @@ public class AppController {
             try {
                 CodeGenTypeEnum routedType = aiCodeGenTypeRoutingService.routeCodeGenType(initPrompt);
                 codeGenType = (routedType != null) ? routedType.getValue() : CodeGenTypeEnum.MULTI_FILE.getValue();
-                log.info("AI routing selected: {} for prompt: {}", codeGenType, initPrompt.substring(0, Math.min(initPrompt.length(), 50)));
+                if (staticOnly && CodeGenTypeEnum.VUE_PROJECT == routedType) {
+                    codeGenType = CodeGenTypeEnum.MULTI_FILE.getValue();
+                }
             } catch (Exception e) {
                 log.warn("AI routing failed, falling back to MULTI_FILE: {}", e.getMessage());
                 codeGenType = CodeGenTypeEnum.MULTI_FILE.getValue();
             }
         }
+        CodeGenTypeEnum type = CodeGenTypeEnum.getEnumByValue(codeGenType);
+        ThrowUtils.throwIf(type == null, ErrorCode.PARAMS_ERROR, "Unknown generation mode");
+        ThrowUtils.throwIf(staticOnly && type == CodeGenTypeEnum.VUE_PROJECT,
+                ErrorCode.PARAMS_ERROR, "The pilot supports HTML and multi-file projects");
         app.setCodeGenType(codeGenType);
         boolean result = appService.save(app);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
@@ -146,7 +156,18 @@ public class AppController {
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
         App app = appService.getById(id);
         ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR);
-        return ResultUtils.success(appService.getAppVO(app));
+        boolean featured = AppConstant.GOOD_APP_PRIORITY.equals(app.getPriority());
+        var session = request.getSession(false);
+        boolean signedIn = session != null && session.getAttribute(UserConstant.USER_LOGIN_STATE) != null;
+        User viewer = featured && !signedIn ? null : userService.getLoginUser(request);
+        boolean canReadDraft = viewer != null && (viewer.getId().equals(app.getUserId()) ||
+                UserConstant.ADMIN_ROLE.equals(viewer.getUserRole()));
+        ThrowUtils.throwIf(!canReadDraft && !featured, ErrorCode.NO_AUTH_ERROR);
+        AppVO view = appService.getAppVO(app);
+        if (!canReadDraft) {
+            view.setInitPrompt(null);
+        }
+        return ResultUtils.success(view);
     }
 
     /**
@@ -177,7 +198,7 @@ public class AppController {
      */
     @PostMapping("/good/list/page/vo")
     @Cacheable(
-            value = "good_app_page",
+            value = "featured_summaries",
             key = "T(com.ling.lingaicodegeneration.utils.CacheKeyUtils).generateKey(#appQueryRequest)",
             condition = "#appQueryRequest.pageNum >= 10"
     )
@@ -188,12 +209,14 @@ public class AppController {
         ThrowUtils.throwIf(pageSize > 20, ErrorCode.PARAMS_ERROR, "Page size cannot exceed 20");
         long pageNum = appQueryRequest.getPageNum();
         appQueryRequest.setPriority(AppConstant.GOOD_APP_PRIORITY);
+        appQueryRequest.setInitPrompt(null);
         QueryWrapper queryWrapper = appService.getQueryWrapper(appQueryRequest);
         com.mybatisflex.core.paginate.Page<App> appPage = appService.page(
                 new com.mybatisflex.core.paginate.Page<>(pageNum, pageSize), queryWrapper);
         com.mybatisflex.core.paginate.Page<AppVO> appVOPage =
                 new com.mybatisflex.core.paginate.Page<>(pageNum, pageSize, appPage.getTotalRow());
         List<AppVO> appVOList = appService.getAppVOList(appPage.getRecords());
+        appVOList.forEach(view -> view.setInitPrompt(null));
         appVOPage.setRecords(appVOList);
         return ResultUtils.success(appVOPage);
     }
@@ -307,7 +330,7 @@ public class AppController {
      */
     @PostMapping("/admin/delete")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    @CacheEvict(value = "good_app_page", allEntries = true)
+    @CacheEvict(value = "featured_summaries", allEntries = true)
     public BaseResponse<Boolean> deleteAppByAdmin(@RequestBody DeleteRequest deleteRequest) {
         ThrowUtils.throwIf(deleteRequest == null || deleteRequest.getId() <= 0,
                 ErrorCode.PARAMS_ERROR);
@@ -322,7 +345,7 @@ public class AppController {
      * Admin update app
      */
     @PostMapping("/admin/update")
-    @CacheEvict(value = "good_app_page", allEntries = true)
+    @CacheEvict(value = "featured_summaries", allEntries = true)
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> updateAppByAdmin(@RequestBody AppAdminUpdateRequest appAdminUpdateRequest) {
         ThrowUtils.throwIf(appAdminUpdateRequest == null || appAdminUpdateRequest.getId() == null,

@@ -80,6 +80,12 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
     @Value("${agent.orchestrator.enabled:false}")
     private boolean orchestratorEnabled;
 
+    @Value("${app.generation.static-only:false}")
+    private boolean staticOnly;
+
+    @Value("${app.deploy.base-url:" + AppConstant.CODE_DEPLOY_HOST + "}")
+    private String deployBaseUrl;
+
     @Resource
     private RedissonClient redissonClient;
 
@@ -117,6 +123,10 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         }
         AppVO appVO = new AppVO();
         BeanUtils.copyProperties(app, appVO);
+        if (StrUtil.isNotBlank(app.getDeployKey())) {
+            appVO.setDeployUrl(deployBaseUrl + "/" + app.getDeployKey());
+        }
+        appVO.setAgentModeAvailable(!staticOnly);
         Long userId = app.getUserId();
         if (userId != null) {
             User user = userService.getById(userId);
@@ -183,6 +193,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         // 7. Vue 项目特殊处理：需要构建后使用 dist 目录
         CodeGenTypeEnum codeGenTypeEnum = CodeGenTypeEnum.getEnumByValue(codeGenType);
         if (codeGenTypeEnum == CodeGenTypeEnum.VUE_PROJECT) {
+            ThrowUtils.throwIf(staticOnly, ErrorCode.FORBIDDEN_ERROR, "Vue builds are disabled during the pilot");
             // 执行构建
             boolean buildSuccess = vueProjectBuilder.buildProject(sourceDirPath);
             ThrowUtils.throwIf(!buildSuccess, ErrorCode.SYSTEM_ERROR,
@@ -213,7 +224,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "Failed to update deploy info");
         }
         // 10. Return URL
-        return String.format("%s/%s", AppConstant.CODE_DEPLOY_HOST, deployKey);
+        return deployBaseUrl + "/" + deployKey;
     }
 
 
@@ -306,6 +317,8 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         if (codeGenTypeEnum == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Unsupported code gen type");
         }
+        ThrowUtils.throwIf(staticOnly && (agent || codeGenTypeEnum == CodeGenTypeEnum.VUE_PROJECT),
+                ErrorCode.FORBIDDEN_ERROR, "The pilot supports direct HTML and multi-file generation");
         log.info("appId: {}, codeGenType from DB: {}, enum: {}", appId, codeGenTypeStr, codeGenTypeEnum);
         // 5. 保存用户消息到对话历史
         chatHistoryService.addChatMessage(appId, message,

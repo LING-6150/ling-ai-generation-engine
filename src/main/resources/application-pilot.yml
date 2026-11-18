@@ -1,0 +1,8 @@
+app:
+  generation:
+    static-only: true
+  preview:
+    base-url: ${PILOT_PREVIEW_BASE_URL}
+    frame-origin: ${PILOT_FRONTEND_ORIGIN}
+  deploy:
+    base-url: ${PILOT_PUBLISH_BASE_URL}

@@ -55,7 +55,7 @@ public class RedisCacheManagerConfig {
         return RedisCacheManager.builder(redisConnectionFactory)
                 .cacheDefaults(defaultConfig)
                 // Featured apps list: shorter TTL (5 min) — admins update it occasionally
-                .withCacheConfiguration("good_app_page",
+                .withCacheConfiguration("featured_summaries",
                         defaultConfig.entryTtl(Duration.ofMinutes(5)))
                 .build();
     }

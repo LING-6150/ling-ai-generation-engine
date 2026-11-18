@@ -2,6 +2,7 @@ package com.ling.lingaicodegeneration.core.builder;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,6 +15,16 @@ class VueProjectBuilderTest {
 
     @TempDir
     Path tempDir;
+
+    @Test
+    void pilotBlocksValidProjectsBeforeLaunchingNpm() throws Exception {
+        Files.writeString(tempDir.resolve("package.json"), "{}");
+        ReflectionTestUtils.setField(builder, "staticOnly", true);
+        VueBuildResult result = builder.buildProjectWithResult(tempDir.toString());
+        assertFalse(result.passed());
+        assertEquals("Vue builds are disabled during the pilot", result.errorSnippet());
+        assertEquals("", result.outputSnippet());
+    }
 
     @Test
     void buildProjectWithResult_missingProjectDirectory_returnsStableFailure() {

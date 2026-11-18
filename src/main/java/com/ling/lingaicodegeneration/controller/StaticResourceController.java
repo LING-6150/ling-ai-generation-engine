@@ -1,93 +1,119 @@
 package com.ling.lingaicodegeneration.controller;
 
 import com.ling.lingaicodegeneration.constant.AppConstant;
+import com.ling.lingaicodegeneration.constant.UserConstant;
+import com.ling.lingaicodegeneration.model.entity.App;
+import com.ling.lingaicodegeneration.model.entity.User;
+import com.ling.lingaicodegeneration.model.enums.CodeGenTypeEnum;
+import com.ling.lingaicodegeneration.service.AppService;
+import com.ling.lingaicodegeneration.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
-@RequestMapping("/static")
+@RequiredArgsConstructor
 public class StaticResourceController {
+    private static final Pattern DIRECTORY = Pattern.compile("(html|multi_file|vue_project)_([1-9][0-9]{0,18})");
+    private static final String TICKET_PREFIX = "preview:ticket:";
+    private final AppService apps;
+    private final UserService users;
+    private final StringRedisTemplate redis;
 
-    // App code output root dir (for preview)
-    private static final String PREVIEW_ROOT_DIR = AppConstant.CODE_OUTPUT_ROOT_DIR;
+    @Value("${app.preview.base-url:}")
+    private String previewBaseUrl;
 
-    /**
-     * Serve static resources, support directory redirect
-     * Access pattern: http://localhost:8123/api/static/{codeGenType}_{appId}/{fileName}
-     */
-    @GetMapping("/{dirName}/**")
-    public ResponseEntity<Resource> serveStaticResource(
-            @PathVariable String dirName,
-            HttpServletRequest request) {
+    @Value("${app.preview.frame-origin:'self'}")
+    private String frameOrigin;
+
+    @GetMapping("/static/{dirName}/{*file}")
+    public ResponseEntity<Void> openPreview(@PathVariable String dirName, @PathVariable String file,
+                                            HttpServletRequest request) {
+        Matcher directory = DIRECTORY.matcher(dirName);
+        if (!directory.matches()) return ResponseEntity.notFound().build();
+        long id;
         try {
-            // Get resource path
-            String resourcePath = (String) request.getAttribute(
-                    "jakarta.servlet.forward.request_uri");
-            if (resourcePath == null) {
-                resourcePath = request.getRequestURI();
-            }
-            resourcePath = resourcePath.substring(
-                    ("/api/static/" + dirName).length());
+            id = Long.parseLong(directory.group(2));
+        } catch (NumberFormatException e) {
+            return ResponseEntity.notFound().build();
+        }
+        User user = users.getLoginUser(request);
+        App app = apps.getById(id);
+        if (app == null || !directory.group(1).equals(app.getCodeGenType())) return ResponseEntity.notFound().build();
+        if (!user.getId().equals(app.getUserId()) && !UserConstant.ADMIN_ROLE.equals(user.getUserRole())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        boolean vue = CodeGenTypeEnum.VUE_PROJECT.getValue().equals(app.getCodeGenType());
+        String entry = file.isEmpty() || file.equals("/") ? "/index.html" : file;
+        if (vue && entry.startsWith("/dist/")) entry = entry.substring(5);
+        String directoryName = vue ? dirName + "/dist" : dirName;
+        if (!safeFile(entry)) return ResponseEntity.notFound().build();
+        String ticket = UUID.randomUUID().toString();
+        redis.opsForValue().set(TICKET_PREFIX + ticket, directoryName, Duration.ofMinutes(5));
+        String base = previewBaseUrl.isBlank() ? request.getContextPath() + "/preview" : previewBaseUrl;
+        URI target = UriComponentsBuilder.fromUriString(base).pathSegment(ticket).path(entry).build().encode().toUri();
+        return ResponseEntity.status(HttpStatus.FOUND).location(target).cacheControl(CacheControl.noStore())
+                .header("Referrer-Policy", "no-referrer").build();
+    }
 
-            // If directory access, redirect to index.html
-            if (resourcePath.isEmpty()) {
-                HttpHeaders headers = new HttpHeaders();
-                headers.add("Location", request.getRequestURI() + "/");
-                return new ResponseEntity<>(headers, HttpStatus.MOVED_PERMANENTLY);
-            }
-
-            // Default to index.html
-            if (resourcePath.equals("/")) {
-                resourcePath = "/index.html";
-            }
-
-            Path previewRoot = Path.of(PREVIEW_ROOT_DIR).toRealPath();
-            Path appRoot = previewRoot.resolve(dirName).normalize();
-            Path requestedPath = appRoot.resolve(resourcePath.substring(1)).normalize();
-            if (!requestedPath.startsWith(appRoot) || !appRoot.startsWith(previewRoot)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-
-            File file = requestedPath.toFile();
-
-            // Check if file exists
-            if (!file.exists()) {
+    @GetMapping("/preview/{ticket}/{*file}")
+    public ResponseEntity<Resource> readPreview(@PathVariable UUID ticket, @PathVariable String file) {
+        if (!safeFile(file)) return ResponseEntity.notFound().build();
+        String directory = redis.opsForValue().get(TICKET_PREFIX + ticket);
+        if (directory == null) return ResponseEntity.notFound().build();
+        try {
+            Path root = Path.of(AppConstant.CODE_OUTPUT_ROOT_DIR).toRealPath().resolve(directory);
+            Path candidate = root.resolve(file.substring(1));
+            // Reject links in every component, including the app directory itself.
+            if (!candidate.toRealPath().equals(candidate) || !Files.isRegularFile(candidate)) {
                 return ResponseEntity.notFound().build();
             }
-
-            // Return file resource
-            Resource resource = new FileSystemResource(file);
-            return ResponseEntity.ok()
-                    .header("Content-Type", getContentTypeWithCharset(requestedPath.toString()))
+            Resource resource = new FileSystemResource(candidate);
+            String mediaType = MediaTypeFactory.getMediaType(resource)
+                    .map(Object::toString).orElse("application/octet-stream");
+            if (mediaType.startsWith("text/") || mediaType.equals("application/javascript")) {
+                mediaType += "; charset=UTF-8";
+            }
+            return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+                    .header("Content-Type", mediaType)
                     .header("X-Content-Type-Options", "nosniff")
                     .header("Referrer-Policy", "no-referrer")
-                    .header("Content-Security-Policy", "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; frame-ancestors 'self'")
+                    .header("Content-Security-Policy", "sandbox allow-scripts; default-src 'self' data: blob:; "
+                            + "script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
+                            + "connect-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'; "
+                            + "frame-ancestors " + frameOrigin)
+                    .header("Access-Control-Allow-Origin", "*")
                     .body(resource);
         } catch (IOException e) {
             return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-    /**
-     * Get content type based on file extension
-     */
-    private String getContentTypeWithCharset(String filePath) {
-        if (filePath.endsWith(".html")) return "text/html; charset=UTF-8";
-        if (filePath.endsWith(".css")) return "text/css; charset=UTF-8";
-        if (filePath.endsWith(".js")) return "application/javascript; charset=UTF-8";
-        if (filePath.endsWith(".png")) return "image/png";
-        if (filePath.endsWith(".jpg")) return "image/jpeg";
-        return "application/octet-stream";
+    private static boolean safeFile(String file) {
+        if (!file.startsWith("/") || file.length() < 2) return false;
+        for (String part : file.substring(1).split("/", -1)) {
+            if (part.isBlank() || part.startsWith(".") || part.indexOf('\\') >= 0 || part.indexOf(':') >= 0) {
+                return false;
+            }
+        }
+        return true;
     }
 }

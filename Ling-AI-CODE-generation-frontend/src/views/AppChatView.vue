@@ -8,9 +8,9 @@
         </a-button>
         <span class="app-name">{{ appInfo?.appName ?? 'AI Code Generator' }}</span>
         <a-button
-          v-if="appInfo?.deployKey"
+          v-if="appInfo?.deployUrl"
           type="link"
-          :href="`http://localhost/${appInfo.deployKey}`"
+          :href="appInfo.deployUrl"
           target="_blank"
         >
           View Live →
@@ -64,7 +64,7 @@
         <div class="input-actions">
           <div class="left-actions">
             <span class="hint">Ctrl + Enter to send</span>
-            <a-tooltip title="Agent mode uses LangGraph4j workflow with image collection and code quality check">
+            <a-tooltip v-if="appInfo?.agentModeAvailable" title="Agent mode uses LangGraph4j workflow with image collection and code quality check">
               <a-switch
                 v-model:checked="agentMode"
                 size="small"
@@ -123,7 +123,8 @@
           :src="previewUrl"
           class="preview-iframe"
           ref="iframeRef"
-          sandbox="allow-scripts allow-same-origin"
+          sandbox="allow-scripts"
+          referrerpolicy="no-referrer"
         />
       </div>
     </div>
@@ -296,6 +297,13 @@ const generateCode = async (userMessage: string, aiMessageIndex: number) => {
     eventSource = new EventSource(url, { withCredentials: true })
 
     let fullContent = ''
+    const failStream = (error: unknown) => {
+      if (streamCompleted) return
+      streamCompleted = true
+      eventSource?.close()
+      handleError(error, aiMessageIndex)
+    }
+    eventSource.addEventListener('business-error', (event: MessageEvent) => failStream(event.data))
 
     eventSource.onmessage = function (event) {
       if (streamCompleted) return
@@ -338,7 +346,7 @@ const generateCode = async (userMessage: string, aiMessageIndex: number) => {
         }
       } catch (error) {
         console.error('Failed to parse message:', error)
-        handleError(error, aiMessageIndex)
+        failStream(error)
       }
     }
 
@@ -354,18 +362,7 @@ const generateCode = async (userMessage: string, aiMessageIndex: number) => {
     })
 
     eventSource.onerror = function () {
-      if (streamCompleted || !isGenerating.value) return
-      if (eventSource?.readyState === EventSource.CONNECTING) {
-        streamCompleted = true
-        isGenerating.value = false
-        eventSource?.close()
-        setTimeout(async () => {
-          await fetchAppInfo()
-          updatePreview()
-        }, 1000)
-      } else {
-        handleError(new Error('SSE connection error'), aiMessageIndex)
-      }
+      failStream(new Error('Generation stream interrupted'))
     }
   } catch (error) {
     console.error('Failed to create EventSource:', error)

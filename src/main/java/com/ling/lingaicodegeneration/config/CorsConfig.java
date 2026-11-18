@@ -23,6 +23,9 @@ public class CorsConfig implements WebMvcConfigurer {
                 .filter(origin -> !origin.isBlank())
                 .toArray(String[]::new);
 
+        registry.addMapping("/preview/**")
+                .allowedOrigins("*")
+                .allowedMethods("GET", "HEAD");
         registry.addMapping("/**")
                 .allowCredentials(true)
                 .allowedOrigins(origins)

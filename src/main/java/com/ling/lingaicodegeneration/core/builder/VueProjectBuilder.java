@@ -1,6 +1,7 @@
 package com.ling.lingaicodegeneration.core.builder;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
@@ -22,6 +23,9 @@ import java.util.concurrent.TimeUnit;
 public class VueProjectBuilder {
 
     static final int SNIPPET_MAX_CHARS = 4_000;
+
+    @Value("${app.generation.static-only:false}")
+    private boolean staticOnly;
 
     /**
      * 异步构建项目（不阻塞主流程）
@@ -48,6 +52,9 @@ public class VueProjectBuilder {
      * 构建 Vue 项目，并返回稳定的构建结果。
      */
     public VueBuildResult buildProjectWithResult(String projectPath) {
+        if (staticOnly) {
+            return VueBuildResult.failed(0, "", "Vue builds are disabled during the pilot");
+        }
         Instant startedAt = Instant.now();
         StringBuilder output = new StringBuilder();
         StringBuilder error = new StringBuilder();

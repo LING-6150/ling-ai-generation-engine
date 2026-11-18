@@ -18,6 +18,8 @@ public class AppVO implements Serializable {
     private String codeGenType;
 
     private String deployKey;
+    private String deployUrl;
+    private boolean agentModeAvailable;
 
     private LocalDateTime deployedTime;
 
