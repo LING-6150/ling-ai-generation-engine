@@ -63,6 +63,10 @@
         />
         <div class="input-actions">
           <div class="left-actions">
+            <a-button v-if="appInfo?.imageGenerationAvailable" size="small"
+                      :disabled="isGenerating || generatingImage" @click="imageDialog = true">
+              Generate image
+            </a-button>
             <span class="hint">Ctrl + Enter to send</span>
             <a-tooltip v-if="appInfo?.agentModeAvailable" title="Agent mode uses LangGraph4j workflow with image collection and code quality check">
               <a-switch
@@ -128,6 +132,12 @@
         />
       </div>
     </div>
+    <a-modal v-model:open="imageDialog" title="Generate a project image" ok-text="Generate"
+             :confirm-loading="generatingImage" :ok-button-props="{ disabled: !imagePrompt.trim() }"
+             @ok="generateImage">
+      <a-textarea v-model:value="imagePrompt" :maxlength="2000" :rows="3"
+                  placeholder="Describe the image to generate with Krea 2" />
+    </a-modal>
   </div>
 </template>
 
@@ -137,6 +147,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useLoginUserStore } from '@/stores/loginUser'
 import { getAppVoById, deployApp as deployAppApi } from '@/api/appController'
 import { listAppChatHistory } from '@/api/chatHistoryController'
+import request from '@/request'
 import { message } from 'ant-design-vue'
 
 const route = useRoute()
@@ -162,6 +173,28 @@ const messagesRef = ref<HTMLElement>()
 const iframeRef = ref<HTMLIFrameElement>()
 const previewUrl = ref('')
 const deploying = ref(false)
+const imageDialog = ref(false)
+const imagePrompt = ref('')
+const generatingImage = ref(false)
+
+const generateImage = async () => {
+  if (!imagePrompt.value.trim() || generatingImage.value) return
+  generatingImage.value = true
+  try {
+    const response = await request.post(`/app/${appId}/images`, { prompt: imagePrompt.value.trim() },
+      { timeout: 210_000 })
+    const asset = response.data.data?.path
+    if (response.data.code !== 0 || !asset) throw new Error(response.data.message || 'Image generation failed')
+    inputMessage.value = [inputMessage.value, `Use the generated project image at ${asset}.`].filter(Boolean).join('\n')
+    imageDialog.value = false
+    imagePrompt.value = ''
+    message.success('Image saved. Send the message to use it in your project.')
+  } catch (e) {
+    message.error(e instanceof Error ? e.message : 'Image generation failed')
+  } finally {
+    generatingImage.value = false
+  }
+}
 const downloading = ref(false)
 const agentMode = ref(false)
 

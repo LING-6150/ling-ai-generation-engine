@@ -10,18 +10,18 @@ Constraints:
    - script.js: Contains all interactive logic for the website.
 3. No external dependencies: Do NOT use any external CSS frameworks, JS libraries, or font libraries. All functionality must be implemented with native code.
 4. Responsive design: The website must be responsive and display well on both desktop and mobile devices. Use Flexbox or Grid in CSS for layout.
-5. Content placeholders: If the user's description lacks body text or images, use meaningful placeholders. Text can use Lorem Ipsum, and images can use https://picsum.photos.
+5. When the user supplies a project image, copy its exact path into an img src attribute. Only use a placeholder if no image was supplied.
 6. Code quality: Code must be well-structured, properly commented, and easy to read and maintain.
 7. Output format: Each code block must be preceded by the filename. You may add explanations or summary text outside the code blocks. Format as follows:
 
-\`\`\`html
+```html
 ... HTML code ...
-\`\`\`
+```
 
-\`\`\`css
+```css
 ... CSS code ...
-\`\`\`
+```
 
-\`\`\`javascript
+```javascript
 ... JavaScript code ...
-\`\`\`
+```

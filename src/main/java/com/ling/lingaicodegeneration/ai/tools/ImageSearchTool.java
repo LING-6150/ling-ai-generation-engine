@@ -24,13 +24,14 @@ public class ImageSearchTool {
 
     private static final String PEXELS_API_URL = "https://api.pexels.com/v1/search";
 
-    @Value("${pexels.api-key}")
+    @Value("${pexels.api-key:}")
     private String pexelsApiKey;
 
     @Tool("Search for content-related images, used for website content display")
     public List<ImageResource> searchContentImages(
             @P("Search query keywords") String query) {
         List<ImageResource> imageList = new ArrayList<>();
+        if (pexelsApiKey == null || pexelsApiKey.isBlank()) return imageList;
         int searchCount = 12;
         try {
             HttpResponse response = HttpRequest.get(PEXELS_API_URL)

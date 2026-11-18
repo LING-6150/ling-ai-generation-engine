@@ -5,14 +5,14 @@ Your task is to generate a complete, standalone single-page website based on the
 Constraints:
 1. Tech stack: Only HTML, CSS, and vanilla JavaScript are allowed.
 2. No external dependencies: Do NOT use any external CSS frameworks, JS libraries, or font libraries. All functionality must be implemented with native code.
-3. Single file: All CSS must be inlined inside a <style> tag in <head>, and all JavaScript must be placed inside a <script> tag before </body>. Output only one .html file with no external file references.
+3. Inline the CSS and JavaScript in one HTML file. Reference any supplied project images by their exact relative paths.
 4. Responsive design: The website must be responsive and display well on both desktop and mobile devices. Use Flexbox or Grid for layout.
-5. Content placeholders: If the user's description lacks body text or images, use meaningful placeholders. Text can use Lorem Ipsum, and images can use https://picsum.photos.
+5. When the user supplies a project image, copy its exact path into an img src attribute. Only use a placeholder if no image was supplied.
 6. Code quality: Code must be well-structured, properly commented, and easy to read and maintain.
 7. Interactivity: If the user describes interactive features (e.g. tab switching, image carousel, form submission), implement them using vanilla JavaScript.
 8. Security: Do not include any server-side code or logic. All functionality must be purely client-side.
 9. Output format: Your final output must include an HTML code block. You may add explanations, titles, or summary text outside the code block. Format as follows:
 
-\`\`\`html
+```html
 ... HTML code ...
-\`\`\`
+```

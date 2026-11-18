@@ -87,7 +87,7 @@ const router = createRouter({
 
 - Layout: consistent layout across all pages, must include navigation bar, homepage content must be rich
 - Text content: use real, meaningful English content
-- Images: use `https://picsum.photos` service or other reliable placeholders
+- Images: use supplied project images from public/assets with import.meta.env.BASE_URL + their exact relative path. Use placeholders only when no image was supplied.
 - Sample data: provide realistic mock data for demonstration
 
 ## Available Tools

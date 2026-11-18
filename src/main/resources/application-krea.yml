@@ -1,0 +1,12 @@
+app:
+  images:
+    krea:
+      enabled: true
+      base-url: ${KREA_BASE_URL:http://127.0.0.1:30000/v1}
+      model: ${KREA_MODEL:krea/Krea-2-Turbo}
+      api-key: ${KREA_API_KEY:}
+      size: ${KREA_IMAGE_SIZE:1024x1024}
+
+# Explicit project images come from Krea. Skip the optional stock-photo search.
+pexels:
+  api-key: ""

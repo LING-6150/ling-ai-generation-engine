@@ -1,0 +1,21 @@
+# Overlay after the datasource/session profile. Applies to every code-generation stage.
+langchain4j:
+  open-ai:
+    chat-model: &qwen
+      base-url: ${QWEN_BASE_URL:http://127.0.0.1:8000/v1}
+      model-name: ${QWEN_MODEL:Qwen/Qwen3-8B}
+      api-key: ${QWEN_API_KEY:local}
+      max-tokens: 8192
+      log-requests: false
+      log-responses: false
+    streaming-chat-model: *qwen
+    reasoning-streaming-chat-model: *qwen
+    routing-chat-model:
+      <<: *qwen
+      max-tokens: 256
+  structured-routing-chat-model:
+    <<: *qwen
+    max-tokens: 1024
+review:
+  model:
+    provider: qwen

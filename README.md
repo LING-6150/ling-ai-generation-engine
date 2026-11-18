@@ -115,7 +115,7 @@ Ling-AI-CODE-generation is a full-stack AI platform that lets users describe a w
 ### 🔌 MCP Server Integration
 - Standalone MCP Server exposing code generation as standardized tools
 - SSE transport, verified via MCP Inspector
-- `generateWebsite` and `listRecentApps` tools available to any MCP client
+- `generateWebsite`, `generateImage` and `listRecentApps` tools available over SSE
 
 ### ☁️ Production Deployment
 - Deployed on AWS EC2 (t2.medium, Ubuntu 24.04)
@@ -194,7 +194,7 @@ Ling-AI-CODE-generation is a full-stack AI platform that lets users describe a w
 | MyBatis Flex | 1.11.0 | ORM with snowflake ID generation |
 | Redisson | 3.50.0 | Distributed rate limiting (token bucket) |
 | Micrometer | 1.15.x | Metrics facade |
-| Spring AI | 1.0.0-SNAPSHOT | MCP Server implementation |
+| Spring AI | 1.1.8 | Companion MCP server |
 
 ### Frontend
 | Technology | Version | Purpose |
@@ -494,8 +494,11 @@ A standalone MCP (Model Context Protocol) Server exposes the code generation cap
 
 | Tool | Description |
 |---|---|
-| `generateWebsite(prompt)` | Creates a new app from a natural language description |
-| `listRecentApps()` | Returns a list of recently featured applications |
+| `generateWebsite(prompt, codeGenType?, imagePrompt?)` | Generates HTML or a multi-file site and waits for completion. Supply an image prompt to include a project asset. |
+| `generateImage(appId, prompt)` | Generates an image in an owned project with the engine's optional Krea profile. Pass the project ID as a string. |
+| `listRecentApps()` | Lists the session owner's five latest apps, or featured apps for anonymous callers. |
+
+Enable the `qwen` and `krea` profiles independently. The Windows pilot can read both models directly from the same GGUF bundle. See [local model setup and the live MCP smoke test](docs/local-models.md).
 
 ### Verification with MCP Inspector
 
@@ -503,8 +506,7 @@ A standalone MCP (Model Context Protocol) Server exposes the code generation cap
 npx @modelcontextprotocol/inspector http://localhost:8127/sse
 ```
 
-- ✅ Connected to `ling-codegen-mcp-server v1.0.0`
-- ✅ Tools registered: `generateWebsite`, `listRecentApps`
+Select the SSE transport and connect to `http://127.0.0.1:8127/sse`. Call `tools/list` to check which tools the running server exposes.
 
 ---
 

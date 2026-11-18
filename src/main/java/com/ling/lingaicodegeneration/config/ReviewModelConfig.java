@@ -4,6 +4,7 @@ import com.ling.lingaicodegeneration.monitor.AiModelMonitorListener;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +24,12 @@ import java.util.List;
  */
 @Configuration
 public class ReviewModelConfig {
+
+    @Bean("reviewChatModel")
+    @ConditionalOnProperty(name = "review.model.provider", havingValue = "qwen")
+    public ChatModel qwenReviewChatModel(@Qualifier("openAiChatModel") ChatModel qwenChatModel) {
+        return qwenChatModel;
+    }
 
     @Resource
     private AiModelMonitorListener aiModelMonitorListener;

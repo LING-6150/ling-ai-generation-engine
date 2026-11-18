@@ -83,6 +83,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
     @Value("${app.generation.static-only:false}")
     private boolean staticOnly;
 
+    @Value("${app.images.krea.enabled:false}")
+    private boolean imageGenerationAvailable;
+
     @Value("${app.deploy.base-url:" + AppConstant.CODE_DEPLOY_HOST + "}")
     private String deployBaseUrl;
 
@@ -127,6 +130,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
             appVO.setDeployUrl(deployBaseUrl + "/" + app.getDeployKey());
         }
         appVO.setAgentModeAvailable(!staticOnly);
+        appVO.setImageGenerationAvailable(imageGenerationAvailable);
         Long userId = app.getUserId();
         if (userId != null) {
             User user = userService.getById(userId);

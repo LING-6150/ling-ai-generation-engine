@@ -38,6 +38,7 @@ declare namespace API {
   type AppVO = {
     deployUrl?: string
     agentModeAvailable?: boolean
+    imageGenerationAvailable?: boolean
     id?: number
     appName?: string
     cover?: string

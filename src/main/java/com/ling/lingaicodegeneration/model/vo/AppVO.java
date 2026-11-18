@@ -20,6 +20,7 @@ public class AppVO implements Serializable {
     private String deployKey;
     private String deployUrl;
     private boolean agentModeAvailable;
+    private boolean imageGenerationAvailable;
 
     private LocalDateTime deployedTime;
 

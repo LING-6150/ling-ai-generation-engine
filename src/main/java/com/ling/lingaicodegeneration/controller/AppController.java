@@ -271,6 +271,16 @@ public class AppController {
     /**
      * Chat to generate code (SSE streaming)
      */
+    public record GenerationRequest(Long appId, String message, boolean agent, boolean contextPruning) {}
+
+    @PostMapping(value = "/chat/gen/code", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @RateLimit(limitType = RateLimitType.USER, rate = 5, rateInterval = 60)
+    public Flux<ServerSentEvent<String>> generateFromBody(@RequestBody GenerationRequest body,
+                                                          HttpServletRequest request) {
+        ThrowUtils.throwIf(body == null, ErrorCode.PARAMS_ERROR);
+        return chatToGenCode(body.appId(), body.message(), body.agent(), body.contextPruning(), request);
+    }
+
     @GetMapping(value = "/chat/gen/code", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @RateLimit(limitType = RateLimitType.USER, rate = 5, rateInterval = 60,
             message = "AI requests are limited to 5 per minute, please try again later")
