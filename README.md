@@ -412,11 +412,7 @@ Frontend runs at: `http://localhost:5173`
 
 ### Monitoring Setup (Optional)
 
-```bash
-docker-compose up -d
-# Prometheus: http://localhost:9090
-# Grafana:    http://localhost:3000 (admin / admin123)
-```
+Provision your local `docker-compose.yml` and `prometheus.yml`, then run `docker compose up -d`. Configure Prometheus to scrape the engine at `/api/actuator/prometheus`. The pilot uses port 9090 for Prometheus and 3000 for Grafana.
 
 ---
 
@@ -556,8 +552,6 @@ Ling-AI-CODE-generation/
 │   │   ├── AiModelMetricsCollector.java   # Micrometer metrics
 │   │   └── AiModelMonitorListener.java    # ChatModelListener
 │   └── ratelimit/                         # Redisson token bucket
-├── prometheus.yml
-├── docker-compose.yml
 └── grafana-dashboard.json
 ```
 

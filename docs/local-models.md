@@ -2,23 +2,9 @@
 
 The `qwen` profile routes code generation, routing and review to a chat-completions server. The `krea` profile enables the project image button and the authenticated image API. Either profile can be added after the engine's normal database and session profile. For the static pilot, use `local,qwen,krea,pilot`. Configure MySQL, Redis and the preview origin as described in the [pilot setup](two-user-pilot.md).
 
-## Start the GGUF servers on Windows
+## Connect the model servers
 
-Run these commands from the engine checkout in separate PowerShell windows. Point `$weights` to the directory containing `krea2-turbo`, `text-encoder` and `vae`. The launcher opens the original weights in place. Its Qwen default uses the Qwen3-VL-4B Instruct text encoder for text-only generation with llama.cpp. Pass `--qwen-model <path-to-gguf>` to use a different local coding checkpoint.
-
-```powershell
-$weights = 'E:\coding\Qwen_ppt\models\krea2-turbo-q4'
-python scripts/start_local_model.py qwen --weights $weights --server '.\tmp\qwen-smoke\llama-server.exe'
-```
-
-```powershell
-$weights = 'E:\coding\Qwen_ppt\models\krea2-turbo-q4'
-python scripts/start_local_model.py krea --weights $weights `
-  --server 'E:\coding\Qwen_ppt\runtime\stable-diffusion-cpp\sd-server.exe' `
-  --cuda-dll-directory 'E:\Qwen_pitao\runtime\llama'
-```
-
-The paths above match the pilot machine. On another host, supply your installed llama.cpp executable and a Krea-capable stable-diffusion.cpp build. The smoke used llama.cpp b12497 and stable-diffusion.cpp 290148d. Qwen runs on CPU. Krea uses the CUDA backend with an 8-step sampler and a default 5.5 GiB GPU budget. Change the budget with `--krea-vram-gib`. Both services bind to loopback and run until interrupted.
+Start a loopback llama.cpp server for text generation and a Krea-capable stable-diffusion.cpp server for images. The Windows pilot used llama.cpp b12497 with Qwen3-VL-4B Instruct on CPU, and stable-diffusion.cpp 290148d with the Krea 2 Turbo Q4 diffusion model, Qwen text encoder and Wan VAE on CUDA. Deployment launchers and host paths are maintained locally under `deployment/`.
 
 Set these variables in the shell that starts the engine. The model names must match the respective servers' `GET /v1/models` responses.
 
@@ -36,10 +22,10 @@ Existing inference servers can also be used. Qwen must support OpenAI-compatible
 
 ## Run the MCP smoke test
 
-Build the companion MCP checkout with Java 21 and `.\mvnw.cmd package`. Sign into the engine as a pilot user and set `CODEGEN_SESSION_COOKIE` in the test process to that user's current cookie header. Set `CODEGEN_BACKEND_URL` to the engine origin, including the port. The default is `http://127.0.0.1:8123`. Use the engine and MCP changes together.
+Build the companion MCP checkout with Java 21 and `.\mvnw.cmd package`. Sign into the engine as a pilot user and set `CODEGEN_SESSION_COOKIE` in the test process to that user's current cookie header. Set `CODEGEN_BACKEND_URL` to the engine origin, including the port. The default is `http://127.0.0.1:8123`. The test command below uses the locally provisioned smoke script in the ignored `tmp/` directory. On a fresh checkout, start the MCP jar directly and call the three tools from an SSE client.
 
 ```powershell
-python scripts/local_mcp_smoke.py --mcp-jar ..\ling-codegen-mcp-server\target\ling-codegen-mcp-server-0.0.1-SNAPSHOT.jar
+python tmp/local_mcp_smoke.py --mcp-jar ..\ling-codegen-mcp-server\target\ling-codegen-mcp-server-0.0.1-SNAPSHOT.jar
 ```
 
 The smoke starts its own loopback MCP server, negotiates an SSE session and discovers all three tools. It creates a real project, generates an HTML page with a Krea image, adds a second image and verifies the HTML image reference and both PNGs in the owner's downloaded ZIP. It prints the project ID and authenticated preview URL, then stops its MCP server. The project remains available to its owner. To run MCP continuously, launch the same jar directly and connect the client to `http://127.0.0.1:8127/sse`. Set `CODEGEN_FRONTEND_URL` when the editor runs on a different origin from the default `http://localhost:5173`.

@@ -62,12 +62,12 @@ Use dummy values for `DEEPSEEK_API_KEY` and `PEXELS_API_KEY` in the disposable b
 --langchain4j.review-model.zhipu.base-url=http://127.0.0.1:38466/v1
 ```
 
-Install Playwright for Python and its Chromium browser, then run:
+The fixture smoke script is provisioned locally in the ignored `tmp/` directory. Install Playwright and its Chromium browser to run it.
 
 ```sh
 python -m pip install playwright
 python -m playwright install chromium
-python scripts/pilot_smoke.py
+python tmp/pilot_smoke.py
 ```
 
 The run creates two synthetic accounts, two drafts and one published HTML release in the disposable stack. It checks browser login, cross-account access, generation, ZIP contents, CSS and JavaScript execution, preview origin and cookie scope. A deliberate provider failure must produce an error and leave the public release byte-for-byte intact. The script leaves the records and artifacts available for inspection.

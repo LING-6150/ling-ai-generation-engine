@@ -37,5 +37,13 @@ application-local.yml
 .env.local
 *-secret.yml
 
-# AI generated code output (should never be committed)
+# Local smoke tests, test artifacts, and generated projects
 tmp/
+
+# Machine-specific deployment launchers and monitoring configuration
+/deployment/
+/docker-compose.yml
+/prometheus.yml
+
+# Local agent notes
+agent.md
